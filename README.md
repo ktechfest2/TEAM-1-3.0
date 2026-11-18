@@ -34,13 +34,20 @@ The admin console is at http://localhost:3000/admin (not linked from the public 
 
 ## Polling unit register
 
-The register (state, LGA, ward and polling unit codes and names) is imported from a CSV with columns `pu_code, pu_name, ward_name, lga_name, state_name` and optionally `latitude, longitude, registered_voters`:
+TrustElect uses INEC's polling unit register: **176,846 polling units, 8,809 wards, 774 LGAs, 36 states and the FCT**. Load it with:
 
 ```sh
-npm run register:import -w @trustelect/api -- path/to/register.csv
+npm run register:fetch -w @trustelect/api    # download and verify (SHA-256) into apps/api/data/
+npm run register:import -w @trustelect/api -- apps/api/data/inec-register.csv
 ```
 
-Imports are idempotent: re-running updates names and adds new units. For development, `apps/api/seed/sample-register.csv` holds a fictional LGA (`24-99`) with 30 polling units, all named `SAMPLE …`.
+Imports are idempotent: re-running updates names and adds new units. Any CSV with columns `pu_code, pu_name, ward_name, lga_name, state_name` (optionally `full_code, latitude, longitude, registered_voters`) can be imported the same way. `apps/api/seed/sample-register.csv` is a small fictional register for tests and offline development.
+
+**Data source and credit.** The register is public electoral information published by the Independent National Electoral Commission (INEC). TrustElect loads the copy compiled in [paul1029-ife/polling-unit-finder](https://github.com/paul1029-ife/polling-unit-finder) (data from [saidiadegoke/nigeria-inec-geo](https://github.com/saidiadegoke/nigeria-inec-geo), MIT licence), pinned to commit `3efbaea` and verified by checksum. It is not an official INEC feed; TrustElect is not affiliated with or endorsed by INEC.
+
+## Ballot order
+
+Parties are always listed in ballot order, which TrustElect sets **alphabetically by party acronym**. The API enforces it, whatever order parties are submitted in.
 
 ## Administrator accounts
 

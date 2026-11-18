@@ -31,3 +31,6 @@ npm-debug.log*
 
 # Local Claude Code settings
 .claude/settings.local.json
+
+# Downloaded datasets (recreate with npm run register:fetch)
+apps/api/data/

@@ -56,6 +56,13 @@ describe('parseRegister', () => {
     expect(parseRegister('code,name\n1,2\n').errors[0].message).toMatch(/Missing columns/);
   });
 
+  it('prefers full_code when pu_code holds only the last part of the code', () => {
+    const csv = 'state_name,lga_name,ward_name,pu_code,pu_name,full_code\nABIA,ABA NORTH,EZIAMA,001,RAILWAY QUARTERS I,01/01/01/001\n';
+    const { rows, errors } = parseRegister(csv);
+    expect(errors).toEqual([]);
+    expect(rows[0]).toMatchObject({ unitCode: '01-01-01-001', wardCode: '01-01-01', unitName: 'RAILWAY QUARTERS I' });
+  });
+
   it('ignores coordinates outside Nigeria', () => {
     const { rows } = parseRegister(`${header}\n24-05-11-001,A,W,L,S,51.5,-0.1\n`);
     expect(rows[0].latitude).toBeNull();

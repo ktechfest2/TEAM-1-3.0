@@ -48,7 +48,7 @@ export const NIGERIAN_STATES = [
 ] as const;
 
 export interface UnitCodeParts {
-  /** Full normalised code, for example 24-05-11-003 */
+  /** Full normalised code, for example 24-05-01-003 */
   unit: string;
   state: string;
   lga: string;
@@ -56,7 +56,7 @@ export interface UnitCodeParts {
 }
 
 /**
- * Parses a polling unit code written with dashes or slashes (24-05-11-003, 24/05/11/003,
+ * Parses a polling unit code written with dashes or slashes (24-05-01-003, 24/05/11/003,
  * 24/5/11/3) into normalised codes for each level. Returns null if it is not a valid code.
  */
 export function parseUnitCode(input: string): UnitCodeParts | null {

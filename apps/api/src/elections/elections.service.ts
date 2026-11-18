@@ -34,7 +34,7 @@ export const createElectionSchema = z
     scopeCode: z.string().trim().max(12).optional(),
     /** ISO date-time with offset, for example 2027-02-20T14:30:00+01:00 */
     pollsCloseAt: z.iso.datetime({ offset: true }),
-    /** Party acronyms in ballot order */
+    /** Parties on the ballot. Ballot order is always alphabetical by acronym. */
     partyAcronyms: z.array(z.string().trim().toUpperCase()).min(2).max(40),
   })
   .refine((v) => (v.scopeLevel === 'national') === !v.scopeCode, {
@@ -45,6 +45,11 @@ export const createElectionSchema = z
     message: 'A party appears more than once',
     path: ['partyAcronyms'],
   });
+
+/** Ballot order: alphabetical by party acronym, as on INEC ballot papers. */
+export function ballotOrder(acronyms: string[]): string[] {
+  return [...acronyms].sort((a, b) => a.localeCompare(b, 'en'));
+}
 
 export type CreateParty = z.infer<typeof createPartySchema>;
 export type CreateElection = z.infer<typeof createElectionSchema>;
@@ -145,7 +150,7 @@ export class ElectionsService {
         })
         .returning();
       await tx.insert(electionParties).values(
-        input.partyAcronyms.map((acronym, i) => ({
+        ballotOrder(input.partyAcronyms).map((acronym, i) => ({
           electionId: created.id,
           partyId: idByAcronym.get(acronym)!,
           ballotOrder: i + 1,

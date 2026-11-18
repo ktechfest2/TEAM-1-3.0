@@ -43,7 +43,7 @@ async function UnitLookup({ searchParams }: { searchParams: PageProps<'/results'
         <section aria-live="polite" className="mt-8 max-w-2xl rounded-2xl border border-divider bg-surface p-5 sm:p-6">
           {!parsed ? (
             <p className="text-mismatch">
-              <strong>{raw}</strong> is not a valid polling unit code. Use the format 24-05-11-003.
+              <strong>{raw}</strong> is not a valid polling unit code. Use the format 24-05-01-003.
             </p>
           ) : found === 'error' ? (
             <p className="text-mismatch">TrustElect could not look this up right now. Please try again shortly.</p>

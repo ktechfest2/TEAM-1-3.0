@@ -98,7 +98,7 @@ export const pollingUnits = pgTable(
   {
     id: integer('id').primaryKey().generatedAlwaysAsIdentity(),
     wardId: integer('ward_id').notNull().references(() => wards.id),
-    /** INEC code, for example 24-05-11-003 */
+    /** INEC code, for example 24-05-01-003 */
     code: text('code').notNull().unique(),
     name: text('name').notNull(),
     latitude: doublePrecision('latitude'),

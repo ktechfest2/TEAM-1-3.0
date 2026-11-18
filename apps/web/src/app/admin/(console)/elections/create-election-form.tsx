@@ -18,7 +18,7 @@ export function CreateElectionForm({ parties }: { parties: Party[] }) {
   const [busy, setBusy] = useState(false);
 
   // INEC lists parties on the ballot in alphabetical order of acronym
-  const ballot = useMemo(() => [...selected].sort((a, b) => a.localeCompare(b)), [selected]);
+  const ballot = useMemo(() => [...selected].sort((a, b) => a.localeCompare(b, 'en')), [selected]);
 
   return (
     <form

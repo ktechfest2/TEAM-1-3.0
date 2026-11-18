@@ -8,6 +8,8 @@ import { parseCsvRecords } from './csv.js';
  *   pu_code, pu_name, ward_name, lga_name, state_name
  * Optional:
  *   latitude, longitude, registered_voters
+ *   full_code: the complete unit code (01/01/01/001). When present it is used
+ *   instead of pu_code, for registers where pu_code holds only the last part.
  */
 export interface RegisterRow {
   unitCode: string;
@@ -52,8 +54,9 @@ export function parseRegister(csv: string): RegisterParseResult {
 
   records.forEach((r, i) => {
     const line = i + 2; // header is line 1
-    const codes = parseUnitCode(r.pu_code ?? '');
-    if (!codes) return errors.push({ line, message: `Invalid polling unit code "${r.pu_code}"` });
+    const rawCode = r.full_code || r.pu_code || '';
+    const codes = parseUnitCode(rawCode);
+    if (!codes) return errors.push({ line, message: `Invalid polling unit code "${rawCode}"` });
     const missing = REQUIRED.filter((k) => !r[k]);
     if (missing.length) return errors.push({ line, message: `Empty ${missing.join(', ')}` });
     if (seen.has(codes.unit)) return errors.push({ line, message: `Duplicate polling unit ${codes.unit}` });

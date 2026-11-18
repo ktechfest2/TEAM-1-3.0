@@ -73,7 +73,7 @@ describe('Parties and elections (e2e)', () => {
     await post('/admin/elections', systemAdmin.cookie).send({ ...base, partyAcronyms: [...acronyms, 'NOPE'] }).expect(400);
   });
 
-  it('creates an election with parties in ballot order, hides the draft from the public, then publishes it', async () => {
+  it('creates an election with parties in alphabetical ballot order, hides the draft from the public, then publishes it', async () => {
     const created = await post('/admin/elections', systemAdmin.cookie)
       .send({
         type: 'governorship',
@@ -88,7 +88,9 @@ describe('Parties and elections (e2e)', () => {
     const id = created.body.id as string;
     electionIds.push(id);
     expect(created.body.status).toBe('draft');
-    expect(created.body.parties.map((p: { acronym: string }) => p.acronym)).toEqual([acronyms[2], acronyms[0], acronyms[1]]);
+    // Submitted out of order; stored alphabetically by acronym
+    expect(created.body.parties.map((p: { acronym: string }) => p.acronym)).toEqual([acronyms[0], acronyms[1], acronyms[2]]);
+    expect(created.body.parties.map((p: { ballotOrder: number }) => p.ballotOrder)).toEqual([1, 2, 3]);
 
     // Draft is invisible publicly
     await request(app.getHttpServer()).get(`/elections/${id}`).expect(404);
