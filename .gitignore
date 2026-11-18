@@ -1,0 +1,33 @@
+# Project documents (kept local, not committed)
+docs/
+*.docx
+*.pdf
+election_chain_*.png
+
+# Dependencies
+node_modules/
+
+# Builds
+.next/
+dist/
+out/
+build/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Generated
+apps/api/src/generated/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs and OS files
+*.log
+npm-debug.log*
+.DS_Store
+
+# Local Claude Code settings
+.claude/settings.local.json

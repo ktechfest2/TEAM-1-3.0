@@ -1,0 +1,3862 @@
+{
+  "type": "base",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "daaf74f7-25a5-464d-86cd-0a4dacae0ccb",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "admin_role"
+      ],
+      "writes": [
+        "s|enum|public.admin_role",
+        "n|enum|public.admin_role",
+        "e|enum|public.admin_role",
+        "n|type|public.admin_role"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "area_level"
+      ],
+      "writes": [
+        "s|enum|public.area_level",
+        "n|enum|public.area_level",
+        "e|enum|public.area_level",
+        "n|type|public.area_level"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "channel"
+      ],
+      "writes": [
+        "s|enum|public.channel",
+        "n|enum|public.channel",
+        "e|enum|public.channel",
+        "n|type|public.channel"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "confidence_level"
+      ],
+      "writes": [
+        "s|enum|public.confidence_level",
+        "n|enum|public.confidence_level",
+        "e|enum|public.confidence_level",
+        "n|type|public.confidence_level"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "declaration_source"
+      ],
+      "writes": [
+        "s|enum|public.declaration_source",
+        "n|enum|public.declaration_source",
+        "e|enum|public.declaration_source",
+        "n|type|public.declaration_source"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "declaration_status"
+      ],
+      "writes": [
+        "s|enum|public.declaration_status",
+        "n|enum|public.declaration_status",
+        "e|enum|public.declaration_status",
+        "n|type|public.declaration_status"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "election_status"
+      ],
+      "writes": [
+        "s|enum|public.election_status",
+        "n|enum|public.election_status",
+        "e|enum|public.election_status",
+        "n|type|public.election_status"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "election_type"
+      ],
+      "writes": [
+        "s|enum|public.election_type",
+        "n|enum|public.election_type",
+        "e|enum|public.election_type",
+        "n|type|public.election_type"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "submission_kind"
+      ],
+      "writes": [
+        "s|enum|public.submission_kind",
+        "n|enum|public.submission_kind",
+        "e|enum|public.submission_kind",
+        "n|type|public.submission_kind"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "submission_status"
+      ],
+      "writes": [
+        "s|enum|public.submission_status",
+        "n|enum|public.submission_status",
+        "e|enum|public.submission_status",
+        "n|type|public.submission_status"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "unit_status"
+      ],
+      "writes": [
+        "s|enum|public.unit_status",
+        "n|enum|public.unit_status",
+        "e|enum|public.unit_status",
+        "n|type|public.unit_status"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "admin_users"
+      ],
+      "writes": [
+        "s|tbl|public.admin_users",
+        "n|tbl|public.admin_users",
+        "e|tbl|public.admin_users",
+        "n|rel|public.admin_users",
+        "n|type|public.admin_users",
+        "n|rel|public.admin_users_pkey",
+        "n|rel|public.admin_users_email_key"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.admin_role"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "audit_log"
+      ],
+      "writes": [
+        "s|tbl|public.audit_log",
+        "n|tbl|public.audit_log",
+        "e|tbl|public.audit_log",
+        "n|rel|public.audit_log",
+        "n|type|public.audit_log",
+        "n|rel|public.audit_log_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "capture_sessions"
+      ],
+      "writes": [
+        "s|tbl|public.capture_sessions",
+        "n|tbl|public.capture_sessions",
+        "e|tbl|public.capture_sessions",
+        "n|rel|public.capture_sessions",
+        "n|type|public.capture_sessions",
+        "n|rel|public.capture_sessions_pkey",
+        "n|rel|public.capture_sessions_token_hash_key"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.channel"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "chain_entries"
+      ],
+      "writes": [
+        "s|tbl|public.chain_entries",
+        "n|tbl|public.chain_entries",
+        "e|tbl|public.chain_entries",
+        "n|rel|public.chain_entries",
+        "n|type|public.chain_entries",
+        "n|rel|public.chain_entries_pkey",
+        "n|rel|public.chain_entries_hash_key"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "declarations"
+      ],
+      "writes": [
+        "s|tbl|public.declarations",
+        "n|tbl|public.declarations",
+        "e|tbl|public.declarations",
+        "n|rel|public.declarations",
+        "n|type|public.declarations",
+        "n|rel|public.declarations_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.area_level",
+        "n|enum|public.declaration_source",
+        "n|enum|public.declaration_status"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "election_parties"
+      ],
+      "writes": [
+        "s|tbl|public.election_parties",
+        "n|tbl|public.election_parties",
+        "e|tbl|public.election_parties",
+        "n|rel|public.election_parties",
+        "n|type|public.election_parties",
+        "n|rel|public.election_parties_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "elections"
+      ],
+      "writes": [
+        "s|tbl|public.elections",
+        "n|tbl|public.elections",
+        "e|tbl|public.elections",
+        "n|rel|public.elections",
+        "n|type|public.elections",
+        "n|rel|public.elections_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.election_type",
+        "n|enum|public.area_level",
+        "n|enum|public.election_status"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "lgas"
+      ],
+      "writes": [
+        "s|tbl|public.lgas",
+        "n|tbl|public.lgas",
+        "e|tbl|public.lgas",
+        "n|rel|public.lgas",
+        "n|type|public.lgas",
+        "n|rel|public.lgas_pkey",
+        "n|rel|public.lgas_code_key"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "parties"
+      ],
+      "writes": [
+        "s|tbl|public.parties",
+        "n|tbl|public.parties",
+        "e|tbl|public.parties",
+        "n|rel|public.parties",
+        "n|type|public.parties",
+        "n|rel|public.parties_pkey",
+        "n|rel|public.parties_acronym_key"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "polling_units"
+      ],
+      "writes": [
+        "s|tbl|public.polling_units",
+        "n|tbl|public.polling_units",
+        "e|tbl|public.polling_units",
+        "n|rel|public.polling_units",
+        "n|type|public.polling_units",
+        "n|rel|public.polling_units_pkey",
+        "n|rel|public.polling_units_code_key"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "rejection_log"
+      ],
+      "writes": [
+        "s|tbl|public.rejection_log",
+        "n|tbl|public.rejection_log",
+        "e|tbl|public.rejection_log",
+        "n|rel|public.rejection_log",
+        "n|type|public.rejection_log",
+        "n|rel|public.rejection_log_pkey"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "reporters"
+      ],
+      "writes": [
+        "s|tbl|public.reporters",
+        "n|tbl|public.reporters",
+        "e|tbl|public.reporters",
+        "n|rel|public.reporters",
+        "n|type|public.reporters",
+        "n|rel|public.reporters_pkey",
+        "n|rel|public.reporters_phone_hash_key"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "result_versions"
+      ],
+      "writes": [
+        "s|tbl|public.result_versions",
+        "n|tbl|public.result_versions",
+        "e|tbl|public.result_versions",
+        "n|rel|public.result_versions",
+        "n|type|public.result_versions",
+        "n|rel|public.result_versions_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.confidence_level"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "states"
+      ],
+      "writes": [
+        "s|tbl|public.states",
+        "n|tbl|public.states",
+        "e|tbl|public.states",
+        "n|rel|public.states",
+        "n|type|public.states",
+        "n|rel|public.states_pkey",
+        "n|rel|public.states_code_key"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "submissions"
+      ],
+      "writes": [
+        "s|tbl|public.submissions",
+        "n|tbl|public.submissions",
+        "e|tbl|public.submissions",
+        "n|rel|public.submissions",
+        "n|type|public.submissions",
+        "n|rel|public.submissions_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.submission_kind",
+        "n|enum|public.channel",
+        "n|enum|public.submission_status"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "unit_results"
+      ],
+      "writes": [
+        "s|tbl|public.unit_results",
+        "n|tbl|public.unit_results",
+        "e|tbl|public.unit_results",
+        "n|rel|public.unit_results",
+        "n|type|public.unit_results",
+        "n|rel|public.unit_results_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.unit_status"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "wards"
+      ],
+      "writes": [
+        "s|tbl|public.wards",
+        "n|tbl|public.wards",
+        "e|tbl|public.wards",
+        "n|rel|public.wards",
+        "n|type|public.wards",
+        "n|rel|public.wards_pkey",
+        "n|rel|public.wards_code_key"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "declarations",
+        "declarations_area_idx"
+      ],
+      "writes": [
+        "s|idx|public.declarations_area_idx",
+        "n|idx|public.declarations_area_idx",
+        "e|idx|public.declarations_area_idx",
+        "n|rel|public.declarations_area_idx"
+      ],
+      "reads": [
+        "n|tbl|public.declarations",
+        "n|sch|public",
+        "n|col|public.declarations.election_id",
+        "n|col|public.declarations.level",
+        "n|col|public.declarations.area_code"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "lgas",
+        "lgas_state_idx"
+      ],
+      "writes": [
+        "s|idx|public.lgas_state_idx",
+        "n|idx|public.lgas_state_idx",
+        "e|idx|public.lgas_state_idx",
+        "n|rel|public.lgas_state_idx"
+      ],
+      "reads": [
+        "n|tbl|public.lgas",
+        "n|sch|public",
+        "n|col|public.lgas.state_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "polling_units",
+        "polling_units_ward_idx"
+      ],
+      "writes": [
+        "s|idx|public.polling_units_ward_idx",
+        "n|idx|public.polling_units_ward_idx",
+        "e|idx|public.polling_units_ward_idx",
+        "n|rel|public.polling_units_ward_idx"
+      ],
+      "reads": [
+        "n|tbl|public.polling_units",
+        "n|sch|public",
+        "n|col|public.polling_units.ward_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "result_versions",
+        "result_versions_unit_figures_uq"
+      ],
+      "writes": [
+        "s|idx|public.result_versions_unit_figures_uq",
+        "n|idx|public.result_versions_unit_figures_uq",
+        "e|idx|public.result_versions_unit_figures_uq",
+        "n|rel|public.result_versions_unit_figures_uq"
+      ],
+      "reads": [
+        "n|tbl|public.result_versions",
+        "n|sch|public",
+        "n|col|public.result_versions.election_id",
+        "n|col|public.result_versions.polling_unit_id",
+        "n|col|public.result_versions.figures_hash"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "submissions",
+        "submissions_unit_idx"
+      ],
+      "writes": [
+        "s|idx|public.submissions_unit_idx",
+        "n|idx|public.submissions_unit_idx",
+        "e|idx|public.submissions_unit_idx",
+        "n|rel|public.submissions_unit_idx"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public",
+        "n|col|public.submissions.election_id",
+        "n|col|public.submissions.polling_unit_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "submissions",
+        "submissions_reporter_idx"
+      ],
+      "writes": [
+        "s|idx|public.submissions_reporter_idx",
+        "n|idx|public.submissions_reporter_idx",
+        "e|idx|public.submissions_reporter_idx",
+        "n|rel|public.submissions_reporter_idx"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public",
+        "n|col|public.submissions.reporter_id"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "wards",
+        "wards_lga_idx"
+      ],
+      "writes": [
+        "s|idx|public.wards_lga_idx",
+        "n|idx|public.wards_lga_idx",
+        "e|idx|public.wards_lga_idx",
+        "n|rel|public.wards_lga_idx"
+      ],
+      "reads": [
+        "n|tbl|public.wards",
+        "n|sch|public",
+        "n|col|public.wards.lga_id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "audit_log"
+      ],
+      "writes": [
+        "s|fk|public.audit_log.audit_log_admin_user_id_admin_users_id_fkey",
+        "n|fk|public.audit_log.audit_log_admin_user_id_admin_users_id_fkey",
+        "e|fk|public.audit_log.audit_log_admin_user_id_admin_users_id_fkey",
+        "n|con|public.audit_log.audit_log_admin_user_id_admin_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.audit_log",
+        "n|sch|public",
+        "n|tbl|public.admin_users",
+        "n|sch|public",
+        "n|col|public.audit_log.admin_user_id",
+        "n|col|public.admin_users.id",
+        "e|uniqueness|public.admin_users.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "capture_sessions"
+      ],
+      "writes": [
+        "s|fk|public.capture_sessions.capture_sessions_reporter_id_reporters_id_fkey",
+        "n|fk|public.capture_sessions.capture_sessions_reporter_id_reporters_id_fkey",
+        "e|fk|public.capture_sessions.capture_sessions_reporter_id_reporters_id_fkey",
+        "n|con|public.capture_sessions.capture_sessions_reporter_id_reporters_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.capture_sessions",
+        "n|sch|public",
+        "n|tbl|public.reporters",
+        "n|sch|public",
+        "n|col|public.capture_sessions.reporter_id",
+        "n|col|public.reporters.id",
+        "e|uniqueness|public.reporters.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "declarations"
+      ],
+      "writes": [
+        "s|fk|public.declarations.declarations_election_id_elections_id_fkey",
+        "n|fk|public.declarations.declarations_election_id_elections_id_fkey",
+        "e|fk|public.declarations.declarations_election_id_elections_id_fkey",
+        "n|con|public.declarations.declarations_election_id_elections_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.declarations",
+        "n|sch|public",
+        "n|tbl|public.elections",
+        "n|sch|public",
+        "n|col|public.declarations.election_id",
+        "n|col|public.elections.id",
+        "e|uniqueness|public.elections.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "declarations"
+      ],
+      "writes": [
+        "s|fk|public.declarations.declarations_entered_by_admin_users_id_fkey",
+        "n|fk|public.declarations.declarations_entered_by_admin_users_id_fkey",
+        "e|fk|public.declarations.declarations_entered_by_admin_users_id_fkey",
+        "n|con|public.declarations.declarations_entered_by_admin_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.declarations",
+        "n|sch|public",
+        "n|tbl|public.admin_users",
+        "n|sch|public",
+        "n|col|public.declarations.entered_by",
+        "n|col|public.admin_users.id",
+        "e|uniqueness|public.admin_users.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "declarations"
+      ],
+      "writes": [
+        "s|fk|public.declarations.declarations_approved_by_admin_users_id_fkey",
+        "n|fk|public.declarations.declarations_approved_by_admin_users_id_fkey",
+        "e|fk|public.declarations.declarations_approved_by_admin_users_id_fkey",
+        "n|con|public.declarations.declarations_approved_by_admin_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.declarations",
+        "n|sch|public",
+        "n|tbl|public.admin_users",
+        "n|sch|public",
+        "n|col|public.declarations.approved_by",
+        "n|col|public.admin_users.id",
+        "e|uniqueness|public.admin_users.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "election_parties"
+      ],
+      "writes": [
+        "s|fk|public.election_parties.election_parties_election_id_elections_id_fkey",
+        "n|fk|public.election_parties.election_parties_election_id_elections_id_fkey",
+        "e|fk|public.election_parties.election_parties_election_id_elections_id_fkey",
+        "n|con|public.election_parties.election_parties_election_id_elections_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.election_parties",
+        "n|sch|public",
+        "n|tbl|public.elections",
+        "n|sch|public",
+        "n|col|public.election_parties.election_id",
+        "n|col|public.elections.id",
+        "e|uniqueness|public.elections.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "election_parties"
+      ],
+      "writes": [
+        "s|fk|public.election_parties.election_parties_party_id_parties_id_fkey",
+        "n|fk|public.election_parties.election_parties_party_id_parties_id_fkey",
+        "e|fk|public.election_parties.election_parties_party_id_parties_id_fkey",
+        "n|con|public.election_parties.election_parties_party_id_parties_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.election_parties",
+        "n|sch|public",
+        "n|tbl|public.parties",
+        "n|sch|public",
+        "n|col|public.election_parties.party_id",
+        "n|col|public.parties.id",
+        "e|uniqueness|public.parties.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "lgas"
+      ],
+      "writes": [
+        "s|fk|public.lgas.lgas_state_id_states_id_fkey",
+        "n|fk|public.lgas.lgas_state_id_states_id_fkey",
+        "e|fk|public.lgas.lgas_state_id_states_id_fkey",
+        "n|con|public.lgas.lgas_state_id_states_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.lgas",
+        "n|sch|public",
+        "n|tbl|public.states",
+        "n|sch|public",
+        "n|col|public.lgas.state_id",
+        "n|col|public.states.id",
+        "e|uniqueness|public.states.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "polling_units"
+      ],
+      "writes": [
+        "s|fk|public.polling_units.polling_units_ward_id_wards_id_fkey",
+        "n|fk|public.polling_units.polling_units_ward_id_wards_id_fkey",
+        "e|fk|public.polling_units.polling_units_ward_id_wards_id_fkey",
+        "n|con|public.polling_units.polling_units_ward_id_wards_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.polling_units",
+        "n|sch|public",
+        "n|tbl|public.wards",
+        "n|sch|public",
+        "n|col|public.polling_units.ward_id",
+        "n|col|public.wards.id",
+        "e|uniqueness|public.wards.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "rejection_log"
+      ],
+      "writes": [
+        "s|fk|public.rejection_log.rejection_log_reporter_id_reporters_id_fkey",
+        "n|fk|public.rejection_log.rejection_log_reporter_id_reporters_id_fkey",
+        "e|fk|public.rejection_log.rejection_log_reporter_id_reporters_id_fkey",
+        "n|con|public.rejection_log.rejection_log_reporter_id_reporters_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.rejection_log",
+        "n|sch|public",
+        "n|tbl|public.reporters",
+        "n|sch|public",
+        "n|col|public.rejection_log.reporter_id",
+        "n|col|public.reporters.id",
+        "e|uniqueness|public.reporters.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "rejection_log"
+      ],
+      "writes": [
+        "s|fk|public.rejection_log.rejection_log_election_id_elections_id_fkey",
+        "n|fk|public.rejection_log.rejection_log_election_id_elections_id_fkey",
+        "e|fk|public.rejection_log.rejection_log_election_id_elections_id_fkey",
+        "n|con|public.rejection_log.rejection_log_election_id_elections_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.rejection_log",
+        "n|sch|public",
+        "n|tbl|public.elections",
+        "n|sch|public",
+        "n|col|public.rejection_log.election_id",
+        "n|col|public.elections.id",
+        "e|uniqueness|public.elections.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "result_versions"
+      ],
+      "writes": [
+        "s|fk|public.result_versions.result_versions_election_id_elections_id_fkey",
+        "n|fk|public.result_versions.result_versions_election_id_elections_id_fkey",
+        "e|fk|public.result_versions.result_versions_election_id_elections_id_fkey",
+        "n|con|public.result_versions.result_versions_election_id_elections_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.result_versions",
+        "n|sch|public",
+        "n|tbl|public.elections",
+        "n|sch|public",
+        "n|col|public.result_versions.election_id",
+        "n|col|public.elections.id",
+        "e|uniqueness|public.elections.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "result_versions"
+      ],
+      "writes": [
+        "s|fk|public.result_versions.result_versions_polling_unit_id_polling_units_id_fkey",
+        "n|fk|public.result_versions.result_versions_polling_unit_id_polling_units_id_fkey",
+        "e|fk|public.result_versions.result_versions_polling_unit_id_polling_units_id_fkey",
+        "n|con|public.result_versions.result_versions_polling_unit_id_polling_units_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.result_versions",
+        "n|sch|public",
+        "n|tbl|public.polling_units",
+        "n|sch|public",
+        "n|col|public.result_versions.polling_unit_id",
+        "n|col|public.polling_units.id",
+        "e|uniqueness|public.polling_units.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "submissions"
+      ],
+      "writes": [
+        "s|fk|public.submissions.submissions_election_id_elections_id_fkey",
+        "n|fk|public.submissions.submissions_election_id_elections_id_fkey",
+        "e|fk|public.submissions.submissions_election_id_elections_id_fkey",
+        "n|con|public.submissions.submissions_election_id_elections_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public",
+        "n|tbl|public.elections",
+        "n|sch|public",
+        "n|col|public.submissions.election_id",
+        "n|col|public.elections.id",
+        "e|uniqueness|public.elections.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "submissions"
+      ],
+      "writes": [
+        "s|fk|public.submissions.submissions_polling_unit_id_polling_units_id_fkey",
+        "n|fk|public.submissions.submissions_polling_unit_id_polling_units_id_fkey",
+        "e|fk|public.submissions.submissions_polling_unit_id_polling_units_id_fkey",
+        "n|con|public.submissions.submissions_polling_unit_id_polling_units_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public",
+        "n|tbl|public.polling_units",
+        "n|sch|public",
+        "n|col|public.submissions.polling_unit_id",
+        "n|col|public.polling_units.id",
+        "e|uniqueness|public.polling_units.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "submissions"
+      ],
+      "writes": [
+        "s|fk|public.submissions.submissions_reporter_id_reporters_id_fkey",
+        "n|fk|public.submissions.submissions_reporter_id_reporters_id_fkey",
+        "e|fk|public.submissions.submissions_reporter_id_reporters_id_fkey",
+        "n|con|public.submissions.submissions_reporter_id_reporters_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public",
+        "n|tbl|public.reporters",
+        "n|sch|public",
+        "n|col|public.submissions.reporter_id",
+        "n|col|public.reporters.id",
+        "e|uniqueness|public.reporters.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "submissions"
+      ],
+      "writes": [
+        "s|fk|public.submissions.submissions_version_id_result_versions_id_fkey",
+        "n|fk|public.submissions.submissions_version_id_result_versions_id_fkey",
+        "e|fk|public.submissions.submissions_version_id_result_versions_id_fkey",
+        "n|con|public.submissions.submissions_version_id_result_versions_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public",
+        "n|tbl|public.result_versions",
+        "n|sch|public",
+        "n|col|public.submissions.version_id",
+        "n|col|public.result_versions.id",
+        "e|uniqueness|public.result_versions.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "unit_results"
+      ],
+      "writes": [
+        "s|fk|public.unit_results.unit_results_election_id_elections_id_fkey",
+        "n|fk|public.unit_results.unit_results_election_id_elections_id_fkey",
+        "e|fk|public.unit_results.unit_results_election_id_elections_id_fkey",
+        "n|con|public.unit_results.unit_results_election_id_elections_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.unit_results",
+        "n|sch|public",
+        "n|tbl|public.elections",
+        "n|sch|public",
+        "n|col|public.unit_results.election_id",
+        "n|col|public.elections.id",
+        "e|uniqueness|public.elections.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "unit_results"
+      ],
+      "writes": [
+        "s|fk|public.unit_results.unit_results_polling_unit_id_polling_units_id_fkey",
+        "n|fk|public.unit_results.unit_results_polling_unit_id_polling_units_id_fkey",
+        "e|fk|public.unit_results.unit_results_polling_unit_id_polling_units_id_fkey",
+        "n|con|public.unit_results.unit_results_polling_unit_id_polling_units_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.unit_results",
+        "n|sch|public",
+        "n|tbl|public.polling_units",
+        "n|sch|public",
+        "n|col|public.unit_results.polling_unit_id",
+        "n|col|public.polling_units.id",
+        "e|uniqueness|public.polling_units.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "unit_results"
+      ],
+      "writes": [
+        "s|fk|public.unit_results.unit_results_counted_version_id_result_versions_id_fkey",
+        "n|fk|public.unit_results.unit_results_counted_version_id_result_versions_id_fkey",
+        "e|fk|public.unit_results.unit_results_counted_version_id_result_versions_id_fkey",
+        "n|con|public.unit_results.unit_results_counted_version_id_result_versions_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.unit_results",
+        "n|sch|public",
+        "n|tbl|public.result_versions",
+        "n|sch|public",
+        "n|col|public.unit_results.counted_version_id",
+        "n|col|public.result_versions.id",
+        "e|uniqueness|public.result_versions.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "unit_results"
+      ],
+      "writes": [
+        "s|fk|public.unit_results.unit_results_resolved_by_admin_users_id_fkey",
+        "n|fk|public.unit_results.unit_results_resolved_by_admin_users_id_fkey",
+        "e|fk|public.unit_results.unit_results_resolved_by_admin_users_id_fkey",
+        "n|con|public.unit_results.unit_results_resolved_by_admin_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.unit_results",
+        "n|sch|public",
+        "n|tbl|public.admin_users",
+        "n|sch|public",
+        "n|col|public.unit_results.resolved_by",
+        "n|col|public.admin_users.id",
+        "e|uniqueness|public.admin_users.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "wards"
+      ],
+      "writes": [
+        "s|fk|public.wards.wards_lga_id_lgas_id_fkey",
+        "n|fk|public.wards.wards_lga_id_lgas_id_fkey",
+        "e|fk|public.wards.wards_lga_id_lgas_id_fkey",
+        "n|con|public.wards.wards_lga_id_lgas_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.wards",
+        "n|sch|public",
+        "n|tbl|public.lgas",
+        "n|sch|public",
+        "n|col|public.wards.lga_id",
+        "n|col|public.lgas.id",
+        "e|uniqueness|public.lgas.id"
+      ]
+    }
+  ],
+  "ddl": [
+    {
+      "schema": "public",
+      "name": "admin_users",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "audit_log",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "capture_sessions",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "chain_entries",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "declarations",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "election_parties",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "elections",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "lgas",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "parties",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "polling_units",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "rejection_log",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "reporters",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "result_versions",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "states",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "submissions",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "unit_results",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "wards",
+      "isRlsEnabled": false,
+      "entityType": "tables"
+    },
+    {
+      "schema": "public",
+      "name": "admin_role",
+      "values": [
+        "reviewer",
+        "declarations_admin",
+        "approver",
+        "system_admin"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "name": "area_level",
+      "values": [
+        "polling_unit",
+        "ward",
+        "lga",
+        "state",
+        "national"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "name": "channel",
+      "values": [
+        "web",
+        "whatsapp",
+        "sms",
+        "ussd"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "name": "confidence_level",
+      "values": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "name": "declaration_source",
+      "values": [
+        "collation_result_photo",
+        "inec_statement",
+        "broadcast"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "name": "declaration_status",
+      "values": [
+        "pending",
+        "approved",
+        "rejected"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "name": "election_status",
+      "values": [
+        "draft",
+        "active",
+        "closed"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "name": "election_type",
+      "values": [
+        "presidential",
+        "governorship",
+        "senate",
+        "house_of_representatives",
+        "state_assembly",
+        "area_council",
+        "local_government"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "name": "submission_kind",
+      "values": [
+        "photo",
+        "typed"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "name": "submission_status",
+      "values": [
+        "pending",
+        "verified",
+        "rejected"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "name": "unit_status",
+      "values": [
+        "not_confirmed",
+        "counted",
+        "provisional",
+        "disputed",
+        "resolved"
+      ],
+      "entityType": "enums"
+    },
+    {
+      "schema": "public",
+      "table": "admin_users",
+      "name": "id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "admin_users",
+      "name": "email",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "admin_users",
+      "name": "display_name",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "admin_users",
+      "name": "role",
+      "type": "admin_role",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "admin_users",
+      "name": "password_hash",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "admin_users",
+      "name": "totp_secret_encrypted",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "admin_users",
+      "name": "disabled_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "admin_users",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "audit_log",
+      "name": "id",
+      "type": "bigserial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "audit_log",
+      "name": "admin_user_id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "audit_log",
+      "name": "action",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "audit_log",
+      "name": "target_type",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "audit_log",
+      "name": "target_id",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "audit_log",
+      "name": "details",
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "audit_log",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "capture_sessions",
+      "name": "id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "capture_sessions",
+      "name": "reporter_id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "capture_sessions",
+      "name": "token_hash",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "capture_sessions",
+      "name": "issued_via",
+      "type": "channel",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "capture_sessions",
+      "name": "expires_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "capture_sessions",
+      "name": "used_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "capture_sessions",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "chain_entries",
+      "name": "seq",
+      "type": "bigserial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "chain_entries",
+      "name": "entry_type",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "chain_entries",
+      "name": "ref_id",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "chain_entries",
+      "name": "payload_sha256",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "chain_entries",
+      "name": "prev_hash",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "chain_entries",
+      "name": "hash",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "chain_entries",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "election_id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "level",
+      "type": "area_level",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "area_code",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "figures",
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "unit_figures",
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "declared_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "source_kind",
+      "type": "declaration_source",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "source_url",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "source_file_key",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "source_sha256",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "status",
+      "type": "declaration_status",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'pending'",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "entered_by",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "approved_by",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "approved_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "election_parties",
+      "name": "election_id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "election_parties",
+      "name": "party_id",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "election_parties",
+      "name": "ballot_order",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "elections",
+      "name": "id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "elections",
+      "name": "type",
+      "type": "election_type",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "elections",
+      "name": "title",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "elections",
+      "name": "election_date",
+      "type": "date",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "elections",
+      "name": "scope_level",
+      "type": "area_level",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "elections",
+      "name": "scope_code",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "elections",
+      "name": "polls_close_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "elections",
+      "name": "status",
+      "type": "election_status",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'draft'",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "elections",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "lgas",
+      "name": "id",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "lgas_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "lgas",
+      "name": "state_id",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "lgas",
+      "name": "code",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "lgas",
+      "name": "name",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "parties",
+      "name": "id",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "parties_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "parties",
+      "name": "acronym",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "parties",
+      "name": "name",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "polling_units",
+      "name": "id",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "polling_units_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "polling_units",
+      "name": "ward_id",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "polling_units",
+      "name": "code",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "polling_units",
+      "name": "name",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "polling_units",
+      "name": "latitude",
+      "type": "double precision",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "polling_units",
+      "name": "longitude",
+      "type": "double precision",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "polling_units",
+      "name": "registered_voters",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "rejection_log",
+      "name": "id",
+      "type": "bigserial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "rejection_log",
+      "name": "reporter_id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "rejection_log",
+      "name": "election_id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "rejection_log",
+      "name": "reason",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "rejection_log",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "reporters",
+      "name": "id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "reporters",
+      "name": "phone_hash",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "reporters",
+      "name": "phone_encrypted",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "reporters",
+      "name": "consent_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "reporters",
+      "name": "blocked_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "reporters",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "result_versions",
+      "name": "id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "result_versions",
+      "name": "election_id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "result_versions",
+      "name": "polling_unit_id",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "result_versions",
+      "name": "figures_hash",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "result_versions",
+      "name": "figures",
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "result_versions",
+      "name": "witness_count",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "result_versions",
+      "name": "typed_support_count",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "result_versions",
+      "name": "confidence",
+      "type": "confidence_level",
+      "typeSchema": "public",
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "result_versions",
+      "name": "created_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "states",
+      "name": "id",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "states_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "states",
+      "name": "code",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "states",
+      "name": "name",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "gen_random_uuid()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "election_id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "polling_unit_id",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "reporter_id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "kind",
+      "type": "submission_kind",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "channel",
+      "type": "channel",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "status",
+      "type": "submission_status",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'pending'",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "captured_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "received_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "latitude",
+      "type": "double precision",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "longitude",
+      "type": "double precision",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "image_key",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "image_sha256",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "extracted",
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "voter_confirmed",
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "version_id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "unit_results",
+      "name": "election_id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "unit_results",
+      "name": "polling_unit_id",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "unit_results",
+      "name": "status",
+      "type": "unit_status",
+      "typeSchema": "public",
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'not_confirmed'",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "unit_results",
+      "name": "counted_version_id",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "unit_results",
+      "name": "resolved_by",
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "unit_results",
+      "name": "resolution_reason",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "unit_results",
+      "name": "updated_at",
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "wards",
+      "name": "id",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "always",
+        "name": "wards_id_seq",
+        "increment": "1",
+        "startWith": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "cache": 1,
+        "cycle": false
+      },
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "wards",
+      "name": "lga_id",
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "wards",
+      "name": "code",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "wards",
+      "name": "name",
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "entityType": "columns"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "declarations_area_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "election_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "level",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "area_code",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "lgas",
+      "name": "lgas_state_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "state_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "polling_units",
+      "name": "polling_units_ward_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "ward_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "result_versions",
+      "name": "result_versions_unit_figures_uq",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "election_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "polling_unit_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "figures_hash",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "submissions_unit_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "election_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "polling_unit_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "submissions_reporter_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "reporter_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "wards",
+      "name": "wards_lga_idx",
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "lga_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "entityType": "indexes"
+    },
+    {
+      "schema": "public",
+      "table": "audit_log",
+      "name": "audit_log_admin_user_id_admin_users_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "admin_user_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "admin_users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "capture_sessions",
+      "name": "capture_sessions_reporter_id_reporters_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "reporter_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "reporters",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "declarations_election_id_elections_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "election_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "elections",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "declarations_entered_by_admin_users_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "entered_by"
+      ],
+      "schemaTo": "public",
+      "tableTo": "admin_users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "declarations_approved_by_admin_users_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "approved_by"
+      ],
+      "schemaTo": "public",
+      "tableTo": "admin_users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "election_parties",
+      "name": "election_parties_election_id_elections_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "election_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "elections",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "election_parties",
+      "name": "election_parties_party_id_parties_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "party_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "parties",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "lgas",
+      "name": "lgas_state_id_states_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "state_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "states",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "polling_units",
+      "name": "polling_units_ward_id_wards_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "ward_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "wards",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "rejection_log",
+      "name": "rejection_log_reporter_id_reporters_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "reporter_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "reporters",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "rejection_log",
+      "name": "rejection_log_election_id_elections_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "election_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "elections",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "result_versions",
+      "name": "result_versions_election_id_elections_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "election_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "elections",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "result_versions",
+      "name": "result_versions_polling_unit_id_polling_units_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "polling_unit_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "polling_units",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "submissions_election_id_elections_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "election_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "elections",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "submissions_polling_unit_id_polling_units_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "polling_unit_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "polling_units",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "submissions_reporter_id_reporters_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "reporter_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "reporters",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "submissions_version_id_result_versions_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "version_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "result_versions",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "unit_results",
+      "name": "unit_results_election_id_elections_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "election_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "elections",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "unit_results",
+      "name": "unit_results_polling_unit_id_polling_units_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "polling_unit_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "polling_units",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "unit_results",
+      "name": "unit_results_counted_version_id_result_versions_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "counted_version_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "result_versions",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "unit_results",
+      "name": "unit_results_resolved_by_admin_users_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "resolved_by"
+      ],
+      "schemaTo": "public",
+      "tableTo": "admin_users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "wards",
+      "name": "wards_lga_id_lgas_id_fkey",
+      "nameExplicit": false,
+      "columns": [
+        "lga_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "lgas",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "entityType": "fks"
+    },
+    {
+      "schema": "public",
+      "table": "election_parties",
+      "name": "election_parties_pkey",
+      "columns": [
+        "election_id",
+        "party_id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "unit_results",
+      "name": "unit_results_pkey",
+      "columns": [
+        "election_id",
+        "polling_unit_id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "admin_users",
+      "name": "admin_users_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "audit_log",
+      "name": "audit_log_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "capture_sessions",
+      "name": "capture_sessions_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "chain_entries",
+      "name": "chain_entries_pkey",
+      "columns": [
+        "seq"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "declarations",
+      "name": "declarations_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "elections",
+      "name": "elections_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "lgas",
+      "name": "lgas_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "parties",
+      "name": "parties_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "polling_units",
+      "name": "polling_units_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "rejection_log",
+      "name": "rejection_log_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "reporters",
+      "name": "reporters_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "result_versions",
+      "name": "result_versions_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "states",
+      "name": "states_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "submissions",
+      "name": "submissions_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "wards",
+      "name": "wards_pkey",
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "entityType": "pks"
+    },
+    {
+      "schema": "public",
+      "table": "admin_users",
+      "name": "admin_users_email_key",
+      "nameExplicit": false,
+      "columns": [
+        "email"
+      ],
+      "nullsNotDistinct": false,
+      "entityType": "uniques"
+    },
+    {
+      "schema": "public",
+      "table": "capture_sessions",
+      "name": "capture_sessions_token_hash_key",
+      "nameExplicit": false,
+      "columns": [
+        "token_hash"
+      ],
+      "nullsNotDistinct": false,
+      "entityType": "uniques"
+    },
+    {
+      "schema": "public",
+      "table": "chain_entries",
+      "name": "chain_entries_hash_key",
+      "nameExplicit": false,
+      "columns": [
+        "hash"
+      ],
+      "nullsNotDistinct": false,
+      "entityType": "uniques"
+    },
+    {
+      "schema": "public",
+      "table": "lgas",
+      "name": "lgas_code_key",
+      "nameExplicit": false,
+      "columns": [
+        "code"
+      ],
+      "nullsNotDistinct": false,
+      "entityType": "uniques"
+    },
+    {
+      "schema": "public",
+      "table": "parties",
+      "name": "parties_acronym_key",
+      "nameExplicit": false,
+      "columns": [
+        "acronym"
+      ],
+      "nullsNotDistinct": false,
+      "entityType": "uniques"
+    },
+    {
+      "schema": "public",
+      "table": "polling_units",
+      "name": "polling_units_code_key",
+      "nameExplicit": false,
+      "columns": [
+        "code"
+      ],
+      "nullsNotDistinct": false,
+      "entityType": "uniques"
+    },
+    {
+      "schema": "public",
+      "table": "reporters",
+      "name": "reporters_phone_hash_key",
+      "nameExplicit": false,
+      "columns": [
+        "phone_hash"
+      ],
+      "nullsNotDistinct": false,
+      "entityType": "uniques"
+    },
+    {
+      "schema": "public",
+      "table": "states",
+      "name": "states_code_key",
+      "nameExplicit": false,
+      "columns": [
+        "code"
+      ],
+      "nullsNotDistinct": false,
+      "entityType": "uniques"
+    },
+    {
+      "schema": "public",
+      "table": "wards",
+      "name": "wards_code_key",
+      "nameExplicit": false,
+      "columns": [
+        "code"
+      ],
+      "nullsNotDistinct": false,
+      "entityType": "uniques"
+    }
+  ]
+}

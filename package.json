@@ -1,0 +1,24 @@
+{
+  "name": "trustelect",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev:web": "npm run dev -w @trustelect/web",
+    "dev:api": "npm run start:dev -w @trustelect/api",
+    "build": "npm run build -w @trustelect/shared && npm run build -w @trustelect/api && npm run build -w @trustelect/web",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:generate": "npm run db:generate -w @trustelect/api",
+    "db:migrate": "npm run db:migrate -w @trustelect/api"
+  }
+}
