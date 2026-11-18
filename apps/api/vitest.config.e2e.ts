@@ -15,6 +15,7 @@ export default defineConfig({
       // Test-only keys, never used outside tests
       APP_ENCRYPTION_KEY: 'dGVzdC1vbmx5LWVuY3J5cHRpb24ta2V5LTMyLWJ5dGU=',
       PHONE_HASH_KEY: 'dGVzdC1vbmx5LXBob25lLWhhc2gta2V5LTMyLWJ5dGU=',
+      EVIDENCE_DIR: 'storage/e2e-evidence',
     },
   },
 });

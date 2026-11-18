@@ -1,5 +1,5 @@
-/** Browser-side calls to the admin API through the same-origin /api proxy. */
-export async function adminPost<T = unknown>(
+/** Browser-side calls to the API through the same-origin /api proxy. */
+export async function apiPost<T = unknown>(
   path: string,
   body: unknown,
 ): Promise<{ ok: true; data: T } | { ok: false; status: number; message: string }> {
@@ -17,10 +17,16 @@ export async function adminPost<T = unknown>(
   }
 }
 
+/** Kept for the admin console */
+export const adminPost = apiPost;
+
+const GENERIC = new Set(['Unauthorized', 'Forbidden resource', 'Forbidden', 'Bad Request', 'Invalid request']);
+
 function describeError(status: number, data: { message?: unknown; issues?: { path: string; message: string }[] }) {
-  if (status === 401) return 'Your session has ended. Sign in again.';
-  if (status === 403) return 'Your role does not allow this action.';
-  if (status === 429) return 'Too many requests. Wait a minute and try again.';
+  const own = typeof data.message === 'string' && !GENERIC.has(data.message) ? data.message : null;
+  if (status === 401) return own ?? 'Your session has ended. Sign in again.';
+  if (status === 403) return own ?? 'You are not allowed to do this.';
+  if (status === 429) return own && !own.startsWith('ThrottlerException') ? own : 'Too many requests. Wait a minute and try again.';
   if (data.issues?.length) return data.issues.map((i) => (i.path ? `${i.path}: ${i.message}` : i.message)).join('. ');
   if (typeof data.message === 'string') return data.message;
   return 'Something went wrong. Try again.';

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { UNOFFICIAL_LABEL } from '@trustelect/shared';
 import { LogoMark } from './logo';
 
@@ -20,6 +21,11 @@ export function SiteFooter() {
             <strong className="text-ink">{UNOFFICIAL_LABEL}.</strong> TrustElect is not INEC and
             does not declare winners. Figures come from EC60E posters already pasted at polling
             units. Official results are declared by INEC.
+          </p>
+          <p>
+            <Link href="/privacy" className="font-medium text-brand-strong hover:underline">
+              Privacy notice
+            </Link>
           </p>
         </div>
       </div>

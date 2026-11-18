@@ -172,16 +172,16 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
           <div className="flex flex-wrap items-center justify-between gap-6 rounded-3xl bg-brand px-6 py-10 text-brand-ink sm:px-10">
             <div className="max-w-xl">
-              <h2 className="text-2xl font-bold tracking-tight">Check your polling unit</h2>
+              <h2 className="text-2xl font-bold tracking-tight">At a polling unit after counting?</h2>
               <p className="mt-2 opacity-90">
-                Enter the code on your voter&apos;s card to see what voters recorded.
+                Photograph the EC60E result poster. Every independent photo makes the record stronger.
               </p>
             </div>
             <Link
-              href="/results"
+              href="/capture"
               className="inline-flex min-h-12 items-center rounded-xl bg-surface px-6 font-semibold text-brand-strong hover:bg-surface-tint"
             >
-              Check a result
+              Photograph a result
             </Link>
           </div>
         </div>

@@ -30,6 +30,18 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // Powerful features are off everywhere except the capture app
+        source: '/((?!capture).*)',
+        headers: [{ key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()' }],
+      },
+      {
+        source: '/capture',
+        headers: [
+          { key: 'Permissions-Policy', value: 'camera=(self), geolocation=(self), microphone=(), payment=(), usb=()' },
+          { key: 'Cache-Control', value: 'no-store' },
+        ],
+      },
+      {
         // The admin console is private: never indexed, never framed, never cached
         source: '/admin/:path*',
         headers: [

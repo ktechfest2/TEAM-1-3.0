@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module.js';
+import { CaptureModule } from './capture/capture.module.js';
 import { validateEnv } from './config/env.js';
 import { DatabaseModule } from './database/database.module.js';
 import { ElectionsModule } from './elections/elections.module.js';
@@ -22,6 +23,7 @@ import { SecurityModule } from './security/security.module.js';
     AuthModule,
     GeographyModule,
     ElectionsModule,
+    CaptureModule,
   ],
   controllers: [HealthController],
 })

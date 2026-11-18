@@ -158,6 +158,21 @@ export const reporters = pgTable('reporters', {
   createdAt: createdAt(),
 });
 
+/** One-time codes sent by SMS to verify a voter's phone number (CAP-02) */
+export const voterOtps = pgTable(
+  'voter_otps',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    phoneHash: text('phone_hash').notNull(),
+    codeHash: text('code_hash').notNull(),
+    attempts: integer('attempts').notNull().default(0),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    consumedAt: timestamp('consumed_at', { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index('voter_otps_phone_idx').on(t.phoneHash, t.createdAt)],
+);
+
 /** One-time links or codes that tie a web capture to a phone number */
 export const captureSessions = pgTable('capture_sessions', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -224,10 +239,17 @@ export const submissions = pgTable(
     extracted: jsonb('extracted').$type<ResultFigures>(),
     voterConfirmed: boolean('voter_confirmed').notNull().default(false),
     versionId: uuid('version_id').references(() => resultVersions.id),
+    /** Generated on the phone; makes offline-queue retries safe (one submission per clientId) */
+    clientId: uuid('client_id'),
+    imageBytes: integer('image_bytes'),
+    imageType: text('image_type'),
+    /** Reported GPS accuracy in metres */
+    locationAccuracy: doublePrecision('location_accuracy'),
   },
   (t) => [
     index('submissions_unit_idx').on(t.electionId, t.pollingUnitId),
-    index('submissions_reporter_idx').on(t.reporterId),
+    index('submissions_reporter_idx').on(t.reporterId, t.receivedAt),
+    uniqueIndex('submissions_reporter_client_uq').on(t.reporterId, t.clientId),
   ],
 );
 

@@ -34,3 +34,6 @@ npm-debug.log*
 
 # Downloaded datasets (recreate with npm run register:fetch)
 apps/api/data/
+
+# Local evidence storage (development)
+apps/api/storage/

@@ -45,6 +45,10 @@ Imports are idempotent: re-running updates names and adds new units. Any CSV wit
 
 **Data source and credit.** The register is public electoral information published by the Independent National Electoral Commission (INEC). TrustElect loads the copy compiled in [paul1029-ife/polling-unit-finder](https://github.com/paul1029-ife/polling-unit-finder) (data from [saidiadegoke/nigeria-inec-geo](https://github.com/saidiadegoke/nigeria-inec-geo), MIT licence), pinned to commit `3efbaea` and verified by checksum. It is not an official INEC feed; TrustElect is not affiliated with or endorsed by INEC.
 
+## Voter capture app
+
+Voters open `/capture`, verify their phone with an SMS code, choose the election and photograph the EC60E poster with the live camera. Photos queue on the phone when offline and upload automatically when the network returns. In development no SMS is sent: the code appears in the API log and on screen.
+
 ## Ballot order
 
 Parties are always listed in ballot order, which TrustElect sets **alphabetically by party acronym**. The API enforces it, whatever order parties are submitted in.
