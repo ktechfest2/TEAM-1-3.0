@@ -38,6 +38,21 @@ export async function requireAdmin(): Promise<AdminProfile> {
   return admin;
 }
 
+/**
+ * Calls the API as the signed-in administrator (server side only).
+ * Throws on errors so pages fail loudly instead of showing wrong data.
+ */
+export async function adminFetch<T>(path: string): Promise<T> {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  const res = await fetch(`${API_URL}${path}`, {
+    headers: token ? { cookie: `${SESSION_COOKIE}=${encodeURIComponent(token)}` } : {},
+    cache: 'no-store',
+  });
+  if (res.status === 401) redirect('/admin/login');
+  if (!res.ok) throw new Error(`API ${path} failed with ${res.status}`);
+  return (await res.json()) as T;
+}
+
 export const ROLE_LABELS: Record<AdminRole, string> = {
   reviewer: 'Reviewer',
   declarations_admin: 'Declarations administrator',

@@ -20,7 +20,8 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "admin:create": "nest build && node dist/cli/create-admin.js"
+    "admin:create": "nest build && node dist/cli/create-admin.js",
+    "register:import": "nest build && node dist/cli/import-register.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",

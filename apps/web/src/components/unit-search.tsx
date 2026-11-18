@@ -12,7 +12,7 @@ export function UnitSearch({ defaultValue }: { defaultValue?: string }) {
             name="unit"
             type="text"
             required
-            pattern="\d{2}-\d{2}-\d{2}-\d{3}"
+            pattern="\d{1,2}[\-/]\d{1,2}[\-/]\d{1,2}[\-/]\d{1,3}"
             aria-describedby="unit-help"
             defaultValue={defaultValue}
             autoComplete="off"

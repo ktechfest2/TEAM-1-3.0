@@ -1,0 +1,31 @@
+pu_code,pu_name,ward_name,lga_name,state_name,latitude,longitude,registered_voters
+24-99-01-001,SAMPLE Primary School 1,SAMPLE Ward 1,SAMPLE LGA (development data),Lagos,6.46100,3.39100,631
+24-99-01-002,SAMPLE Town Hall 1,SAMPLE Ward 1,SAMPLE LGA (development data),Lagos,6.46200,3.39200,454
+24-99-01-003,SAMPLE Health Centre 1,SAMPLE Ward 1,SAMPLE LGA (development data),Lagos,6.46300,3.39300,704
+24-99-01-004,SAMPLE Market Square 1,SAMPLE Ward 1,SAMPLE LGA (development data),Lagos,6.46400,3.39400,966
+24-99-01-005,SAMPLE Community Centre 1,SAMPLE Ward 1,SAMPLE LGA (development data),Lagos,6.46500,3.39500,349
+24-99-01-006,SAMPLE Mosque Junction 1,SAMPLE Ward 1,SAMPLE LGA (development data),Lagos,6.46600,3.39600,374
+24-99-01-007,SAMPLE Church Compound 1,SAMPLE Ward 1,SAMPLE LGA (development data),Lagos,6.46700,3.39700,1140
+24-99-01-008,SAMPLE Junior Secondary School 1,SAMPLE Ward 1,SAMPLE LGA (development data),Lagos,6.46800,3.39800,848
+24-99-01-009,SAMPLE Motor Park 1,SAMPLE Ward 1,SAMPLE LGA (development data),Lagos,6.46900,3.39900,396
+24-99-01-010,SAMPLE Village Square 1,SAMPLE Ward 1,SAMPLE LGA (development data),Lagos,6.47000,3.40000,674
+24-99-02-001,SAMPLE Primary School 2,SAMPLE Ward 2,SAMPLE LGA (development data),Lagos,6.47100,3.40100,896
+24-99-02-002,SAMPLE Town Hall 2,SAMPLE Ward 2,SAMPLE LGA (development data),Lagos,6.47200,3.40200,359
+24-99-02-003,SAMPLE Health Centre 2,SAMPLE Ward 2,SAMPLE LGA (development data),Lagos,6.47300,3.40300,819
+24-99-02-004,SAMPLE Market Square 2,SAMPLE Ward 2,SAMPLE LGA (development data),Lagos,6.47400,3.40400,519
+24-99-02-005,SAMPLE Community Centre 2,SAMPLE Ward 2,SAMPLE LGA (development data),Lagos,6.47500,3.40500,338
+24-99-02-006,SAMPLE Mosque Junction 2,SAMPLE Ward 2,SAMPLE LGA (development data),Lagos,6.47600,3.40600,388
+24-99-02-007,SAMPLE Church Compound 2,SAMPLE Ward 2,SAMPLE LGA (development data),Lagos,6.47700,3.40700,744
+24-99-02-008,SAMPLE Junior Secondary School 2,SAMPLE Ward 2,SAMPLE LGA (development data),Lagos,6.47800,3.40800,728
+24-99-02-009,SAMPLE Motor Park 2,SAMPLE Ward 2,SAMPLE LGA (development data),Lagos,6.47900,3.40900,371
+24-99-02-010,SAMPLE Village Square 2,SAMPLE Ward 2,SAMPLE LGA (development data),Lagos,6.48000,3.41000,546
+24-99-03-001,SAMPLE Primary School 3,SAMPLE Ward 3,SAMPLE LGA (development data),Lagos,6.48100,3.41100,392
+24-99-03-002,SAMPLE Town Hall 3,SAMPLE Ward 3,SAMPLE LGA (development data),Lagos,6.48200,3.41200,864
+24-99-03-003,SAMPLE Health Centre 3,SAMPLE Ward 3,SAMPLE LGA (development data),Lagos,6.48300,3.41300,734
+24-99-03-004,SAMPLE Market Square 3,SAMPLE Ward 3,SAMPLE LGA (development data),Lagos,6.48400,3.41400,360
+24-99-03-005,SAMPLE Community Centre 3,SAMPLE Ward 3,SAMPLE LGA (development data),Lagos,6.48500,3.41500,1146
+24-99-03-006,SAMPLE Mosque Junction 3,SAMPLE Ward 3,SAMPLE LGA (development data),Lagos,6.48600,3.41600,879
+24-99-03-007,SAMPLE Church Compound 3,SAMPLE Ward 3,SAMPLE LGA (development data),Lagos,6.48700,3.41700,426
+24-99-03-008,SAMPLE Junior Secondary School 3,SAMPLE Ward 3,SAMPLE LGA (development data),Lagos,6.48800,3.41800,528
+24-99-03-009,SAMPLE Motor Park 3,SAMPLE Ward 3,SAMPLE LGA (development data),Lagos,6.48900,3.41900,945
+24-99-03-010,SAMPLE Village Square 3,SAMPLE Ward 3,SAMPLE LGA (development data),Lagos,6.49000,3.42000,942

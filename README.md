@@ -32,6 +32,16 @@ npm run dev:web        # web on http://localhost:3000
 
 The admin console is at http://localhost:3000/admin (not linked from the public site). The web app proxies `/api/*` to the API, so admin cookies stay first-party.
 
+## Polling unit register
+
+The register (state, LGA, ward and polling unit codes and names) is imported from a CSV with columns `pu_code, pu_name, ward_name, lga_name, state_name` and optionally `latitude, longitude, registered_voters`:
+
+```sh
+npm run register:import -w @trustelect/api -- path/to/register.csv
+```
+
+Imports are idempotent: re-running updates names and adds new units. For development, `apps/api/seed/sample-register.csv` holds a fictional LGA (`24-99`) with 30 polling units, all named `SAMPLE …`.
+
 ## Administrator accounts
 
 Admins sign in with a password and a mandatory authenticator-app code (TOTP). Create the first one with:

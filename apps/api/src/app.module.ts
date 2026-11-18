@@ -4,6 +4,8 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module.js';
 import { validateEnv } from './config/env.js';
 import { DatabaseModule } from './database/database.module.js';
+import { ElectionsModule } from './elections/elections.module.js';
+import { GeographyModule } from './geography/geography.module.js';
 import { HealthController } from './health/health.controller.js';
 import { SecurityModule } from './security/security.module.js';
 
@@ -18,6 +20,8 @@ import { SecurityModule } from './security/security.module.js';
     DatabaseModule,
     SecurityModule,
     AuthModule,
+    GeographyModule,
+    ElectionsModule,
   ],
   controllers: [HealthController],
 })
