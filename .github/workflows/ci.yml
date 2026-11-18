@@ -12,7 +12,20 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: trustelect
+          POSTGRES_PASSWORD: trustelect_local_only
+          POSTGRES_DB: trustelect
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U trustelect -d trustelect"
+          --health-interval 5s --health-timeout 5s --health-retries 10
     env:
+      DATABASE_URL: postgres://trustelect:trustelect_local_only@localhost:5432/trustelect
       DISABLE_TELEMETRY: "1"
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
@@ -37,6 +50,12 @@ jobs:
 
       - name: Test
         run: npm test
+
+      - name: Migrate database
+        run: npm run db:migrate
+
+      - name: End-to-end tests
+        run: npm run test:e2e -w @trustelect/api
 
       - name: Build
         run: npm run build

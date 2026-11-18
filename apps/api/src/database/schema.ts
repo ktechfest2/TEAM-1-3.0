@@ -3,6 +3,7 @@
  * Requirement IDs refer to the System Overview and Functional Specification v2.0.
  */
 import {
+  bigint,
   bigserial,
   boolean,
   date,
@@ -295,9 +296,34 @@ export const adminUsers = pgTable('admin_users', {
   passwordHash: text('password_hash').notNull(),
   /** Encrypted TOTP secret; two-factor authentication is mandatory */
   totpSecretEncrypted: text('totp_secret_encrypted'),
+  /** Set once the administrator has confirmed their authenticator app */
+  totpEnabledAt: timestamp('totp_enabled_at', { withTimezone: true }),
+  /** Last accepted TOTP time step, so a code cannot be used twice */
+  totpLastStep: bigint('totp_last_step', { mode: 'number' }),
+  failedLogins: integer('failed_logins').notNull().default(0),
+  lockedUntil: timestamp('locked_until', { withTimezone: true }),
   disabledAt: timestamp('disabled_at', { withTimezone: true }),
   createdAt: createdAt(),
 });
+
+/** Server-side admin sessions; the browser holds only an opaque token in an HTTP-only cookie */
+export const adminSessions = pgTable(
+  'admin_sessions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    adminUserId: uuid('admin_user_id').notNull().references(() => adminUsers.id),
+    tokenHash: text('token_hash').notNull().unique(),
+    /** False while the administrator still has to set up or enter their TOTP code */
+    mfaVerified: boolean('mfa_verified').notNull().default(false),
+    ipAddress: text('ip_address'),
+    userAgent: text('user_agent'),
+    createdAt: createdAt(),
+    lastSeenAt: timestamp('last_seen_at', { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+  },
+  (t) => [index('admin_sessions_user_idx').on(t.adminUserId)],
+);
 
 export const auditLog = pgTable('audit_log', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),

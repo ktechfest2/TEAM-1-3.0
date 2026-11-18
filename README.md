@@ -30,13 +30,25 @@ npm run dev:api        # API on http://localhost:4000
 npm run dev:web        # web on http://localhost:3000
 ```
 
+## Administrator accounts
+
+Admins sign in with a password and a mandatory authenticator-app code (TOTP). Create the first one with:
+
+```sh
+ADMIN_PASSWORD='a long passphrase' npm run admin:create -w @trustelect/api -- \
+  --email you@example.org --name "Your Name" --role system_admin
+```
+
+Roles: `reviewer`, `declarations_admin`, `approver`, `system_admin`. At first sign-in the admin scans a QR code with an authenticator app. Sessions are server-side, in an HTTP-only, SameSite=Strict cookie; logins are rate-limited and lock for 15 minutes after 5 failures; every action is written to the audit log.
+
 ## Common commands
 
 | Command | What it does |
 |---|---|
 | `npm run lint` | Lint all workspaces |
 | `npm run typecheck` | Type-check all workspaces |
-| `npm test` | Run all tests |
+| `npm test` | Run unit tests |
+| `npm run test:e2e -w @trustelect/api` | Run API end-to-end tests (needs the database) |
 | `npm run build` | Build shared, API and web |
 | `npm run db:generate` | Generate a migration after changing `apps/api/src/database/schema.ts` |
 | `npm run db:migrate` | Apply pending migrations |
