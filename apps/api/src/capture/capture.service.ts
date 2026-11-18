@@ -116,7 +116,22 @@ export class CaptureService {
       throw new UnauthorizedException('That code is not correct');
     }
     await this.db.update(voterOtps).set({ consumedAt: new Date() }).where(eq(voterOtps.id, otp.id));
+    return this.openSession(phone, 'sms');
+  }
 
+  /**
+   * Starts a capture session from a phone number alone (no SMS code). The number is
+   * self-declared, so it identifies a witness but does not prove they are a separate person.
+   */
+  async startWithoutVerification(rawPhone: string): Promise<{ token: string; voter: CaptureVoter }> {
+    const phone = normaliseNigerianMobile(rawPhone);
+    if (!phone) throw new BadRequestException('Enter a Nigerian mobile number, for example 0803 123 4567');
+    return this.openSession(phone, 'web');
+  }
+
+  /** Records consent for the number and opens a capture session. */
+  private async openSession(phone: string, via: 'sms' | 'web'): Promise<{ token: string; voter: CaptureVoter }> {
+    const phoneHash = this.phoneHash(phone);
     const [reporter] = await this.db
       .insert(reporters)
       .values({ phoneHash, phoneEncrypted: this.encryptor.encrypt(phone), consentAt: new Date() })
@@ -128,7 +143,7 @@ export class CaptureService {
     const expiresAt = new Date(Date.now() + CAPTURE_SESSION_HOURS * 3_600_000);
     const [session] = await this.db
       .insert(captureSessions)
-      .values({ reporterId: reporter.id, tokenHash: hash, issuedVia: 'sms', expiresAt })
+      .values({ reporterId: reporter.id, tokenHash: hash, issuedVia: via, expiresAt })
       .returning({ id: captureSessions.id });
 
     return { token, voter: { sessionId: session.id, reporterId: reporter.id, phoneMasked: maskPhone(phone), expiresAt } };

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { Camera } from './camera';
+import { EnterPhone } from './enter-phone';
 import { flushQueue, queue, type QueuedPhoto } from './queue';
 import { QueueList } from './queue-list';
 import { VerifyPhone } from './verify-phone';
@@ -39,6 +40,7 @@ export function CaptureApp() {
   const [items, setItems] = useState<QueuedPhoto[]>([]);
   const online = useSyncExternalStore(subscribeOnline, () => navigator.onLine, () => true);
   const [needsVerify, setNeedsVerify] = useState(false);
+  const [smsMode, setSmsMode] = useState(false);
 
   const refresh = useCallback(async () => setItems(await queue.all()), []);
 
@@ -51,6 +53,10 @@ export function CaptureApp() {
   // Session check, queue load, and upload when the network comes back
   useEffect(() => {
     queue.all().then(setItems).catch(() => undefined);
+    fetch('/api/capture/config')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((c: { phoneVerification?: string } | null) => setSmsMode(c?.phoneVerification === 'sms'))
+      .catch(() => undefined);
     fetch('/api/capture/session')
       .then(async (res) => {
         if (res.ok) {
@@ -84,6 +90,13 @@ export function CaptureApp() {
   useEffect(() => () => {
     if (photo) URL.revokeObjectURL(photo.url);
   }, [photo]);
+
+  function started(masked: string) {
+    setPhoneMasked(masked);
+    setNeedsVerify(false);
+    setStep('election');
+    void flush();
+  }
 
   function askLocation() {
     if (!('geolocation' in navigator)) return setLocationState('denied');
@@ -130,7 +143,7 @@ export function CaptureApp() {
         <div role="alert" className="rounded-xl border border-dispute bg-dispute-bg px-3 py-2 text-sm text-dispute">
           Your session has ended, so {pending} photo(s) are waiting.{' '}
           <button type="button" className="font-semibold underline" onClick={() => setStep('verify')}>
-            Verify your number again
+            Enter your number again
           </button>{' '}
           to send them.
         </div>
@@ -147,7 +160,7 @@ export function CaptureApp() {
           </p>
           <h2 className="mt-5 font-semibold">What TrustElect collects</h2>
           <ul className="mt-2 grid list-disc gap-1.5 pl-5 text-sm">
-            <li>Your phone number, to confirm you are a real, separate witness. Stored encrypted and never shown publicly.</li>
+            <li>Your phone number, so each person counts as one witness. Stored encrypted and never shown publicly.</li>
             <li>The photo of the poster, with the time it was taken.</li>
             <li>Your location, only if you choose to share it, to show the photo was taken at the polling unit.</li>
           </ul>
@@ -168,22 +181,21 @@ export function CaptureApp() {
 
       {step === 'verify' && (
         <section className={card} aria-labelledby="verify-heading">
-          <h1 id="verify-heading" className="mb-4 text-xl font-bold tracking-tight">Verify your phone</h1>
-          <VerifyPhone
-            onVerified={(masked) => {
-              setPhoneMasked(masked);
-              setNeedsVerify(false);
-              setStep('election');
-              void flush();
-            }}
-          />
+          <h1 id="verify-heading" className="mb-4 text-xl font-bold tracking-tight">
+            {smsMode ? 'Verify your phone' : 'Your phone number'}
+          </h1>
+          {smsMode ? (
+            <VerifyPhone onVerified={started} />
+          ) : (
+            <EnterPhone onStarted={started} />
+          )}
         </section>
       )}
 
       {step === 'election' && (
         <section className={card} aria-labelledby="election-heading">
           <h1 id="election-heading" className="text-xl font-bold tracking-tight">Which election is this poster for?</h1>
-          {phoneMasked && <p className="mt-1 text-sm text-ink-muted">Verified: {phoneMasked}</p>}
+          {phoneMasked && <p className="mt-1 text-sm text-ink-muted">Phone: {phoneMasked}</p>}
           {elections === null ? (
             <p role="status" className="mt-4 text-ink-muted">Loading elections…</p>
           ) : elections.length === 0 ? (

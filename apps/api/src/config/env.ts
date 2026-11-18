@@ -17,6 +17,11 @@ export const envSchema = z.object({
   PHONE_HASH_KEY: base64Key32,
   /** Admin session lifetime */
   ADMIN_SESSION_HOURS: z.coerce.number().int().min(1).max(24).default(8),
+  /**
+   * How voters' phone numbers are handled at capture:
+   * none = number entered without verification (default); sms = one-time SMS code required.
+   */
+  CAPTURE_PHONE_VERIFICATION: z.enum(['none', 'sms']).default('none'),
   /** Directory for evidence photographs in development (object storage in production) */
   EVIDENCE_DIR: z.string().default('storage/evidence'),
   /** OpenRouter key for AI verification (required from Sprint 4) */

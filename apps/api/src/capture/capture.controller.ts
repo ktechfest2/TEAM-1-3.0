@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Injectable,
+  NotFoundException,
   Post,
   Query,
   Req,
@@ -47,6 +48,11 @@ const CurrentVoter = createParamDecorator(
 );
 
 const requestSchema = z.object({ phone: z.string().min(7).max(20) });
+const startSchema = z.object({
+  phone: z.string().min(7).max(20),
+  /** The voter must accept the privacy notice */
+  consent: z.literal(true),
+});
 const verifySchema = z.object({
   phone: z.string().min(7).max(20),
   code: z.string().regex(/^\d{6}$/),
@@ -69,11 +75,39 @@ export class CaptureController {
     private readonly config: ConfigService<Env, true>,
   ) {}
 
+  private get verification() {
+    return this.config.get('CAPTURE_PHONE_VERIFICATION', { infer: true });
+  }
+
+  private requireMode(mode: 'none' | 'sms') {
+    if (this.verification !== mode) throw new NotFoundException();
+  }
+
+  /** Tells the app whether an SMS code is needed */
+  @Get('config')
+  captureConfig() {
+    return { phoneVerification: this.verification };
+  }
+
+  /** Default flow: phone number and consent, no SMS code */
+  @Post('start')
+  @HttpCode(200)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  async start(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
+    this.requireMode('none');
+    const { phone } = parseOrThrow(startSchema, body);
+    const { token, voter } = await this.capture.startWithoutVerification(phone);
+    this.setSessionCookie(res, token);
+    return { phoneMasked: voter.phoneMasked, expiresAt: voter.expiresAt };
+  }
+
   @Post('code')
   @HttpCode(200)
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   requestCode(@Body() body: unknown) {
+    this.requireMode('sms');
     return this.capture.requestCode(parseOrThrow(requestSchema, body).phone);
   }
 
@@ -82,8 +116,14 @@ export class CaptureController {
   @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   async verify(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
+    this.requireMode('sms');
     const { phone, code } = parseOrThrow(verifySchema, body);
     const { token, voter } = await this.capture.verifyCode(phone, code);
+    this.setSessionCookie(res, token);
+    return { phoneMasked: voter.phoneMasked, expiresAt: voter.expiresAt };
+  }
+
+  private setSessionCookie(res: Response, token: string) {
     res.cookie(CAPTURE_COOKIE, token, {
       httpOnly: true,
       sameSite: 'strict',
@@ -91,7 +131,6 @@ export class CaptureController {
       path: '/',
       maxAge: CAPTURE_SESSION_HOURS * 3_600_000,
     });
-    return { phoneMasked: voter.phoneMasked, expiresAt: voter.expiresAt };
   }
 
   @Get('session')

@@ -84,6 +84,22 @@ export default function Home() {
               photo, counts results from the unit up, and shows whether declared results match
               what was pasted on the wall.
             </p>
+            {/* Primary action: send an EC60E result */}
+            <div className="grid max-w-xl gap-3 rounded-2xl border-2 border-brand bg-surface-tint p-5">
+              <div>
+                <h2 className="text-lg font-bold">At a polling unit after counting?</h2>
+                <p className="text-ink-muted">
+                  Photograph the EC60E result poster. Every independent photo makes the record stronger.
+                </p>
+              </div>
+              <Link
+                href="/capture"
+                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-brand px-6 text-lg font-semibold text-brand-ink hover:bg-brand-strong"
+              >
+                <OutlineIcon d="M4 8h3l2-3h6l2 3h3v11H4V8Zm8 9a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+                Photograph a result poster
+              </Link>
+            </div>
             <div className="max-w-xl">
               <UnitSearch />
             </div>
@@ -172,16 +188,16 @@ export default function Home() {
         <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
           <div className="flex flex-wrap items-center justify-between gap-6 rounded-3xl bg-brand px-6 py-10 text-brand-ink sm:px-10">
             <div className="max-w-xl">
-              <h2 className="text-2xl font-bold tracking-tight">At a polling unit after counting?</h2>
+              <h2 className="text-2xl font-bold tracking-tight">Check your polling unit</h2>
               <p className="mt-2 opacity-90">
-                Photograph the EC60E result poster. Every independent photo makes the record stronger.
+                Enter the code on your voter&apos;s card to see what voters recorded.
               </p>
             </div>
             <Link
-              href="/capture"
+              href="/results"
               className="inline-flex min-h-12 items-center rounded-xl bg-surface px-6 font-semibold text-brand-strong hover:bg-surface-tint"
             >
-              Photograph a result
+              Check a result
             </Link>
           </div>
         </div>

@@ -13,7 +13,7 @@ export function SiteHeader() {
           </Link>
           <nav aria-label="Primary">
             <ul className="flex flex-wrap items-center gap-x-1 gap-y-1 text-[0.9375rem] font-medium">
-              <li>
+              <li className="hidden sm:block">
                 <Link
                   href="/#how-it-works"
                   className="rounded-lg px-3 py-2 text-ink-muted hover:bg-surface-muted hover:text-ink"
@@ -24,9 +24,17 @@ export function SiteHeader() {
               <li>
                 <Link
                   href="/results"
-                  className="ml-1 inline-flex min-h-11 items-center rounded-lg bg-brand px-4 font-semibold text-brand-ink hover:bg-brand-strong"
+                  className="rounded-lg px-3 py-2 text-ink-muted hover:bg-surface-muted hover:text-ink"
                 >
                   Check a result
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/capture"
+                  className="ml-1 inline-flex min-h-11 items-center rounded-lg bg-brand px-4 font-semibold text-brand-ink hover:bg-brand-strong"
+                >
+                  Send a result
                 </Link>
               </li>
             </ul>

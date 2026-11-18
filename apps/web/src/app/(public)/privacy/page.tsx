@@ -17,8 +17,8 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
     body: (
       <ul className="grid list-disc gap-2 pl-5">
         <li>
-          <strong>Your phone number</strong>: to send a one-time code and to count each person as one witness, so no one
-          can pretend to be many. We store it encrypted, plus a one-way fingerprint used for counting. It is never shown
+          <strong>Your phone number</strong>: to count each person as one witness and to spot one person sending many
+          photos. We store it encrypted, plus a one-way fingerprint used for counting. It is never shown
           publicly or shared.
         </li>
         <li>
@@ -49,7 +49,7 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
     title: 'Legal basis',
     body: (
       <p>
-        We process your data with your consent, given when you verify your phone, and in the public interest of
+        We process your data with your consent, given before you enter your phone number, and in the public interest of
         transparent elections, in line with the Nigeria Data Protection Act 2023.
       </p>
     ),
@@ -59,8 +59,7 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
     body: (
       <p>
         Photos that are not genuine EC60E posters are not stored. Accepted photos and records are kept as election
-        evidence until any disputes about that election are finally settled, then deleted or anonymised. One-time codes
-        expire after 10 minutes.
+        evidence until any disputes about that election are finally settled, then deleted or anonymised.
       </p>
     ),
   },
