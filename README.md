@@ -11,7 +11,7 @@ All results shown by the platform are **citizen-collated and unofficial**.
 | `apps/web` | Next.js + Tailwind CSS: live-camera capture app, public results and comparison site, admin console |
 | `apps/api` | NestJS API: verification, witness, counting and comparison engines, hash chain, messaging webhooks |
 | `packages/shared` | Types and constants shared by both apps (trust model, area levels) |
-| `docker-compose.yml` | Local PostgreSQL |
+| `docker-compose.yml` | Local PostgreSQL (host port 5442) |
 
 ## Requirements
 
@@ -29,6 +29,8 @@ npm run build -w @trustelect/shared
 npm run dev:api        # API on http://localhost:4000
 npm run dev:web        # web on http://localhost:3000
 ```
+
+The admin console is at http://localhost:3000/admin (not linked from the public site). The web app proxies `/api/*` to the API, so admin cookies stay first-party.
 
 ## Administrator accounts
 

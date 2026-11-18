@@ -90,11 +90,14 @@ describe('Admin authentication (e2e)', () => {
       .expect(403);
 
     // 3. Confirm with a code: session upgraded
+    const confirmedAt = Date.now();
+    const firstCode = totp(setup.body.secret, confirmedAt);
+    const firstStep = Math.floor(confirmedAt / 30_000);
     await request(server)
       .post('/admin/auth/totp/confirm')
       .set('Cookie', pending)
       .set('Origin', origin)
-      .send({ code: totp(setup.body.secret) })
+      .send({ code: firstCode })
       .expect(200);
     const signedIn = await request(server).get('/admin/auth/me').set('Cookie', pending).expect(200);
     expect(signedIn.body).toMatchObject({ email, role: 'reviewer', mfaVerified: true });
@@ -103,7 +106,7 @@ describe('Admin authentication (e2e)', () => {
     await request(server).post('/admin/auth/logout').set('Cookie', pending).set('Origin', origin).expect(200);
     await request(server).get('/admin/auth/me').set('Cookie', pending).expect(401);
 
-    // 5. Second sign-in needs the code; the code just used cannot be replayed
+    // 5. Second sign-in needs the code; the code already used cannot be replayed
     const needsCode = await request(server)
       .post('/admin/auth/login')
       .set('Origin', origin)
@@ -114,10 +117,11 @@ describe('Admin authentication (e2e)', () => {
     await request(server)
       .post('/admin/auth/login')
       .set('Origin', origin)
-      .send({ email, password, code: totp(setup.body.secret) })
+      .send({ email, password, code: firstCode })
       .expect(401);
 
-    const nextCode = totp(setup.body.secret, Date.now() + 30_000);
+    // The code for the following 30-second step is new, so it is accepted
+    const nextCode = totp(setup.body.secret, (firstStep + 1) * 30_000);
     const second = await request(server)
       .post('/admin/auth/login')
       .set('Origin', origin)

@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: trustelect_local_only
       POSTGRES_DB: trustelect
     ports:
-      - "5432:5432"
+      - "5442:5432"
     volumes:
       - db-data:/var/lib/postgresql
     healthcheck:

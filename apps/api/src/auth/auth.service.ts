@@ -110,6 +110,12 @@ export class AuthService {
 
   /** Starts two-factor setup for a pending session: returns a new secret for the authenticator app. */
   async beginTotpSetup(admin: AuthenticatedAdmin): Promise<{ secret: string; uri: string }> {
+    // Reuse an unconfirmed secret, so reloading the setup page shows the same QR code
+    const [row] = await this.db.select().from(adminUsers).where(eq(adminUsers.id, admin.id)).limit(1);
+    if (row?.totpSecretEncrypted && !row.totpEnabledAt) {
+      const existing = this.encryptor.decrypt(row.totpSecretEncrypted);
+      return { secret: existing, uri: totpUri(existing, admin.email) };
+    }
     const secret = generateTotpSecret();
     await this.db
       .update(adminUsers)
