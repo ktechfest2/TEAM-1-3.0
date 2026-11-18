@@ -16,6 +16,9 @@ export default defineConfig({
       APP_ENCRYPTION_KEY: 'dGVzdC1vbmx5LWVuY3J5cHRpb24ta2V5LTMyLWJ5dGU=',
       PHONE_HASH_KEY: 'dGVzdC1vbmx5LXBob25lLWhhc2gta2V5LTMyLWJ5dGU=',
       EVIDENCE_DIR: 'storage/e2e-evidence',
+      // Never send real SMS from tests
+      SMS_PROVIDER: 'log',
+      CAPTURE_PHONE_VERIFICATION: 'none',
     },
   },
 });

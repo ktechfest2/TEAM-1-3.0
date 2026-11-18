@@ -92,8 +92,11 @@ export class CaptureService {
     const domain = new URL(this.config.get('WEB_ORIGIN', { infer: true })).hostname;
     await this.sms.send(phone, `Your TrustElect code is ${code}. It expires in ${OTP_MINUTES} minutes.\n\n@${domain} #${code}`);
 
-    const production = this.config.get('NODE_ENV', { infer: true }) === 'production';
-    return { phoneMasked: maskPhone(phone), ...(production ? {} : { devCode: code }) };
+    // The code is shown on screen only in development with the log provider, never when a real SMS is sent
+    const showCode =
+      this.config.get('NODE_ENV', { infer: true }) !== 'production' &&
+      this.config.get('SMS_PROVIDER', { infer: true }) === 'log';
+    return { phoneMasked: maskPhone(phone), ...(showCode ? { devCode: code } : {}) };
   }
 
   /** Checks the code, records consent and opens a capture session. Returns the session token. */

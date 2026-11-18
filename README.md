@@ -47,7 +47,16 @@ Imports are idempotent: re-running updates names and adds new units. Any CSV wit
 
 ## Voter capture app
 
-Voters open `/capture`, verify their phone with an SMS code, choose the election and photograph the EC60E poster with the live camera. Photos queue on the phone when offline and upload automatically when the network returns. In development no SMS is sent: the code appears in the API log and on screen.
+Voters open `/capture`, verify their phone with an SMS code, choose the election and photograph the EC60E poster with the live camera. Photos queue on the phone when offline and upload automatically when the network returns. Phone verification is controlled by settings in `.env`:
+
+| Setting | Values |
+|---|---|
+| `CAPTURE_PHONE_VERIFICATION` | `none` (phone number only) or `sms` (6-digit SMS code required) |
+| `SMS_PROVIDER` | `log` (development: codes appear in the API log and on screen) or `bulksmslive` (real SMS) |
+| `BULKSMSLIVE_API_KEY` | API key from the BulkSMSLive dashboard (required for `bulksmslive`) |
+| `SMS_SENDER_NAME` | Sender name on the SMS, max 11 characters (default `TrustElect`) |
+
+Tests never read `.env` and always use the `log` provider, so they cannot send real SMS.
 
 ## Ballot order
 

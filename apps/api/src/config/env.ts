@@ -22,6 +22,11 @@ export const envSchema = z.object({
    * none = number entered without verification (default); sms = one-time SMS code required.
    */
   CAPTURE_PHONE_VERIFICATION: z.enum(['none', 'sms']).default('none'),
+  /** SMS provider: log = development (writes codes to the log); bulksmslive = real SMS */
+  SMS_PROVIDER: z.enum(['log', 'bulksmslive']).default('log'),
+  BULKSMSLIVE_API_KEY: z.string().min(1).optional(),
+  /** Sender name shown on the SMS (max 11 characters, as registered with the provider) */
+  SMS_SENDER_NAME: z.string().min(1).max(11).default('TrustElect'),
   /** Directory for evidence photographs in development (object storage in production) */
   EVIDENCE_DIR: z.string().default('storage/evidence'),
   /** OpenRouter key for AI verification (required from Sprint 4) */
@@ -30,8 +35,13 @@ export const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 
+const refinedSchema = envSchema.refine((e) => e.SMS_PROVIDER !== 'bulksmslive' || !!e.BULKSMSLIVE_API_KEY, {
+  message: 'BULKSMSLIVE_API_KEY is required when SMS_PROVIDER=bulksmslive',
+  path: ['BULKSMSLIVE_API_KEY'],
+});
+
 export function validateEnv(config: Record<string, unknown>): Env {
-  const result = envSchema.safeParse(config);
+  const result = refinedSchema.safeParse(config);
   if (!result.success) {
     throw new Error(`Invalid environment configuration:\n${z.prettifyError(result.error)}`);
   }

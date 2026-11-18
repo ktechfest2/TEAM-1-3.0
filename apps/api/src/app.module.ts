@@ -15,6 +15,8 @@ import { SecurityModule } from './security/security.module.js';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env', '../../.env'],
+      // Tests never read .env, so they cannot pick up real SMS or other live credentials
+      ignoreEnvFile: process.env.NODE_ENV === 'test',
       validate: validateEnv,
     }),
     ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 120 }]),
