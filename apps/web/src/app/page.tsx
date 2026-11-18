@@ -1,106 +1,189 @@
-import { CONFIDENCE_THRESHOLDS, UNOFFICIAL_LABEL } from '@trustelect/shared';
+import Link from 'next/link';
+import { CONFIDENCE_THRESHOLDS } from '@trustelect/shared';
+import { ExampleResultCard } from '@/components/example-result-card';
 import { ComparisonBadge } from '@/components/status-badge';
 import { UnitSearch } from '@/components/unit-search';
+
+const ASSURANCES = [
+  {
+    title: 'Live photos only',
+    body: 'Taken on the spot with the camera. No uploads from galleries or forwarded chats.',
+    icon: 'M4 8h3l2-3h6l2 3h3v11H4V8Zm8 9a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z',
+  },
+  {
+    title: 'Every form checked',
+    body: 'Genuine, stamped EC60E for this election, with the arithmetic verified.',
+    icon: 'M6 3h9l4 4v14H6V3Zm3 10 2 2 4-4',
+  },
+  {
+    title: 'Independent witnesses',
+    body: 'Confidence comes from different people recording the same figures.',
+    icon: 'M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM2 20c0-3 3-5 6-5s6 2 6 5m-1-4.6c1-.3 2-.4 3-.4 3 0 6 2 6 5',
+  },
+  {
+    title: 'Tamper-evident record',
+    body: 'Every photo and decision is chained by hash. Any later change shows.',
+    icon: 'M7 11V8a5 5 0 0 1 10 0v3M5 11h14v10H5V11Zm7 4v2',
+  },
+];
 
 const STEPS = [
   {
     title: 'Photograph the poster',
-    body: 'After counting, voters photograph the EC60E result poster at their polling unit with the live camera. Old or forwarded photos cannot be used.',
+    body: 'After counting, voters photograph the EC60E result poster at their polling unit.',
   },
   {
-    title: 'Every photo is checked',
-    body: 'TrustElect confirms it is a genuine, stamped EC60E for this election, reads the figures and checks that they add up.',
+    title: 'TrustElect checks it',
+    body: 'The form, the stamp and the arithmetic are verified before anything is counted.',
   },
   {
-    title: 'Independent witnesses agree',
-    body: `Confidence grows as different people photograph the same figures: ${CONFIDENCE_THRESHOLDS.high} or more independent witnesses means high confidence. Disagreements go to human review.`,
+    title: 'Witnesses agree',
+    body: `${CONFIDENCE_THRESHOLDS.high} or more independent witnesses with the same figures means high confidence.`,
   },
   {
     title: 'Counted from the unit up',
-    body: 'Results are added up by ward, LGA, state and nation, always showing how many polling units are covered.',
+    body: 'Ward, LGA, state and national totals, always showing how many units are covered.',
   },
   {
-    title: 'Compared with what is declared',
-    body: 'When results are officially declared, TrustElect shows where they match what voters recorded, where they do not, and where disputes exist.',
+    title: 'Compared with declarations',
+    body: 'See where declared results match what voters recorded, and where they do not.',
   },
 ];
+
+function OutlineIcon({ d }: { d: string }) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d={d} />
+    </svg>
+  );
+}
 
 export default function Home() {
   return (
     <>
-      <section className="border-b border-divider bg-surface">
-        <div className="mx-auto grid max-w-5xl gap-6 px-4 py-12 sm:py-16">
-          <p className="inline-flex w-fit items-center gap-2 rounded-full border border-divider bg-surface-muted px-3 py-1 text-sm font-medium text-ink-muted">
-            {UNOFFICIAL_LABEL}
-          </p>
-          <h1 className="max-w-3xl text-[clamp(2rem,1.4rem+2.4vw,3.25rem)] font-bold tracking-tight">
-            Is what was declared what was pasted on the wall?
-          </h1>
-          <p className="max-w-[60ch] text-lg text-ink-muted">
-            TrustElect turns voters&apos; photographs of polling unit result posters into a public,
-            tamper-evident record, and checks declared results against it.
-          </p>
-          <div className="max-w-xl rounded-xl border border-divider bg-canvas p-4 sm:p-5">
-            <UnitSearch />
+      {/* Hero */}
+      <section className="bg-surface">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:py-20">
+          <div className="grid gap-6">
+            <h1 className="text-[clamp(2.25rem,1.6rem+2.6vw,3.75rem)] font-bold tracking-tight text-ink">
+              Every result, <span className="text-brand-strong">backed by evidence.</span>
+            </h1>
+            <p className="max-w-[54ch] text-lg text-ink-muted">
+              Voters photograph the result poster at their polling unit. TrustElect verifies each
+              photo, counts results from the unit up, and shows whether declared results match
+              what was pasted on the wall.
+            </p>
+            <div className="max-w-xl">
+              <UnitSearch />
+            </div>
+          </div>
+          <div className="mx-auto w-full max-w-md lg:max-w-none">
+            <ExampleResultCard />
           </div>
         </div>
       </section>
 
-      <section id="how-it-works" aria-labelledby="how-heading" className="mx-auto max-w-5xl px-4 py-12">
-        <h2 id="how-heading" className="text-2xl font-bold">
-          How it works
-        </h2>
-        <ol className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {STEPS.map((step, i) => (
-            <li key={step.title} className="rounded-xl border border-divider bg-surface p-5">
-              <span className="text-sm font-semibold text-brand tabular">Step {i + 1}</span>
-              <h3 className="mt-1 text-lg font-semibold">{step.title}</h3>
-              <p className="mt-2 text-ink-muted">{step.body}</p>
-            </li>
-          ))}
-        </ol>
+      {/* Assurances */}
+      <section aria-labelledby="assurance-heading" className="border-y border-divider bg-surface-muted">
+        <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+          <h2 id="assurance-heading" className="sr-only">
+            Why you can rely on TrustElect
+          </h2>
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {ASSURANCES.map((a) => (
+              <li key={a.title} className="rounded-2xl border border-divider bg-surface p-5">
+                <span className="inline-flex size-11 items-center justify-center rounded-xl bg-surface-tint text-brand-strong">
+                  <OutlineIcon d={a.icon} />
+                </span>
+                <h3 className="mt-4 font-semibold">{a.title}</h3>
+                <p className="mt-1.5 text-sm text-ink-muted">{a.body}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
 
-      <section aria-labelledby="status-heading" className="border-t border-divider bg-surface">
-        <div className="mx-auto max-w-5xl px-4 py-12">
-          <h2 id="status-heading" className="text-2xl font-bold">
-            What the comparison labels mean
-          </h2>
-          <dl className="mt-6 grid gap-5 sm:grid-cols-2">
-            <div className="grid gap-2">
-              <dt>
-                <ComparisonBadge status="match" />
-              </dt>
-              <dd className="text-ink-muted">
-                The declared figures agree with what voters recorded for every covered polling unit.
-              </dd>
-            </div>
-            <div className="grid gap-2">
-              <dt>
-                <ComparisonBadge status="does_not_match" />
-              </dt>
-              <dd className="text-ink-muted">
-                Voters&apos; confirmed figures are inconsistent with the declaration, for example a
-                party has more confirmed votes than it was declared to have in total.
-              </dd>
-            </div>
-            <div className="grid gap-2">
-              <dt>
-                <ComparisonBadge status="possible_mismatch_low_confidence" />
-              </dt>
-              <dd className="text-ink-muted">
-                A difference that rests only on units with a single witness. Treated with caution.
-              </dd>
-            </div>
-            <div className="grid gap-2">
-              <dt>
-                <ComparisonBadge status="awaiting_data" />
-              </dt>
-              <dd className="text-ink-muted">
-                No approved declaration yet, or no confirmed polling units in this area.
-              </dd>
-            </div>
+      {/* How it works */}
+      <section id="how-it-works" aria-labelledby="how-heading" className="bg-surface">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold text-verified">How it works</p>
+            <h2 id="how-heading" className="mt-2 text-3xl font-bold tracking-tight">
+              From the polling unit wall to a public record
+            </h2>
+          </div>
+          <ol className="mt-10 grid gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-5">
+            {STEPS.map((step, i) => (
+              <li key={step.title} className="grid content-start gap-2 border-t-2 border-brand pt-4">
+                <span className="text-sm font-bold text-brand-strong tabular">0{i + 1}</span>
+                <h3 className="font-semibold">{step.title}</h3>
+                <p className="text-sm text-ink-muted">{step.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* Comparison labels */}
+      <section aria-labelledby="labels-heading" className="border-t border-divider bg-surface">
+        <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold text-verified">Reading the results</p>
+            <h2 id="labels-heading" className="mt-2 text-3xl font-bold tracking-tight">
+              Clear labels, never guesses
+            </h2>
+            <p className="mt-3 text-ink-muted">
+              TrustElect never calls a result rigged or fake. It shows what the evidence supports.
+            </p>
+          </div>
+          <dl className="mt-10 grid gap-4 sm:grid-cols-2">
+            {(
+              [
+                ['match', 'Declared figures agree with what voters recorded in every covered polling unit.'],
+                ['does_not_match', 'Confirmed figures are inconsistent with the declaration, for example more confirmed votes than declared.'],
+                ['possible_mismatch_low_confidence', 'A difference that rests only on single-witness units. Treated with caution.'],
+                ['awaiting_data', 'No approved declaration yet, or no confirmed polling units in this area.'],
+              ] as const
+            ).map(([status, text]) => (
+              <div key={status} className="grid gap-3 rounded-2xl border border-divider p-5">
+                <dt>
+                  <ComparisonBadge status={status} />
+                </dt>
+                <dd className="text-ink-muted">{text}</dd>
+              </div>
+            ))}
           </dl>
+        </div>
+      </section>
+
+      {/* Call to action */}
+      <section className="bg-surface">
+        <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
+          <div className="flex flex-wrap items-center justify-between gap-6 rounded-3xl bg-brand px-6 py-10 text-brand-ink sm:px-10">
+            <div className="max-w-xl">
+              <h2 className="text-2xl font-bold tracking-tight">Check your polling unit</h2>
+              <p className="mt-2 opacity-90">
+                Enter the code on your voter&apos;s card to see what voters recorded.
+              </p>
+            </div>
+            <Link
+              href="/results"
+              className="inline-flex min-h-12 items-center rounded-xl bg-surface px-6 font-semibold text-brand-strong hover:bg-surface-tint"
+            >
+              Check a result
+            </Link>
+          </div>
         </div>
       </section>
     </>

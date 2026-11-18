@@ -1,18 +1,27 @@
 import { UNOFFICIAL_LABEL } from '@trustelect/shared';
+import { LogoMark } from './logo';
 
 export function SiteFooter() {
   return (
-    <footer className="mt-auto border-t border-divider bg-surface">
-      <div className="mx-auto grid max-w-5xl gap-3 px-4 py-6 text-sm text-ink-muted">
-        <p>
-          <strong className="text-ink">{UNOFFICIAL_LABEL}.</strong> TrustElect shows results
-          photographed by voters from EC60E posters already pasted at polling units. It is not
-          INEC and does not declare winners. Official results are declared by INEC.
-        </p>
-        <p>
-          TrustElect is neutral: the same rules apply to every party, parties are listed in ballot
-          order, and no party colours are used. No advertising and no third-party trackers.
-        </p>
+    <footer className="mt-auto border-t border-divider bg-surface-muted">
+      <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-[1.2fr_1fr]">
+        <div className="grid content-start gap-3">
+          <div className="inline-flex items-center gap-2.5">
+            <LogoMark size={28} />
+            <span className="text-lg font-bold tracking-tight">TrustElect</span>
+          </div>
+          <p className="max-w-[48ch] text-ink-muted">
+            Citizen-verified polling unit results, counted from the polling unit up and compared
+            with what is officially declared.
+          </p>
+        </div>
+        <div className="grid content-start gap-3 text-sm text-ink-muted">
+          <p>
+            <strong className="text-ink">{UNOFFICIAL_LABEL}.</strong> TrustElect is not INEC and
+            does not declare winners. Figures come from EC60E posters already pasted at polling
+            units. Official results are declared by INEC.
+          </p>
+        </div>
       </div>
     </footer>
   );

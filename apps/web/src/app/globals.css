@@ -1,131 +1,62 @@
 @import "tailwindcss";
 
 /*
- * Design system: trust principles (Specification v2.0, Section 9).
- * Calm, civic and neutral. Party colours are never used.
- * Status is always shown with words and an icon, never colour alone.
+ * TrustElect design system.
+ * Green-white-green, after the Nigerian flag, on a clean white interface.
+ * Party colours are never used. Status is always shown in words and an icon.
  */
 
 :root {
-  /* ---------- Raw palette: light ---------- */
-  --raw-canvas-light: #f7f8fa;
-  --raw-surface-light: #ffffff;
-  --raw-surface-muted-light: #eef1f5;
-  --raw-ink-light: #14213a;
-  --raw-ink-muted-light: #4a5568;
-  --raw-border-light: #8a94a6; /* 3:1 against surface for component boundaries */
-  --raw-divider-light: #dde2ea;
-  --raw-brand-light: #1f3a5f; /* civic navy */
-  --raw-brand-ink-light: #ffffff;
-  --raw-verified-light: #0b6e4f; /* evidence green */
-  --raw-match-light: #0b6e4f;
-  --raw-match-bg-light: #e7f3ee;
-  --raw-mismatch-light: #a4262c;
-  --raw-mismatch-bg-light: #fbeaea;
-  --raw-dispute-light: #8a5300;
-  --raw-dispute-bg-light: #fff3d6;
-  --raw-pending-light: #3d4f6b;
-  --raw-pending-bg-light: #e9edf3;
-  --raw-focus-light: #1a5fb4;
+  /* Surfaces: white first */
+  --canvas: #ffffff;
+  --surface: #ffffff;
+  --surface-muted: #f5f7fa;
+  --surface-tint: #e9f6ef; /* light green wash for highlighted panels */
 
-  /* ---------- Raw palette: dark ---------- */
-  --raw-canvas-dark: #0e1522;
-  --raw-surface-dark: #152033;
-  --raw-surface-muted-dark: #1c2a40;
-  --raw-ink-dark: #e8edf5;
-  --raw-ink-muted-dark: #a9b4c6;
-  --raw-border-dark: #6c7a91;
-  --raw-divider-dark: #2a3a54;
-  --raw-brand-dark: #9cc0ec;
-  --raw-brand-ink-dark: #0e1522;
-  --raw-verified-dark: #6fd3a8;
-  --raw-match-dark: #6fd3a8;
-  --raw-match-bg-dark: #12352a;
-  --raw-mismatch-dark: #ff9b9b;
-  --raw-mismatch-bg-dark: #3d1a1d;
-  --raw-dispute-dark: #f5c062;
-  --raw-dispute-bg-dark: #3a2c10;
-  --raw-pending-dark: #b9c6db;
-  --raw-pending-bg-dark: #24324a;
-  --raw-focus-dark: #8ab8ff;
+  /* Text */
+  --ink: #0f1b2d;
+  --ink-muted: #4a5568;
+  --ink-subtle: #5f6b7d;
 
-  /* ---------- Semantic tokens (light by default) ---------- */
-  --canvas: var(--raw-canvas-light);
-  --surface: var(--raw-surface-light);
-  --surface-muted: var(--raw-surface-muted-light);
-  --ink: var(--raw-ink-light);
-  --ink-muted: var(--raw-ink-muted-light);
-  --border: var(--raw-border-light);
-  --divider: var(--raw-divider-light);
-  --brand: var(--raw-brand-light);
-  --brand-ink: var(--raw-brand-ink-light);
-  --verified: var(--raw-verified-light);
-  --match: var(--raw-match-light);
-  --match-bg: var(--raw-match-bg-light);
-  --mismatch: var(--raw-mismatch-light);
-  --mismatch-bg: var(--raw-mismatch-bg-light);
-  --dispute: var(--raw-dispute-light);
-  --dispute-bg: var(--raw-dispute-bg-light);
-  --pending: var(--raw-pending-light);
-  --pending-bg: var(--raw-pending-bg-light);
-  --focus: var(--raw-focus-light);
+  /* Lines: --border meets 3:1 for control boundaries, --divider is decorative */
+  --border: #8a94a6;
+  --divider: #e3e8ef;
 
-  /* Fallback for browsers without light-dark() */
-  @media (prefers-color-scheme: dark) {
-    --canvas: var(--raw-canvas-dark);
-    --surface: var(--raw-surface-dark);
-    --surface-muted: var(--raw-surface-muted-dark);
-    --ink: var(--raw-ink-dark);
-    --ink-muted: var(--raw-ink-muted-dark);
-    --border: var(--raw-border-dark);
-    --divider: var(--raw-divider-dark);
-    --brand: var(--raw-brand-dark);
-    --brand-ink: var(--raw-brand-ink-dark);
-    --verified: var(--raw-verified-dark);
-    --match: var(--raw-match-dark);
-    --match-bg: var(--raw-match-bg-dark);
-    --mismatch: var(--raw-mismatch-dark);
-    --mismatch-bg: var(--raw-mismatch-bg-dark);
-    --dispute: var(--raw-dispute-dark);
-    --dispute-bg: var(--raw-dispute-bg-dark);
-    --pending: var(--raw-pending-dark);
-    --pending-bg: var(--raw-pending-bg-dark);
-    --focus: var(--raw-focus-dark);
-  }
+  /* Brand */
+  /* Nigerian flag green: fills and buttons (4.58:1 with white) */
+  --brand: #008751;
+  /* Deeper green for green text and hover states (6.61:1 on white) */
+  --brand-strong: #006b40;
+  --brand-ink: #ffffff;
+  --verified: #006b40;
+  --verified-bg: #e9f6ef;
 
-  /* Follows color-scheme, including any future per-section override */
-  @supports (color: light-dark(white, black)) {
-    --canvas: light-dark(var(--raw-canvas-light), var(--raw-canvas-dark));
-    --surface: light-dark(var(--raw-surface-light), var(--raw-surface-dark));
-    --surface-muted: light-dark(var(--raw-surface-muted-light), var(--raw-surface-muted-dark));
-    --ink: light-dark(var(--raw-ink-light), var(--raw-ink-dark));
-    --ink-muted: light-dark(var(--raw-ink-muted-light), var(--raw-ink-muted-dark));
-    --border: light-dark(var(--raw-border-light), var(--raw-border-dark));
-    --divider: light-dark(var(--raw-divider-light), var(--raw-divider-dark));
-    --brand: light-dark(var(--raw-brand-light), var(--raw-brand-dark));
-    --brand-ink: light-dark(var(--raw-brand-ink-light), var(--raw-brand-ink-dark));
-    --verified: light-dark(var(--raw-verified-light), var(--raw-verified-dark));
-    --match: light-dark(var(--raw-match-light), var(--raw-match-dark));
-    --match-bg: light-dark(var(--raw-match-bg-light), var(--raw-match-bg-dark));
-    --mismatch: light-dark(var(--raw-mismatch-light), var(--raw-mismatch-dark));
-    --mismatch-bg: light-dark(var(--raw-mismatch-bg-light), var(--raw-mismatch-bg-dark));
-    --dispute: light-dark(var(--raw-dispute-light), var(--raw-dispute-dark));
-    --dispute-bg: light-dark(var(--raw-dispute-bg-light), var(--raw-dispute-bg-dark));
-    --pending: light-dark(var(--raw-pending-light), var(--raw-pending-dark));
-    --pending-bg: light-dark(var(--raw-pending-bg-light), var(--raw-pending-bg-dark));
-    --focus: light-dark(var(--raw-focus-light), var(--raw-focus-dark));
-  }
+  /* Status */
+  --match: #0b6e4f;
+  --match-bg: #e7f3ee;
+  --mismatch: #a4262c;
+  --mismatch-bg: #fbeaea;
+  --dispute: #8a5300;
+  --dispute-bg: #fff3d6;
+  --pending: #3d4f6b;
+  --pending-bg: #e9edf3;
+
+  --focus: #1a5fb4;
+  --header-height: 4rem;
 
   /* Windows High Contrast: map tokens to system colours */
   @media (forced-colors: active) {
     --canvas: Canvas;
     --surface: Canvas;
     --surface-muted: Canvas;
+    --surface-tint: Canvas;
     --ink: CanvasText;
     --ink-muted: CanvasText;
+    --ink-subtle: CanvasText;
     --border: CanvasText;
     --divider: GrayText;
     --brand: LinkText;
+    --brand-strong: LinkText;
     --brand-ink: Canvas;
     --verified: CanvasText;
     --match: CanvasText;
@@ -135,22 +66,28 @@
     --focus: Highlight;
   }
 
-  color-scheme: light dark;
+  /* TrustElect uses a light theme only */
+  color-scheme: light;
   accent-color: var(--brand);
+  scroll-padding-top: calc(var(--header-height) + 1rem);
 }
 
-/* Map tokens to Tailwind utilities: bg-surface, text-ink, border-border, ... */
+/* Map tokens to Tailwind utilities: bg-surface, text-ink, border-divider, ... */
 @theme inline {
   --color-canvas: var(--canvas);
   --color-surface: var(--surface);
   --color-surface-muted: var(--surface-muted);
+  --color-surface-tint: var(--surface-tint);
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
+  --color-ink-subtle: var(--ink-subtle);
   --color-border: var(--border);
   --color-divider: var(--divider);
   --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
   --color-brand-ink: var(--brand-ink);
   --color-verified: var(--verified);
+  --color-verified-bg: var(--verified-bg);
   --color-match: var(--match);
   --color-match-bg: var(--match-bg);
   --color-mismatch: var(--mismatch);
@@ -180,20 +117,75 @@
   h2,
   h3 {
     text-wrap: balance;
-    line-height: 1.2;
+    line-height: 1.15;
   }
 
   p {
     text-wrap: pretty;
   }
 
+  :focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
   /* Figures line up in columns */
   .tabular {
     font-variant-numeric: tabular-nums;
   }
 
-  :focus-visible {
-    outline: 3px solid var(--focus);
-    outline-offset: 2px;
+  /* Sticky header that gains a shadow only once content scrolls under it */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    container-type: scroll-state;
+    container-name: site-header;
+  }
+
+  .site-header-bar {
+    background-color: rgb(255 255 255 / 0.92);
+    backdrop-filter: saturate(1.4) blur(8px);
+    border-block-end: 1px solid var(--divider);
+    transition: box-shadow 0.2s;
+  }
+
+  @container site-header scroll-state(stuck: top) {
+    .site-header-bar {
+      box-shadow: 0 1px 12px rgb(0 60 35 / 0.1);
+    }
+  }
+
+  /* Green-white-green flag band */
+  .flag-band {
+    block-size: 0.375rem;
+    background: linear-gradient(
+      90deg,
+      var(--brand) 0 33.333%,
+      var(--surface) 33.333% 66.666%,
+      var(--brand) 66.666% 100%
+    );
+    border-block-end: 1px solid var(--divider);
+  }
+
+  @media (forced-colors: active) {
+    .flag-band {
+      border-block-end-color: CanvasText;
+    }
+  }
+
+  /* Soft card shadow: decorative only, every card also has a divider border */
+  .card-shadow {
+    box-shadow:
+      0 1px 2px rgb(15 27 45 / 0.04),
+      0 8px 24px rgb(15 27 45 / 0.06);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-header-bar {
+      transition: none;
+    }
   }
 }
