@@ -1,4 +1,4 @@
-import { findAreaCode, isEmergency, numbersIn, parseTypedFigures, wantsCaptureLink } from './parse.js';
+import { findAreaCode, isEmergency, meansRememberedUnit, numbersIn, parseTypedFigures, wantsCaptureLink } from './parse.js';
 
 describe('typed figures (CAP-06)', () => {
   it('reads the short format, in any case and with separators', () => {
@@ -28,6 +28,12 @@ describe('message understanding without the model', () => {
     expect(wantsCaptureLink('PHOTO')).toBe(true);
     expect(wantsCaptureLink('my photo id')).toBe(false);
     expect(wantsCaptureLink('send the result')).toBe(false);
+  });
+
+  it('recognises questions about the unit already discussed', () => {
+    expect(meansRememberedUnit('is there any activity happening in this polling unit?')).toBe(true);
+    expect(meansRememberedUnit('any update for my PU')).toBe(true);
+    expect(meansRememberedUnit('what do I need to vote?')).toBe(false);
   });
 
   it('lists numbers so a translation that changes them can be rejected', () => {

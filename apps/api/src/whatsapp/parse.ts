@@ -46,5 +46,10 @@ export const wantsHelp = (text: string) => /^\s*(hi|hello|hey|help|menu|start|go
 export const isEmergency = (text: string) =>
   /\b(attack(ed|ing)?|violence|violent|gun(s|shot|men)?|shoot(ing)?|shot|stab(bed)?|kill(ed|ing)?|thugs?|injur(ed|y)|bleeding|danger|emergency|fire|burn(ing)?|kidnap(ped)?|snatch(ed|ing)?)\b/i.test(text);
 
+/** "this unit", "my polling unit", "that PU": the voter means the unit already discussed (INF-02) */
+export const meansRememberedUnit = (text: string) =>
+  /\b(this|my|that|the same|our)\s+(polling\s+)?(unit|pu|booth|station)\b/i.test(text) ||
+  /\b(una|for)\s+(my|this)\s+(unit|pu)\b/i.test(text);
+
 /** Every number in a text, in order: used to check a translation kept them unchanged */
 export const numbersIn = (text: string) => (text.match(/\d+/g) ?? []).join(',');

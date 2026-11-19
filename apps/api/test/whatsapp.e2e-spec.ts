@@ -199,6 +199,10 @@ describe('WhatsApp channel (e2e)', () => {
     await text(voter, '24-98-01-001');
     expect(last(voter).text).toMatch(new RegExp(`${P[0]} 100 · ${P[1]} 50`));
     expect(last(voter).text).toMatch(/1 independent witness/);
+    // INF-02: "this unit" means the one just looked up, without asking the model
+    assistant.next = null;
+    await text(voter, 'is there any activity happening in this polling unit?');
+    expect(last(voter).text).toMatch(new RegExp(`${P[0]} 100 · ${P[1]} 50`));
     await text(voter, 'ward 24-98-01');
     expect(last(voter).text).toMatch(/Counted from 1 of 2 polling units/);
   });

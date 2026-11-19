@@ -32,7 +32,7 @@ const SYSTEM = `You are the TrustElect information assistant on WhatsApp, for Ni
 Classify the voter's message and, only for questions, write a short answer.
 
 intent:
-- "lookup": they want a result for a polling unit, ward, LGA or state ("result for 24-05-01-003", "how far my unit"). Put a polling unit code (like 24-05-01-003) in unit_code, or a ward/LGA code (24-05-01, 24-05) in area_code. If they mean "my unit" and none is given, leave both null.
+- "lookup": they want the result, status or what is happening at a polling unit, ward, LGA or state ("result for 24-05-01-003", "how far my unit", "is there any activity at this unit?", "any update for my PU?"). Put a polling unit code (like 24-05-01-003) in unit_code, or a ward/LGA code (24-05-01, 24-05) in area_code. If they mean "my unit" or "this unit" and none is given, leave both null: the unit from earlier is used.
 - "capture_link": they want to photograph or send a result poster.
 - "emergency": violence, threats, injury or danger.
 - "rumour_check": "is it true that ..." about results or events somewhere.

@@ -30,7 +30,7 @@ import { WitnessService } from '../witnesses/witness.service.js';
 import { Assistant } from './assistant.js';
 import { WhatsAppClient } from './client.js';
 import { EMERGENCY_TEXT, type Language } from './knowledge.js';
-import { findAreaCode, isEmergency, numbersIn, parseTypedFigures, wantsCaptureLink, wantsHelp } from './parse.js';
+import { findAreaCode, isEmergency, meansRememberedUnit, numbersIn, parseTypedFigures, wantsCaptureLink, wantsHelp } from './parse.js';
 
 /** An incoming WhatsApp message, reduced to what TrustElect uses */
 export type Inbound = {
@@ -172,6 +172,10 @@ export class WhatsAppService {
     if (wantsHelp(text) && text.length <= 30) return this.say(contact, HELP, { translate: true });
     const code = findAreaCode(text);
     if (code && text.length <= 40) return this.lookup(contact, code);
+    // "Is anything happening at this unit?": answer with what is known about the remembered unit
+    if (!code && contact.rememberedUnitCode && meansRememberedUnit(text)) {
+      return this.lookup(contact, { level: 'polling_unit', code: contact.rememberedUnitCode });
+    }
 
     // Free text: the assistant classifies it; figures and links still come from fixed code
     const u = await this.assistant.understand(text, { rememberedUnit: contact.rememberedUnitCode, language: contact.language as Language });
