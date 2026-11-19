@@ -62,7 +62,11 @@ export const TEST_UNIT_OUTSIDE_LAGOS = '19-98-01-001';
 
 export async function addTestUnits(app: INestApplication<App>) {
   const { rows } = parseRegister(
-    `pu_code,pu_name,ward_name,lga_name,state_name\n${TEST_UNIT},TEST UNIT,TEST WARD,TEST LGA,Lagos\n${TEST_UNIT_OUTSIDE_LAGOS},TEST UNIT KANO,TEST WARD,TEST LGA,Kano\n`,
+    'pu_code,pu_name,ward_name,lga_name,state_name\n' +
+      `${TEST_UNIT},TEST UNIT,TEST WARD,TEST LGA,Lagos\n` +
+      '24-98-01-002,TEST UNIT TWO,TEST WARD,TEST LGA,Lagos\n' +
+      '24-98-02-001,TEST UNIT THREE,TEST WARD TWO,TEST LGA,Lagos\n' +
+      `${TEST_UNIT_OUTSIDE_LAGOS},TEST UNIT KANO,TEST WARD,TEST LGA,Kano\n`,
   );
   await app.get(GeographyService).importRegister(rows);
 }

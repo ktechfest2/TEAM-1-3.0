@@ -5,6 +5,7 @@ import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import { AuditService } from '../audit/audit.service.js';
 import type { Database } from '../database/database.module.js';
 import { pollingUnits, resultVersions, submissions, unitResults } from '../database/schema.js';
+import { RESULTS_CHANNEL } from '../tally/results-stream.service.js';
 import { computeUnit, type AcceptedPhoto } from './engine.js';
 
 @Injectable()
@@ -90,12 +91,16 @@ export class WitnessService {
       if (current?.status === 'resolved') {
         // A reviewer's decision stands; new evidence is flagged for them to look at again
         const flags = [...new Set([...current.flags, ...outcome.flags, 'new_evidence_after_resolution'])];
+        await tx.execute(sql`select pg_notify(${RESULTS_CHANNEL}, ${electionId})`);
         await tx
           .update(unitResults)
           .set({ ...base, flags })
           .where(and(eq(unitResults.electionId, electionId), eq(unitResults.pollingUnitId, pollingUnitId)));
         return;
       }
+
+      // Live dashboards are told after commit (NOTIFY is delivered when the transaction commits)
+      await tx.execute(sql`select pg_notify(${RESULTS_CHANNEL}, ${electionId})`);
 
       const values = {
         ...base,
@@ -167,6 +172,7 @@ export class WitnessService {
         updatedAt: new Date(),
       })
       .where(and(eq(unitResults.electionId, input.electionId), eq(unitResults.pollingUnitId, unit.id)));
+    await this.db.execute(sql`select pg_notify(${RESULTS_CHANNEL}, ${input.electionId})`);
     await this.audit.record({
       adminUserId: adminId,
       action: 'unit.resolved',

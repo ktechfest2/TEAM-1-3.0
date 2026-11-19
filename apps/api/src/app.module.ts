@@ -10,6 +10,7 @@ import { GeographyModule } from './geography/geography.module.js';
 import { HealthController } from './health/health.controller.js';
 import { ResultsModule } from './results/results.module.js';
 import { SecurityModule } from './security/security.module.js';
+import { TallyModule } from './tally/tally.module.js';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { SecurityModule } from './security/security.module.js';
     ElectionsModule,
     CaptureModule,
     ResultsModule,
+    TallyModule,
   ],
   controllers: [HealthController],
 })

@@ -176,6 +176,41 @@
     }
   }
 
+  /* Coverage bar: light track, green fill (custom-styled <progress>) */
+  .coverage-bar {
+    appearance: none;
+    border: 0 solid;
+    overflow: clip;
+    inline-size: 100%;
+    block-size: 0.75rem;
+    border-radius: 1e5px;
+    background: var(--surface-muted);
+    box-shadow: inset 0 0 0 1px var(--divider);
+  }
+
+  .coverage-bar::-webkit-progress-bar {
+    background: transparent;
+  }
+
+  .coverage-bar::-webkit-progress-value {
+    background: var(--brand);
+    border-radius: 1e5px;
+    /* A sliver stays visible however small the coverage */
+    min-inline-size: 0.375rem;
+    transition: inline-size 0.3s;
+  }
+
+  .coverage-bar::-moz-progress-bar {
+    background: var(--brand);
+    border-radius: 1e5px;
+  }
+
+  @media (forced-colors: active) {
+    .coverage-bar {
+      border: 1px solid CanvasText;
+    }
+  }
+
   /* Soft card shadow: decorative only, every card also has a divider border */
   .card-shadow {
     box-shadow:

@@ -23,6 +23,14 @@ export function SiteHeader() {
               </li>
               <li>
                 <Link
+                  href="/results/elections"
+                  className="rounded-lg px-3 py-2 text-ink-muted hover:bg-surface-muted hover:text-ink"
+                >
+                  Live results
+                </Link>
+              </li>
+              <li className="hidden sm:block">
+                <Link
                   href="/results"
                   className="rounded-lg px-3 py-2 text-ink-muted hover:bg-surface-muted hover:text-ink"
                 >
