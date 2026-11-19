@@ -11,7 +11,7 @@ export const envSchema = z.object({
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
   /** Origin of the web app, allowed by CORS and checked on admin requests */
   WEB_ORIGIN: z.url().default('http://localhost:3000'),
-  /** Other origins serving the same web app, comma-separated (e.g. https://trustelect.firebaseapp.com) */
+  /** Other origins serving the same web app, comma-separated (e.g. a second domain for the same site) */
   WEB_EXTRA_ORIGINS: z
     .string()
     .default('')

@@ -99,27 +99,21 @@ ADMIN_PASSWORD='a long passphrase' npm run admin:create -w @trustelect/api -- \
   --email you@example.org --name "Your Name" --role system_admin
 ```
 
-Roles: `reviewer`, `declarations_admin`, `approver`, `system_admin`. At first sign-in the admin scans a QR code with an authenticator app. Sessions are server-side, in an HTTP-only, SameSite=Strict cookie; logins are rate-limited and lock for 15 minutes after 5 failures; every action is written to the audit log.
+Roles: `reviewer`, `declarations_admin`, `approver`, `system_admin`. At first sign-in the admin scans a QR code with an authenticator app. Sessions are server-side; logins are rate-limited and lock for 15 minutes after 5 failures; every action is written to the audit log.
 
 ## Deployment
 
-| Part | Where | Address |
-|---|---|---|
-| Web app (static) | Firebase Hosting, project `trustelect` (free Spark plan) | https://trustelect.web.app |
-| API, Postgres | VPS | https://api.example.org |
-
 The web app is a static export: pages load data in the browser from `NEXT_PUBLIC_API_URL`, and admin
-and voter sessions travel as Bearer tokens (the API is on another site, where browsers block cookies).
-Security headers and the Content-Security-Policy are in `firebase.json`. On the server, Caddy terminates
-HTTPS (`deploy/api/Caddyfile`) and the API listens on `127.0.0.1:4100` only.
+and voter sessions travel as Bearer tokens. The API runs in Docker behind an HTTPS reverse proxy and
+listens on localhost only; migrations run when the API container starts.
 
 ```bash
-deploy/deploy-api.sh   # build the API image here, load it on the server, restart, health check
-deploy/deploy-web.sh   # build the static site and publish it to Firebase Hosting
+deploy/deploy-api.sh   # build the API image, load it on the server, restart, health check
+deploy/deploy-web.sh   # build the static site and publish it
 ```
 
-Production secrets are only in `/opt/trustelect/.env` and `/opt/trustelect/db_password` on the server.
-Migrations run when the API container starts.
+Both scripts read their settings from `deploy/.env.deploy` (not committed; see `deploy/.env.deploy.example`).
+Production secrets live only on the server.
 
 ## Tests
 

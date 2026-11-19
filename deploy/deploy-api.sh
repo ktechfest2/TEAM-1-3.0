@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# Builds the API image here and runs it on the server (ssh alias: deploy-server).
-# The server only receives the finished image; secrets live in /opt/trustelect/.env there.
+# Builds the API image here and runs it on the server. The server only receives the finished image;
+# its secrets stay in /opt/trustelect/.env there.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+source deploy/.env.deploy
 docker build -f apps/api/Dockerfile -t trustelect-api:latest .
-docker save trustelect-api:latest | gzip -1 | ssh deploy-server 'gunzip | docker load'
-scp -q deploy/api/docker-compose.yml deploy-server:/opt/trustelect/docker-compose.yml
-ssh deploy-server 'cd /opt/trustelect && docker compose up -d && docker image prune -f >/dev/null'
+docker save trustelect-api:latest | gzip -1 | ssh "$DEPLOY_SSH_HOST" 'gunzip | docker load'
+scp -q deploy/api/docker-compose.yml "$DEPLOY_SSH_HOST":/opt/trustelect/docker-compose.yml
+ssh "$DEPLOY_SSH_HOST" 'cd /opt/trustelect && docker compose up -d && docker image prune -f >/dev/null'
 sleep 10
-curl -fsS https://api.example.org/health/live && echo
+curl -fsS "$API_URL/health/live" && echo

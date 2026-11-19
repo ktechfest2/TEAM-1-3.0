@@ -1,9 +1,8 @@
 import type { NextConfig } from 'next';
 
 /**
- * TrustElect's web app is a static site (Firebase Hosting, trustelect.web.app). Pages load
- * their data in the browser from the API at NEXT_PUBLIC_API_URL. Security headers are set
- * by the host: see firebase.json at the repository root.
+ * TrustElect's web app is a static site. Pages load their data in the browser from the API
+ * at NEXT_PUBLIC_API_URL. Security headers are set by the host: see deploy/web.hosting.template.json.
  */
 const nextConfig: NextConfig = {
   output: 'export',
