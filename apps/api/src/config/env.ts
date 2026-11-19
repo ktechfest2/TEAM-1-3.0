@@ -58,6 +58,8 @@ export const envSchema = z.object({
   WHATSAPP_GRAPH_VERSION: z.string().regex(/^v\d+\.\d+$/).default('v23.0'),
   /** Text model for the information assistant (INF) */
   OPENROUTER_CHAT_MODEL: z.string().min(3).default('anthropic/claude-haiku-5.5'),
+  /** Audio model that transcribes WhatsApp voice notes (INF-05) */
+  OPENROUTER_AUDIO_MODEL: z.string().min(3).default('google/gemini-3.8-flash'),
 });
 
 export type Env = z.infer<typeof envSchema>;

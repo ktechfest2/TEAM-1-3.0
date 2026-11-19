@@ -13,6 +13,8 @@ export abstract class WhatsAppClient {
   /** A list of up to ten choices (titles up to 24 characters) */
   abstract sendList(to: string, body: string, buttonLabel: string, rows: ListRow[]): Promise<string | null>;
   abstract markRead(messageId: string): Promise<void>;
+  /** Downloads an incoming media file (e.g. a voice note) */
+  abstract downloadMedia(mediaId: string): Promise<{ bytes: Buffer; mimeType: string } | null>;
 }
 
 export type SentMessage = { to: string; kind: 'text' | 'buttons' | 'list'; text: string; options?: string[] };
@@ -39,6 +41,11 @@ export class LogWhatsAppClient extends WhatsAppClient {
     return this.record({ to, kind: 'list', text: body, options: rows.map((r) => r.id) });
   }
   async markRead() {}
+  /** Tests put media here by id */
+  readonly media = new Map<string, { bytes: Buffer; mimeType: string }>();
+  async downloadMedia(mediaId: string) {
+    return this.media.get(mediaId) ?? null;
+  }
 }
 
 /** Meta WhatsApp Cloud API. */
@@ -116,5 +123,28 @@ export class CloudWhatsAppClient extends WhatsAppClient {
 
   async markRead(messageId: string) {
     await this.post({ status: 'read', message_id: messageId });
+  }
+
+  async downloadMedia(mediaId: string, maxBytes = 2 * 1024 * 1024) {
+    const auth = { Authorization: `Bearer ${this.config.get('WHATSAPP_ACCESS_TOKEN', { infer: true })}` };
+    try {
+      const version = this.config.get('WHATSAPP_GRAPH_VERSION', { infer: true });
+      const meta = (await (await this.http(`https://graph.facebook.com/${version}/${encodeURIComponent(mediaId)}`, { headers: auth, signal: AbortSignal.timeout(15_000) })).json()) as {
+        url?: string;
+        mime_type?: string;
+        file_size?: number;
+      };
+      if (!meta.url || (meta.file_size ?? 0) > maxBytes) return null;
+      // Media URLs are on Meta's CDN; only follow https links there
+      if (!/^https:\/\/[\w.-]+\.(fbsbx|facebook|whatsapp)\.(com|net)\//.test(meta.url)) return null;
+      const res = await this.http(meta.url, { headers: auth, signal: AbortSignal.timeout(30_000) });
+      if (!res.ok) return null;
+      const bytes = Buffer.from(await res.arrayBuffer());
+      if (bytes.length > maxBytes) return null;
+      return { bytes, mimeType: meta.mime_type ?? 'audio/ogg' };
+    } catch (err) {
+      this.logger.warn(`media download failed: ${(err as Error).message}`);
+      return null;
+    }
   }
 }

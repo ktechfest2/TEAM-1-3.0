@@ -12,6 +12,7 @@ type WebhookMessage = {
   text?: { body?: string };
   interactive?: { button_reply?: { id: string }; list_reply?: { id: string } };
   button?: { payload?: string; text?: string };
+  audio?: { id?: string };
 };
 type WebhookBody = {
   object?: string;
@@ -91,7 +92,7 @@ function toInbound(m: WebhookMessage): Inbound {
     case 'sticker':
       return { ...base, type: 'media' };
     case 'audio':
-      return { ...base, type: 'audio' };
+      return { ...base, type: 'audio', mediaId: m.audio?.id };
     default:
       return { ...base, type: 'other' };
   }

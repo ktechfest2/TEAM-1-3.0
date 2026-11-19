@@ -50,6 +50,10 @@ class FakeAssistant extends Assistant {
   async understand(): Promise<Understanding> {
     return this.next ?? { intent: 'other', language: 'en', unit_code: null, area_code: null, answer: null };
   }
+  heard: { text: string; language: 'en' | 'pcm' | 'ha' | 'yo' | 'ig' } | null = null;
+  async transcribe(): Promise<{ text: string; language: 'en' | 'pcm' | 'ha' | 'yo' | 'ig' } | null> {
+    return this.heard;
+  }
   async translate(text: string): Promise<string> {
     this.translations.push(text);
     return this.translateWith(text);
@@ -260,6 +264,21 @@ describe('WhatsApp channel (e2e)', () => {
     await text(voter, 'Ewu wa nibi');
     expect(last(voter).text).toMatch(/call 112/);
     expect(last(voter).text).not.toMatch(/911/);
+  });
+
+  it('understands voice notes and answers them like typed messages (INF-05)', async () => {
+    client.media.set('voice-1', { bytes: Buffer.from('OggS fake audio'), mimeType: 'audio/ogg; codecs=opus' });
+    assistant.heard = { text: 'result for 24-98-01-001', language: 'en' };
+    assistant.translateWith = (t) => t;
+    const before = client.sent.filter((m) => m.to === voter).length;
+    await send(voter, { type: 'audio', audio: { id: 'voice-1', mime_type: 'audio/ogg; codecs=opus' } });
+    const replies = client.sent.filter((m) => m.to === voter).slice(before);
+    expect(replies[0].text).toBe('🎙 “result for 24-98-01-001”');
+    expect(replies[1].text).toMatch(new RegExp(`${P[0]} 100`));
+
+    assistant.heard = null;
+    await send(voter, { type: 'audio', audio: { id: 'voice-2' } });
+    expect(last(voter).text).toMatch(/could not understand that voice note/);
   });
 
   it('only takes results from Nigerian numbers, and tracks delivery', async () => {

@@ -42,6 +42,8 @@ export type Inbound = {
   text?: string;
   /** Quick-reply button or list choice */
   choice?: string;
+  /** Voice note media id */
+  mediaId?: string;
 };
 
 type Contact = typeof whatsappContacts.$inferSelect;
@@ -151,7 +153,7 @@ export class WhatsAppService {
       return;
     }
 
-    const text = m.text?.trim() ?? '';
+    let text = m.text?.trim() ?? '';
     // INF-08: danger first, even before consent
     if (text && isEmergency(text)) return this.say(contact, EMERGENCY_TEXT);
 
@@ -165,7 +167,21 @@ export class WhatsAppService {
         { translate: true },
       );
     }
-    if (m.type === 'audio') return this.say(contact, 'Voice notes are not supported yet. Please type your message.', { translate: true });
+    if (m.type === 'audio') {
+      // INF-05: a voice note is transcribed, shown back, then handled like typed text. Neither is stored.
+      const audio = m.mediaId ? await this.client.downloadMedia(m.mediaId) : null;
+      const heard = audio ? await this.assistant.transcribe(audio.bytes, audio.mimeType) : null;
+      if (!heard) {
+        return this.say(contact, 'Sorry, I could not understand that voice note. Please try again, keep it under 2 minutes, or type your message.', { translate: true });
+      }
+      if (heard.language !== contact.language) {
+        await this.db.update(whatsappContacts).set({ language: heard.language }).where(eq(whatsappContacts.id, contact.id));
+        contact.language = heard.language;
+      }
+      await this.say(contact, `🎙 “${heard.text}”`);
+      text = heard.text;
+      if (isEmergency(text)) return this.say(contact, EMERGENCY_TEXT, { translate: true });
+    }
     if (!text) return this.say(contact, HELP, { translate: true });
 
     const typed = parseTypedFigures(text);

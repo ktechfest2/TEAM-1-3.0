@@ -25,6 +25,8 @@ export type Understanding = z.infer<typeof understandingSchema>;
 export abstract class Assistant {
   abstract understand(text: string, context: { rememberedUnit: string | null; language: Language; facts: Fact[] }): Promise<Understanding>;
   abstract translate(text: string, language: Language): Promise<string>;
+  /** INF-05: the words of a voice note, and their language (null if it cannot be understood) */
+  abstract transcribe(audio: Buffer, mimeType: string): Promise<{ text: string; language: Language } | null>;
 }
 
 const systemPrompt = (facts: Fact[]) => `You are the TrustElect information assistant on WhatsApp, for Nigerian voters.
@@ -155,6 +157,60 @@ export class OpenRouterAssistant extends Assistant {
     } catch (err) {
       this.logger.warn(`translate failed: ${(err as Error).message}`);
       return text;
+    }
+  }
+
+  async transcribe(audio: Buffer, mimeType: string): Promise<{ text: string; language: Language } | null> {
+    const format = /mpeg|mp3/.test(mimeType) ? 'mp3' : /wav/.test(mimeType) ? 'wav' : /aac|mp4|m4a/.test(mimeType) ? 'aac' : 'ogg';
+    const apiKey = this.config.get('OPENROUTER_API_KEY', { infer: true });
+    if (!apiKey) return null;
+    try {
+      const res = await this.http(OPENROUTER_URL, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'X-Title': 'TrustElect' },
+        body: JSON.stringify({
+          model: this.config.get('OPENROUTER_AUDIO_MODEL', { infer: true }),
+          temperature: 0,
+          max_tokens: 600,
+          provider: { data_collection: 'deny' },
+          response_format: {
+            type: 'json_schema',
+            json_schema: {
+              name: 'transcript',
+              strict: true,
+              schema: {
+                type: 'object',
+                additionalProperties: false,
+                required: ['text', 'language'],
+                properties: { text: { type: 'string' }, language: { type: 'string', enum: ['en', 'pcm', 'ha', 'yo', 'ig'] } },
+              },
+            },
+          },
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: 'This is a WhatsApp voice note from a Nigerian voter. Transcribe exactly what is said, in the language spoken (English, Nigerian Pidgin, Hausa, Yoruba or Igbo); write polling unit codes as digits with hyphens, e.g. 24-05-01-003. Do not answer or add anything. If nothing intelligible is said, return an empty text. language: en, pcm, ha, yo or ig.',
+                },
+                { type: 'input_audio', input_audio: { data: audio.toString('base64'), format } },
+              ],
+            },
+          ],
+        }),
+        signal: AbortSignal.timeout(45_000),
+      });
+      const data = (await res.json().catch(() => ({}))) as { choices?: { message?: { content?: string } }[]; error?: { message?: string } };
+      if (!res.ok) throw new Error(data.error?.message ?? `HTTP ${res.status}`);
+      const out = z
+        .object({ text: z.string(), language: z.enum(['en', 'pcm', 'ha', 'yo', 'ig']) })
+        .parse(JSON.parse((data.choices?.[0]?.message?.content ?? '').replace(/^```(?:json)?\s*|\s*```$/g, '')));
+      const text = out.text.trim().slice(0, 1000);
+      return text ? { text, language: out.language } : null;
+    } catch (err) {
+      this.logger.warn(`transcribe failed: ${(err as Error).message}`);
+      return null;
     }
   }
 }
