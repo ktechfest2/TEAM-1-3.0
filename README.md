@@ -101,6 +101,12 @@ ADMIN_PASSWORD='a long passphrase' npm run admin:create -w @trustelect/api -- \
 
 Roles: `reviewer`, `declarations_admin`, `approver`, `system_admin`. At first sign-in the admin scans a QR code with an authenticator app. Sessions are server-side, in an HTTP-only, SameSite=Strict cookie; logins are rate-limited and lock for 15 minutes after 5 failures; every action is written to the audit log.
 
+## Tests
+
+`npm run test:e2e -w @trustelect/api` runs against its own database, `trustelect_test` (created and
+migrated automatically; override with `TEST_DATABASE_URL`, whose name must end in `_test`). It never
+touches the development database.
+
 ## Common commands
 
 | Command | What it does |
