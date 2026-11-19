@@ -24,6 +24,11 @@ export default defineConfig({
       VERIFICATION_WORKER: 'off',
       CHAIN_ANCHOR_WORKER: 'off',
       CHAIN_ANCHOR_EXTERNAL: 'none',
+      // WhatsApp: messages go to an in-memory log; webhook secrets for signing test calls
+      WHATSAPP_PROVIDER: 'log',
+      WHATSAPP_APP_SECRET: 'test-only-whatsapp-app-secret',
+      WHATSAPP_VERIFY_TOKEN: 'test-only-verify-token-123',
+      WHATSAPP_PHONE_NUMBER_ID: '1000000001',
     },
   },
 });

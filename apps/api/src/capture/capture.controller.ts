@@ -127,6 +127,19 @@ export class CaptureController {
     return { phoneMasked: voter.phoneMasked, expiresAt: voter.expiresAt, token };
   }
 
+  /** Opens a capture session from a one-time link sent by WhatsApp or SMS (CAP-02) */
+  @Post('link')
+  @HttpCode(200)
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  async link(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
+    const { token: linkToken } = parseOrThrow(z.object({ token: z.string().regex(/^[A-Za-z0-9_-]{20,200}$/) }), body);
+    const opened = await this.capture.redeemLink(linkToken);
+    if (!opened) throw new UnauthorizedException('This link has expired or was already used. Ask for a new one on WhatsApp.');
+    this.setSessionCookie(res, opened.token);
+    return { phoneMasked: opened.voter.phoneMasked, expiresAt: opened.voter.expiresAt, token: opened.token };
+  }
+
   private setSessionCookie(res: Response, token: string) {
     res.cookie(CAPTURE_COOKIE, token, {
       httpOnly: true,

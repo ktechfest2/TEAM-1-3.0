@@ -7,7 +7,7 @@ import { ChainService } from '../chain/chain.service.js';
 import type { Database } from '../database/database.module.js';
 import { pollingUnits, resultVersions, submissions, unitResults } from '../database/schema.js';
 import { RESULTS_CHANNEL } from '../tally/channel.js';
-import { computeUnit, type AcceptedPhoto } from './engine.js';
+import { computeUnit, figuresHash, type AcceptedPhoto } from './engine.js';
 
 @Injectable()
 export class WitnessService {
@@ -50,6 +50,25 @@ export class WitnessService {
       const photos: AcceptedPhoto[] = rows.map((r) => ({ ...r, figures: r.figures!, strength: r.strength ?? 'standard' }));
       const outcome = computeUnit(photos);
 
+      // WIT-06: typed figures (WhatsApp, SMS) only support a photographed version; they never create one
+      const typed = await tx
+        .select({ reporterId: submissions.reporterId, figures: submissions.extracted })
+        .from(submissions)
+        .where(
+          and(
+            eq(submissions.electionId, electionId),
+            eq(submissions.pollingUnitId, pollingUnitId),
+            eq(submissions.status, 'verified'),
+            eq(submissions.kind, 'typed'),
+            isNotNull(submissions.extracted),
+          ),
+        );
+      const typedSupport = new Map<string, Set<string>>();
+      for (const t of typed) {
+        const h = figuresHash(t.figures!);
+        typedSupport.set(h, (typedSupport.get(h) ?? new Set()).add(t.reporterId));
+      }
+
       // Versions: one row per distinct set of figures
       const versionIds = new Map<string, string>();
       for (const v of outcome.versions) {
@@ -63,6 +82,7 @@ export class WitnessService {
             witnessCount: v.witnesses,
             stampedWitnessCount: v.stampedWitnesses,
             strongWitnessCount: v.strongWitnesses,
+            typedSupportCount: typedSupport.get(v.figuresHash)?.size ?? 0,
             confidence: v.confidence,
           })
           .onConflictDoUpdate({
@@ -72,6 +92,7 @@ export class WitnessService {
               witnessCount: v.witnesses,
               stampedWitnessCount: v.stampedWitnesses,
               strongWitnessCount: v.strongWitnesses,
+              typedSupportCount: typedSupport.get(v.figuresHash)?.size ?? 0,
               confidence: v.confidence,
               updatedAt: new Date(),
             },

@@ -55,6 +55,8 @@ export function CaptureApp() {
     await refresh();
   }, [refresh]);
 
+  const [linkError, setLinkError] = useState<string | null>(null);
+
   // Session check, queue load, and upload when the network comes back
   useEffect(() => {
     queue.all().then(setItems).catch(() => undefined);
@@ -62,7 +64,23 @@ export function CaptureApp() {
       .then((r) => (r.ok ? r.json() : null))
       .then((c: { phoneVerification?: string } | null) => setSmsMode(c?.phoneVerification === 'sms'))
       .catch(() => undefined);
-    fetch(apiUrl('/capture/session'), { headers: authHeaders('voter') })
+    // A one-time link from WhatsApp (?link=…) opens the session directly (CAP-02)
+    const link = new URLSearchParams(window.location.search).get('link');
+    const opened = link
+      ? fetch(apiUrl('/capture/link'), {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ token: link }),
+        })
+          .then(async (res) => {
+            if (res.ok) sessionToken.set('voter', ((await res.json()) as { token: string }).token);
+            else setLinkError('This link has expired or was already used. Ask for a new one on WhatsApp, or continue below.');
+          })
+          .catch(() => undefined)
+          .finally(() => window.history.replaceState(null, '', window.location.pathname))
+      : Promise.resolve();
+    opened
+      .then(() => fetch(apiUrl('/capture/session'), { headers: authHeaders('voter') }))
       .then(async (res) => {
         if (res.status === 401) sessionToken.clear('voter');
         if (res.ok) {
@@ -162,6 +180,12 @@ export function CaptureApp() {
       )}
 
       {step === 'loading' && <p role="status" className="text-ink-muted">Loading…</p>}
+
+      {linkError && step === 'intro' && (
+        <p role="alert" className="rounded-xl border border-dispute bg-dispute-bg px-4 py-3 text-sm text-dispute">
+          {linkError}
+        </p>
+      )}
 
       {step === 'intro' && (
         <section className={card} aria-labelledby="intro-heading">

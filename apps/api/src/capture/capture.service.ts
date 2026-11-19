@@ -14,7 +14,7 @@ import { ChainService } from '../chain/chain.service.js';
 import type { Env } from '../config/env.js';
 import type { Database } from '../database/database.module.js';
 import { parseUnitCode } from '@trustelect/shared';
-import { captureSessions, elections, lgas, pollingUnits, reporters, states, submissions, voterOtps, wards } from '../database/schema.js';
+import { captureLinks, captureSessions, elections, lgas, pollingUnits, reporters, states, submissions, voterOtps, wards } from '../database/schema.js';
 import { Encryptor, keyedHash, newToken, sha256 } from '../security/encryption.js';
 import { EvidenceStorage } from '../storage/evidence-storage.js';
 import { maskPhone, normaliseNigerianMobile } from './phone.js';
@@ -27,6 +27,8 @@ const OTP_PER_WINDOW = 3;
 const OTP_WINDOW_MINUTES = 15;
 /** Capture sessions cover a whole election day and the night after */
 export const CAPTURE_SESSION_HOURS = 24;
+/** A capture link sent by WhatsApp or SMS works once, within this time */
+export const LINK_MINUTES = 30;
 /** Photos a voter can submit per hour (abuse prevention) */
 const PHOTOS_PER_HOUR = 20;
 export const MAX_PHOTO_BYTES = 6 * 1024 * 1024;
@@ -141,15 +143,47 @@ export class CaptureService {
   }
 
   /** Records consent for the number and opens a capture session. */
-  private async openSession(phone: string, via: 'sms' | 'web'): Promise<{ token: string; voter: CaptureVoter }> {
-    const phoneHash = this.phoneHash(phone);
+  /** The reporter for a phone number (E.164), recording consent. Refuses blocked numbers. */
+  async reporterFor(phone: string): Promise<string> {
     const [reporter] = await this.db
       .insert(reporters)
-      .values({ phoneHash, phoneEncrypted: this.encryptor.encrypt(phone), consentAt: new Date() })
+      .values({ phoneHash: this.phoneHash(phone), phoneEncrypted: this.encryptor.encrypt(phone), consentAt: new Date() })
       .onConflictDoUpdate({ target: reporters.phoneHash, set: { consentAt: new Date() } })
       .returning({ id: reporters.id, blockedAt: reporters.blockedAt });
     if (reporter.blockedAt) throw new ForbiddenException('This number cannot submit to TrustElect');
+    return reporter.id;
+  }
 
+  /**
+   * A one-time link that opens the camera app already tied to this phone (CAP-02, INF-06).
+   * Sent by WhatsApp, whose number is itself verified, so no SMS code is needed.
+   */
+  async issueLink(phone: string, via: 'whatsapp' | 'sms'): Promise<string> {
+    const reporterId = await this.reporterFor(phone);
+    const { token, hash } = newToken();
+    await this.db.insert(captureLinks).values({ reporterId, tokenHash: hash, issuedVia: via, expiresAt: new Date(Date.now() + LINK_MINUTES * 60_000) });
+    return `${this.config.get('WEB_ORIGIN', { infer: true })}/capture?link=${token}`;
+  }
+
+  /** Redeems a one-time link (once, before it expires) for a capture session. */
+  async redeemLink(token: string): Promise<{ token: string; voter: CaptureVoter } | null> {
+    const [link] = await this.db
+      .update(captureLinks)
+      .set({ usedAt: new Date() })
+      .where(and(eq(captureLinks.tokenHash, sha256(token)), isNull(captureLinks.usedAt), gt(captureLinks.expiresAt, new Date())))
+      .returning({ reporterId: captureLinks.reporterId, via: captureLinks.issuedVia });
+    if (!link) return null;
+    const [reporter] = await this.db.select().from(reporters).where(eq(reporters.id, link.reporterId)).limit(1);
+    if (!reporter || reporter.blockedAt) return null;
+    return this.sessionFor(reporter.id, this.encryptor.decrypt(reporter.phoneEncrypted), link.via);
+  }
+
+  private async openSession(phone: string, via: 'sms' | 'web'): Promise<{ token: string; voter: CaptureVoter }> {
+    return this.sessionFor(await this.reporterFor(phone), phone, via);
+  }
+
+  private async sessionFor(reporterId: string, phone: string, via: 'sms' | 'web' | 'whatsapp' | 'ussd') {
+    const reporter = { id: reporterId };
     const { token, hash } = newToken();
     const expiresAt = new Date(Date.now() + CAPTURE_SESSION_HOURS * 3_600_000);
     const [session] = await this.db

@@ -4,7 +4,8 @@ import { AppModule } from './app.module.js';
 import { webOrigins, type Env } from './config/env.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // rawBody: the WhatsApp webhook checks Meta's signature over the exact bytes received
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const config = app.get<ConfigService<Env, true>>(ConfigService);
 
   // The web app (trustelect.web.app) calls the API from another site; sessions travel as Bearer tokens

@@ -9,5 +9,6 @@ import { ResultsService } from './results.service.js';
   imports: [AuthModule, WitnessModule],
   controllers: [PublicResultsController, AdminReviewController],
   providers: [ResultsService, EvidenceStorage],
+  exports: [ResultsService],
 })
 export class ResultsModule {}

@@ -47,6 +47,17 @@ export const envSchema = z.object({
   CHAIN_ANCHOR_MINUTES: z.coerce.number().int().min(1).max(1440).default(10),
   /** External public record of each anchor: none, or opentimestamps (Bitcoin-backed, free, sends only a hash) */
   CHAIN_ANCHOR_EXTERNAL: z.enum(['none', 'opentimestamps']).default('none'),
+  /** WhatsApp channel: log = development and tests (messages written to the log), cloud = Meta Cloud API */
+  WHATSAPP_PROVIDER: z.enum(['log', 'cloud']).default('log'),
+  WHATSAPP_PHONE_NUMBER_ID: z.string().regex(/^\d+$/).optional(),
+  WHATSAPP_ACCESS_TOKEN: z.string().min(20).optional(),
+  /** Meta app secret: every webhook call is checked against its X-Hub-Signature-256 */
+  WHATSAPP_APP_SECRET: z.string().min(16).optional(),
+  /** Shared secret Meta sends when the webhook is registered */
+  WHATSAPP_VERIFY_TOKEN: z.string().min(16).optional(),
+  WHATSAPP_GRAPH_VERSION: z.string().regex(/^v\d+\.\d+$/).default('v23.0'),
+  /** Text model for the information assistant (INF) */
+  OPENROUTER_CHAT_MODEL: z.string().min(3).default('anthropic/claude-haiku-5.5'),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -54,10 +65,20 @@ export type Env = z.infer<typeof envSchema>;
 /** Every origin allowed to call the API from a browser */
 export const webOrigins = (env: Pick<Env, 'WEB_ORIGIN' | 'WEB_EXTRA_ORIGINS'>) => [env.WEB_ORIGIN, ...env.WEB_EXTRA_ORIGINS];
 
-const refinedSchema = envSchema.refine((e) => e.SMS_PROVIDER !== 'bulksmslive' || !!e.BULKSMSLIVE_API_KEY, {
-  message: 'BULKSMSLIVE_API_KEY is required when SMS_PROVIDER=bulksmslive',
-  path: ['BULKSMSLIVE_API_KEY'],
-});
+const refinedSchema = envSchema
+  .refine((e) => e.SMS_PROVIDER !== 'bulksmslive' || !!e.BULKSMSLIVE_API_KEY, {
+    message: 'BULKSMSLIVE_API_KEY is required when SMS_PROVIDER=bulksmslive',
+    path: ['BULKSMSLIVE_API_KEY'],
+  })
+  .refine(
+    (e) =>
+      e.WHATSAPP_PROVIDER !== 'cloud' ||
+      !!(e.WHATSAPP_PHONE_NUMBER_ID && e.WHATSAPP_ACCESS_TOKEN && e.WHATSAPP_APP_SECRET && e.WHATSAPP_VERIFY_TOKEN),
+    {
+      message: 'WHATSAPP_PHONE_NUMBER_ID, WHATSAPP_ACCESS_TOKEN, WHATSAPP_APP_SECRET and WHATSAPP_VERIFY_TOKEN are required when WHATSAPP_PROVIDER=cloud',
+      path: ['WHATSAPP_PROVIDER'],
+    },
+  );
 
 export function validateEnv(config: Record<string, unknown>): Env {
   const result = refinedSchema.safeParse(config);

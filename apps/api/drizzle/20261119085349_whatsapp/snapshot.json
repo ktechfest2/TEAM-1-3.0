@@ -1,0 +1,736 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "b1c95966-eea6-4358-9b74-2ce437b41f29",
+  "prevIds": [
+    "2973059e-ecc2-4c95-864f-b47fa8db9e90"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "capture_links"
+      ],
+      "writes": [
+        "s|tbl|public.capture_links",
+        "n|tbl|public.capture_links",
+        "e|tbl|public.capture_links",
+        "n|rel|public.capture_links",
+        "n|type|public.capture_links",
+        "n|rel|public.capture_links_pkey",
+        "n|rel|public.capture_links_token_hash_key"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.channel"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "whatsapp_contacts"
+      ],
+      "writes": [
+        "s|tbl|public.whatsapp_contacts",
+        "n|tbl|public.whatsapp_contacts",
+        "e|tbl|public.whatsapp_contacts",
+        "n|rel|public.whatsapp_contacts",
+        "n|type|public.whatsapp_contacts",
+        "n|rel|public.whatsapp_contacts_pkey",
+        "n|rel|public.whatsapp_contacts_phone_hash_key"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "whatsapp_messages"
+      ],
+      "writes": [
+        "s|tbl|public.whatsapp_messages",
+        "n|tbl|public.whatsapp_messages",
+        "e|tbl|public.whatsapp_messages",
+        "n|rel|public.whatsapp_messages",
+        "n|type|public.whatsapp_messages",
+        "n|rel|public.whatsapp_messages_pkey",
+        "n|rel|public.whatsapp_messages_wa_message_id_key"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "whatsapp_messages",
+        "whatsapp_messages_contact_idx"
+      ],
+      "writes": [
+        "s|idx|public.whatsapp_messages_contact_idx",
+        "n|idx|public.whatsapp_messages_contact_idx",
+        "e|idx|public.whatsapp_messages_contact_idx",
+        "n|rel|public.whatsapp_messages_contact_idx"
+      ],
+      "reads": [
+        "n|tbl|public.whatsapp_messages",
+        "n|sch|public",
+        "n|col|public.whatsapp_messages.contact_id",
+        "n|col|public.whatsapp_messages.created_at"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "capture_links"
+      ],
+      "writes": [
+        "s|fk|public.capture_links.capture_links_reporter_id_reporters_id_fkey",
+        "n|fk|public.capture_links.capture_links_reporter_id_reporters_id_fkey",
+        "e|fk|public.capture_links.capture_links_reporter_id_reporters_id_fkey",
+        "n|con|public.capture_links.capture_links_reporter_id_reporters_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.capture_links",
+        "n|sch|public",
+        "n|tbl|public.reporters",
+        "n|sch|public",
+        "n|col|public.capture_links.reporter_id",
+        "n|col|public.reporters.id",
+        "e|uniqueness|public.reporters.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "whatsapp_messages"
+      ],
+      "writes": [
+        "s|fk|public.whatsapp_messages.whatsapp_messages_contact_id_whatsapp_contacts_id_fkey",
+        "n|fk|public.whatsapp_messages.whatsapp_messages_contact_id_whatsapp_contacts_id_fkey",
+        "e|fk|public.whatsapp_messages.whatsapp_messages_contact_id_whatsapp_contacts_id_fkey",
+        "n|con|public.whatsapp_messages.whatsapp_messages_contact_id_whatsapp_contacts_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.whatsapp_messages",
+        "n|sch|public",
+        "n|tbl|public.whatsapp_contacts",
+        "n|sch|public",
+        "n|col|public.whatsapp_messages.contact_id",
+        "n|col|public.whatsapp_contacts.id",
+        "e|uniqueness|public.whatsapp_contacts.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "capture_links",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "whatsapp_contacts",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "whatsapp_messages",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "capture_links",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "capture_links",
+        "name": "reporter_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "capture_links",
+        "name": "token_hash",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "capture_links",
+        "name": "issued_via",
+        "type": "channel",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "capture_links",
+        "name": "expires_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "capture_links",
+        "name": "used_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "capture_links",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_contacts",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_contacts",
+        "name": "phone_hash",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_contacts",
+        "name": "phone_encrypted",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_contacts",
+        "name": "consent_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_contacts",
+        "name": "declined_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_contacts",
+        "name": "language",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'en'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_contacts",
+        "name": "remembered_unit_code",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_contacts",
+        "name": "pending_figures",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_contacts",
+        "name": "last_inbound_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_contacts",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_messages",
+        "name": "id",
+        "type": "bigserial",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_messages",
+        "name": "wa_message_id",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_messages",
+        "name": "contact_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_messages",
+        "name": "direction",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_messages",
+        "name": "kind",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_messages",
+        "name": "status",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_messages",
+        "name": "error",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_messages",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_messages",
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_messages",
+        "name": "whatsapp_messages_contact_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "contact_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "created_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "capture_links",
+        "name": "capture_links_reporter_id_reporters_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "reporter_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "reporters",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "NO ACTION",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_messages",
+        "name": "whatsapp_messages_contact_id_whatsapp_contacts_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "contact_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "whatsapp_contacts",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "NO ACTION",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "capture_links",
+        "name": "capture_links_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_contacts",
+        "name": "whatsapp_contacts_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_messages",
+        "name": "whatsapp_messages_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "capture_links",
+        "name": "capture_links_token_hash_key",
+        "nameExplicit": false,
+        "columns": [
+          "token_hash"
+        ],
+        "nullsNotDistinct": false,
+        "entityType": "uniques"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_contacts",
+        "name": "whatsapp_contacts_phone_hash_key",
+        "nameExplicit": false,
+        "columns": [
+          "phone_hash"
+        ],
+        "nullsNotDistinct": false,
+        "entityType": "uniques"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_messages",
+        "name": "whatsapp_messages_wa_message_id_key",
+        "nameExplicit": false,
+        "columns": [
+          "wa_message_id"
+        ],
+        "nullsNotDistinct": false,
+        "entityType": "uniques"
+      }
+    }
+  ]
+}

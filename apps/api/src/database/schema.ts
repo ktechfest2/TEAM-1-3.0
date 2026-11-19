@@ -187,6 +187,56 @@ export const captureSessions = pgTable('capture_sessions', {
   createdAt: createdAt(),
 });
 
+/** One-time links that open a capture session, sent by WhatsApp or SMS (CAP-02, INF-06) */
+export const captureLinks = pgTable('capture_links', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  reporterId: uuid('reporter_id').notNull().references(() => reporters.id),
+  tokenHash: text('token_hash').notNull().unique(),
+  issuedVia: channel('issued_via').notNull(),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  usedAt: timestamp('used_at', { withTimezone: true }),
+  createdAt: createdAt(),
+});
+
+/* ------------------------------------------------------------------ */
+/* WhatsApp channel (CAP-06, CNT-08, INF)                               */
+/* ------------------------------------------------------------------ */
+
+/** A WhatsApp user. No message text is stored. */
+export const whatsappContacts = pgTable('whatsapp_contacts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  /** Keyed hash of the WhatsApp number (same key as reporters, so one person is one witness) */
+  phoneHash: text('phone_hash').notNull().unique(),
+  phoneEncrypted: text('phone_encrypted').notNull(),
+  consentAt: timestamp('consent_at', { withTimezone: true }),
+  declinedAt: timestamp('declined_at', { withTimezone: true }),
+  /** en, pcm (Pidgin), ha, yo or ig */
+  language: text('language').notNull().default('en'),
+  /** INF-02: the polling unit the voter talked about, remembered for the conversation */
+  rememberedUnitCode: text('remembered_unit_code'),
+  /** Typed figures waiting for the voter to choose the election */
+  pendingFigures: jsonb('pending_figures'),
+  lastInboundAt: timestamp('last_inbound_at', { withTimezone: true }),
+  createdAt: createdAt(),
+});
+
+/** Message ids and delivery status only (de-duplication and delivery tracking) */
+export const whatsappMessages = pgTable(
+  'whatsapp_messages',
+  {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    waMessageId: text('wa_message_id').notNull().unique(),
+    contactId: uuid('contact_id').references(() => whatsappContacts.id),
+    direction: text('direction').notNull(),
+    kind: text('kind').notNull(),
+    status: text('status').notNull(),
+    error: text('error'),
+    createdAt: createdAt(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('whatsapp_messages_contact_idx').on(t.contactId, t.createdAt)],
+);
+
 /* ------------------------------------------------------------------ */
 /* Submissions, versions and unit results (VER, WIT)                   */
 /* ------------------------------------------------------------------ */
