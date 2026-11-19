@@ -106,7 +106,7 @@ Roles: `reviewer`, `declarations_admin`, `approver`, `system_admin`. At first si
 | Part | Where | Address |
 |---|---|---|
 | Web app (static) | Firebase Hosting, project `trustelect` (free Spark plan) | https://trustelect.web.app |
-| API, Postgres | VPS, Docker Compose in `/opt/trustelect` | https://api.example.org |
+| API, Postgres | VPS | https://api.example.org |
 
 The web app is a static export: pages load data in the browser from `NEXT_PUBLIC_API_URL`, and admin
 and voter sessions travel as Bearer tokens (the API is on another site, where browsers block cookies).
