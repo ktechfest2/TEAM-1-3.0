@@ -29,6 +29,9 @@ export default defineConfig({
       WHATSAPP_APP_SECRET: 'test-only-whatsapp-app-secret',
       WHATSAPP_VERIFY_TOKEN: 'test-only-verify-token-123',
       WHATSAPP_PHONE_NUMBER_ID: '1000000001',
+      // SMS and USSD callbacks (replies go to an in-memory log)
+      CHANNELS_PROVIDER: 'log',
+      CHANNELS_WEBHOOK_TOKEN: 'test-only-channels-token-0123456789',
     },
   },
 });

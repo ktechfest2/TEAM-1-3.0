@@ -60,6 +60,15 @@ export const envSchema = z.object({
   OPENROUTER_CHAT_MODEL: z.string().min(3).default('anthropic/claude-haiku-5.5'),
   /** Audio model that transcribes WhatsApp voice notes (INF-05) */
   OPENROUTER_AUDIO_MODEL: z.string().min(3).default('google/gemini-3.8-flash'),
+  /** Two-way SMS and USSD (Sprint 10): log = development and tests, africastalking = Africa's Talking */
+  CHANNELS_PROVIDER: z.enum(['log', 'africastalking']).default('log'),
+  /** Africa's Talking app username ("sandbox" for the free sandbox) */
+  AFRICASTALKING_USERNAME: z.string().min(1).default('sandbox'),
+  AFRICASTALKING_API_KEY: z.string().min(20).optional(),
+  /** Short code replies are sent from */
+  AFRICASTALKING_SHORTCODE: z.string().regex(/^\d{3,8}$/).optional(),
+  /** Secret part of the SMS and USSD callback addresses (Africa's Talking does not sign callbacks) */
+  CHANNELS_WEBHOOK_TOKEN: z.string().regex(/^[\w-]{24,128}$/).optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -71,6 +80,10 @@ const refinedSchema = envSchema
   .refine((e) => e.SMS_PROVIDER !== 'bulksmslive' || !!e.BULKSMSLIVE_API_KEY, {
     message: 'BULKSMSLIVE_API_KEY is required when SMS_PROVIDER=bulksmslive',
     path: ['BULKSMSLIVE_API_KEY'],
+  })
+  .refine((e) => e.CHANNELS_PROVIDER !== 'africastalking' || !!(e.AFRICASTALKING_API_KEY && e.CHANNELS_WEBHOOK_TOKEN), {
+    message: 'AFRICASTALKING_API_KEY and CHANNELS_WEBHOOK_TOKEN are required when CHANNELS_PROVIDER=africastalking',
+    path: ['CHANNELS_PROVIDER'],
   })
   .refine(
     (e) =>

@@ -1,33 +1,16 @@
-import { HttpException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectDrizzle } from '@nestjs/drizzle';
-import { UNOFFICIAL_LABEL } from '@trustelect/shared';
-import { and, asc, count, eq, gt, ne, or } from 'drizzle-orm';
+import { and, count, eq, gt } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
-import { ChainService } from '../chain/chain.service.js';
 import { CaptureService } from '../capture/capture.service.js';
 import { normaliseNigerianMobile } from '../capture/phone.js';
 import type { Env } from '../config/env.js';
 import type { Database } from '../database/database.module.js';
-import {
-  electionParties,
-  elections,
-  lgas,
-  parties,
-  pollingUnits,
-  resultVersions,
-  states,
-  submissions,
-  wards,
-  whatsappContacts,
-  whatsappMessages,
-} from '../database/schema.js';
+import { whatsappContacts, whatsappMessages } from '../database/schema.js';
 import { KnowledgeService } from '../knowledge/knowledge.service.js';
-import { ResultsService } from '../results/results.service.js';
+import { MessagingCore, type Area, type Reply } from '../messaging/core.service.js';
 import { Encryptor, keyedHash } from '../security/encryption.js';
-import { TallyService } from '../tally/tally.service.js';
-import { figuresHash } from '../witnesses/engine.js';
-import { WitnessService } from '../witnesses/witness.service.js';
 import { Assistant } from './assistant.js';
 import { WhatsAppClient } from './client.js';
 import { EMERGENCY_TEXT, type Language } from './knowledge.js';
@@ -51,23 +34,6 @@ type PendingFigures = { unitCode: string; votes: Record<string, number> };
 
 /** Messages per contact in 10 minutes before TrustElect asks them to slow down */
 const MESSAGES_PER_10_MIN = 20;
-const TYPED_PER_HOUR = 10;
-
-const UNIT_STATUS: Record<string, string> = {
-  not_confirmed: 'No confirmed result yet',
-  counted: 'Counted',
-  provisional: 'Provisional: witnesses disagree, under review',
-  disputed: 'Disputed: not counted until reviewed',
-  resolved: 'Resolved by review',
-};
-const COMPARISON: Record<string, string> = {
-  match: 'Matches the declared result',
-  match_so_far: 'Matches the declared result so far',
-  does_not_match: 'Does not match the declared result',
-  possible_mismatch_low_confidence: 'Possible mismatch (low confidence)',
-  conflicting_declarations: 'Conflicting declarations, under review',
-  awaiting_data: 'No approved declaration to compare yet',
-};
 
 const HELP = [
   'TrustElect: citizen-collated election results (unofficial; official results are declared by INEC).',
@@ -106,11 +72,8 @@ export class WhatsAppService {
     private readonly client: WhatsAppClient,
     private readonly assistant: Assistant,
     private readonly capture: CaptureService,
-    private readonly results: ResultsService,
-    private readonly tally: TallyService,
-    private readonly witnesses: WitnessService,
-    private readonly chain: ChainService,
     private readonly knowledge: KnowledgeService,
+    private readonly core: MessagingCore,
   ) {}
 
   /** Records the message (ignoring Meta's repeats) and queues it for handling. */
@@ -292,7 +255,13 @@ export class WhatsAppService {
     });
   }
 
-  /* ------------------------------ capture link ------------------------------ */
+  /* ------------------------- shared with SMS and USSD ------------------------ */
+
+  /** Sends a core reply and remembers the unit it was about (INF-02) */
+  private async reply(contact: Contact, r: Reply) {
+    if (r.rememberUnit) await this.db.update(whatsappContacts).set({ rememberedUnitCode: r.rememberUnit }).where(eq(whatsappContacts.id, contact.id));
+    return this.say(contact, r.text, { translate: r.translate });
+  }
 
   private async linkFor(contact: Contact) {
     const phone = normaliseNigerianMobile(this.phoneOf(contact));
@@ -301,126 +270,22 @@ export class WhatsAppService {
   }
 
   private async sendLink(contact: Contact) {
-    if (!normaliseNigerianMobile(this.phoneOf(contact))) {
-      return this.say(contact, `Results can only be sent from Nigerian mobile numbers. Open ${this.config.get('WEB_ORIGIN', { infer: true })}/capture on a phone with a Nigerian number.`, { translate: true });
-    }
-    try {
-      const link = await this.linkFor(contact);
-      return this.say(
-        contact,
-        `Open this link to photograph the EC60E result poster with your camera. It works once, for 30 minutes, and is linked to this number:\n${link}`,
-        { translate: true },
-      );
-    } catch (err) {
-      if (err instanceof HttpException) return this.say(contact, 'This number cannot send results to TrustElect.');
-      throw err;
-    }
+    return this.reply(contact, await this.core.captureLink(this.phoneOf(contact), 'whatsapp'));
   }
 
-  /* --------------------------------- lookups -------------------------------- */
-
-  private async lookup(contact: Contact, area: { level: 'polling_unit' | 'ward' | 'lga' | 'state'; code: string }) {
-    if (area.level === 'polling_unit') return this.unitLookup(contact, area.code);
-
-    const covering = (await this.db.select().from(elections).where(ne(elections.status, 'draft')).orderBy(asc(elections.electionDate)))
-      .filter((e) => e.scopeLevel === 'national' || (e.scopeCode !== null && area.code.startsWith(e.scopeCode)));
-    const blocks: string[] = [];
-    let name = area.code;
-    for (const e of covering) {
-      try {
-        const t = await this.tally.area(e.id, area.level, area.code);
-        name = t.area.name;
-        const votes = t.parties.map((p: { acronym: string }) => `${p.acronym} ${(t.totals.partyVotes[p.acronym] ?? 0).toLocaleString('en-NG')}`).join(' · ');
-        blocks.push(
-          [
-            `*${e.title}*`,
-            `Counted from ${t.totals.countedUnits.toLocaleString('en-NG')} of ${t.totals.totalUnits.toLocaleString('en-NG')} polling units`,
-            t.totals.countedUnits ? votes : 'No counted polling units yet',
-            t.totals.comparison ? COMPARISON[t.totals.comparison.status] : null,
-          ]
-            .filter(Boolean)
-            .join('\n'),
-        );
-      } catch (err) {
-        if (!(err instanceof NotFoundException) && !(err instanceof HttpException)) throw err;
-      }
-    }
-    if (!blocks.length) return this.say(contact, `No published election covers ${area.code} yet, or that code is not in the register.`, { translate: true });
-    const web = this.config.get('WEB_ORIGIN', { infer: true });
-    return this.say(contact, `${name} (${area.code})\n\n${blocks.join('\n\n')}\n\n${UNOFFICIAL_LABEL}. Not a projection. More: ${web}/results/elections`);
-  }
-
-  private async unitLookup(contact: Contact, code: string) {
-    let found;
-    try {
-      found = await this.results.publicUnitResults(code);
-    } catch (err) {
-      if (err instanceof NotFoundException || err instanceof HttpException) {
-        return this.say(contact, `${code} is not in the polling unit register. Check the code on your voter's card or the result poster.`, { translate: true });
-      }
-      throw err;
-    }
-    await this.db.update(whatsappContacts).set({ rememberedUnitCode: found.unit.code }).where(eq(whatsappContacts.id, contact.id));
-    const head = `${found.unit.name} (${found.unit.code})\n${found.unit.wardName} ward, ${found.unit.lgaName}, ${found.unit.stateName}`;
-    if (!found.results.length) return this.say(contact, `${head}\n\nNo published election covers this polling unit yet.`);
-    const blocks = found.results.map((r) => {
-      const lines = [`*${r.election.title}*`, UNIT_STATUS[r.status] ?? r.status];
-      if (r.figures) {
-        lines.push(r.parties.map((p) => `${p.acronym} ${r.figures!.partyVotes[p.acronym] ?? 0}`).join(' · '));
-        lines.push(`Total valid ${r.figures.totalValid}`);
-        lines.push(`${r.confidence ? `${r.confidence[0].toUpperCase()}${r.confidence.slice(1)} confidence: ` : ''}${r.witnessCount} independent ${r.witnessCount === 1 ? 'witness' : 'witnesses'}`);
-      }
-      return lines.join('\n');
-    });
-    return this.say(contact, `${head}\n\n${blocks.join('\n\n')}\n\n${UNOFFICIAL_LABEL}.`);
-  }
-
-  /* ------------------------------ typed figures ----------------------------- */
-
-  private async unitWithArea(code: string) {
-    const [unit] = await this.db
-      .select({ id: pollingUnits.id, code: pollingUnits.code, wardCode: wards.code, lgaCode: lgas.code, stateCode: states.code })
-      .from(pollingUnits)
-      .innerJoin(wards, eq(wards.id, pollingUnits.wardId))
-      .innerJoin(lgas, eq(lgas.id, wards.lgaId))
-      .innerJoin(states, eq(states.id, lgas.stateId))
-      .where(eq(pollingUnits.code, code))
-      .limit(1);
-    return unit ?? null;
-  }
-
-  private async activeElectionsFor(unit: NonNullable<Awaited<ReturnType<WhatsAppService['unitWithArea']>>>) {
-    return this.db
-      .select({ id: elections.id, title: elections.title })
-      .from(elections)
-      .where(
-        and(
-          eq(elections.status, 'active'),
-          or(
-            eq(elections.scopeLevel, 'national'),
-            and(eq(elections.scopeLevel, 'state'), eq(elections.scopeCode, unit.stateCode)),
-            and(eq(elections.scopeLevel, 'lga'), eq(elections.scopeCode, unit.lgaCode)),
-            and(eq(elections.scopeLevel, 'ward'), eq(elections.scopeCode, unit.wardCode)),
-            and(eq(elections.scopeLevel, 'polling_unit'), eq(elections.scopeCode, unit.code)),
-          ),
-        ),
-      )
-      .orderBy(asc(elections.title));
+  private async lookup(contact: Contact, area: Area) {
+    return this.reply(contact, await this.core.lookup(area, 'whatsapp'));
   }
 
   private async typedFigures(contact: Contact, figures: PendingFigures) {
-    const unit = await this.unitWithArea(figures.unitCode);
-    if (!unit) return this.say(contact, `${figures.unitCode} is not in the polling unit register. Check the code on the result poster.`, { translate: true });
-    const open = await this.activeElectionsFor(unit);
-    if (!open.length) return this.say(contact, `No election is open for results at ${unit.code} right now.`, { translate: true });
-    if (open.length === 1) return this.recordFigures(contact, open[0].id, figures);
-
+    const r = await this.core.typedFigures(this.phoneOf(contact), 'whatsapp', figures);
+    if (!('choose' in r)) return this.reply(contact, r);
     await this.db.update(whatsappContacts).set({ pendingFigures: figures }).where(eq(whatsappContacts.id, contact.id));
     const id = await this.client.sendList(
       this.phoneOf(contact).slice(1),
-      `Which election are these figures for (${unit.code})?`,
+      `Which election are these figures for (${r.unitCode})?`,
       'Choose election',
-      open.slice(0, 10).map((e) => ({ id: `election:${e.id}`, title: e.title.slice(0, 24), description: e.title.length > 24 ? e.title : undefined })),
+      r.choose.slice(0, 10).map((e) => ({ id: `election:${e.id}`, title: e.title.slice(0, 24), description: e.title.length > 24 ? e.title : undefined })),
     );
     await this.track(contact, id, 'list');
   }
@@ -429,84 +294,6 @@ export class WhatsAppService {
     const pending = contact.pendingFigures as PendingFigures | null;
     if (!pending) return this.say(contact, 'Please send the figures again: PU 24-05-01-003 APC 112 LP 98 PDP 140', { translate: true });
     await this.db.update(whatsappContacts).set({ pendingFigures: null }).where(eq(whatsappContacts.id, contact.id));
-    return this.recordFigures(contact, electionId, pending);
-  }
-
-  /** CAP-06, WIT-06: typed figures are a supporting witness for a photographed version, never a version of their own */
-  private async recordFigures(contact: Contact, electionId: string, figures: PendingFigures) {
-    const phone = normaliseNigerianMobile(this.phoneOf(contact));
-    if (!phone) return this.say(contact, 'Results can only be sent from Nigerian mobile numbers.', { translate: true });
-    const unit = await this.unitWithArea(figures.unitCode);
-    const [election] = unit ? (await this.activeElectionsFor(unit)).filter((e) => e.id === electionId) : [];
-    if (!unit || !election) return this.say(contact, 'That election is not open for results at this polling unit.', { translate: true });
-
-    const ballot = (
-      await this.db
-        .select({ acronym: parties.acronym })
-        .from(electionParties)
-        .innerJoin(parties, eq(parties.id, electionParties.partyId))
-        .where(eq(electionParties.electionId, electionId))
-        .orderBy(asc(electionParties.ballotOrder))
-    ).map((p) => p.acronym.toUpperCase());
-    const given = Object.keys(figures.votes);
-    const unknown = given.filter((p) => !ballot.includes(p));
-    const missing = ballot.filter((p) => !given.includes(p));
-    if (unknown.length || missing.length) {
-      return this.say(
-        contact,
-        [
-          unknown.length ? `Not on this ballot: ${unknown.join(', ')}.` : null,
-          missing.length ? `Missing: ${missing.join(', ')}.` : null,
-          `Send every party on the poster, in this format:\nPU ${unit.code} ${ballot.map((p) => `${p} 0`).join(' ')}`,
-        ]
-          .filter(Boolean)
-          .join('\n'),
-      );
-    }
-
-    const reporterId = await this.capture.reporterFor(phone);
-    const [{ recent }] = await this.db
-      .select({ recent: count() })
-      .from(submissions)
-      .where(and(eq(submissions.reporterId, reporterId), eq(submissions.kind, 'typed'), gt(submissions.receivedAt, new Date(Date.now() - 3_600_000))));
-    if (recent >= TYPED_PER_HOUR) return this.say(contact, 'Too many results from this number in the last hour. Try again later.', { translate: true });
-
-    const extracted = { partyVotes: figures.votes, totalValid: Object.values(figures.votes).reduce((a, b) => a + b, 0), rejected: null, totalCast: null };
-    const [row] = await this.db
-      .insert(submissions)
-      .values({
-        electionId,
-        pollingUnitId: unit.id,
-        reporterId,
-        kind: 'typed',
-        channel: 'whatsapp',
-        status: 'verified',
-        extracted,
-        clientId: randomUUID(),
-        processedAt: new Date(),
-      })
-      .returning({ id: submissions.id });
-    await this.chain.syncSubmission(row.id);
-    await this.witnesses.recalculate(electionId, unit.id);
-    await this.db.update(whatsappContacts).set({ rememberedUnitCode: unit.code }).where(eq(whatsappContacts.id, contact.id));
-
-    const [version] = await this.db
-      .select({ witnessCount: resultVersions.witnessCount })
-      .from(resultVersions)
-      .where(and(eq(resultVersions.electionId, electionId), eq(resultVersions.pollingUnitId, unit.id), eq(resultVersions.figuresHash, figuresHash(extracted))))
-      .limit(1);
-    const summary = ballot.map((p) => `${p} ${figures.votes[p]}`).join(' · ');
-    if (version) {
-      return this.say(
-        contact,
-        `Recorded for ${unit.code} (${election.title}): ${summary}.\nThese figures match a result photographed by ${version.witnessCount} ${version.witnessCount === 1 ? 'witness' : 'witnesses'}; yours is counted as supporting evidence. Thank you.`,
-        { translate: true },
-      );
-    }
-    return this.say(
-      contact,
-      `Recorded for ${unit.code} (${election.title}): ${summary}.\nNo photo of these figures has been verified yet. Typed figures support photos but never count on their own. If you are at the polling unit, send PHOTO for a camera link.`,
-      { translate: true },
-    );
+    return this.reply(contact, await this.core.recordFigures(this.phoneOf(contact), 'whatsapp', electionId, pending));
   }
 }

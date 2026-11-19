@@ -2,17 +2,15 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CaptureModule } from '../capture/capture.module.js';
 import { KnowledgeModule } from '../knowledge/knowledge.module.js';
+import { MessagingModule } from '../messaging/messaging.module.js';
 import type { Env } from '../config/env.js';
-import { ResultsModule } from '../results/results.module.js';
-import { TallyModule } from '../tally/tally.module.js';
-import { WitnessModule } from '../witnesses/witness.module.js';
 import { Assistant, OpenRouterAssistant } from './assistant.js';
 import { CloudWhatsAppClient, LogWhatsAppClient, WhatsAppClient } from './client.js';
 import { WhatsAppController } from './whatsapp.controller.js';
 import { WhatsAppService } from './whatsapp.service.js';
 
 @Module({
-  imports: [CaptureModule, KnowledgeModule, ResultsModule, TallyModule, WitnessModule],
+  imports: [CaptureModule, KnowledgeModule, MessagingModule],
   controllers: [WhatsAppController],
   providers: [
     WhatsAppService,
