@@ -6,12 +6,13 @@ export function LogoMark({ size = 32 }: { size?: number }) {
   return <Image src={mark} alt="" width={size} height={size} className="shrink-0" />;
 }
 
-/** The name as in the logo: "Trust" in deep green, "Elect" in flag green. */
+/** The name as in the logo: "Trust" in deep green, "Elect" in a lighter green. */
 export function Wordmark({ className = '' }: { className?: string }) {
   return (
     <span className={`font-bold tracking-tight ${className}`}>
-      <span className="text-brand-strong">Trust</span>
-      <span className="text-brand">Elect</span>
+      {/* Two greens as in the logo, both readable on white and grey (WCAG AA) */}
+      <span className="text-[#0b3d2a]">Trust</span>
+      <span className="text-brand-strong">Elect</span>
     </span>
   );
 }

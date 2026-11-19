@@ -11,7 +11,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import type { Env } from '../config/env.js';
@@ -42,7 +42,6 @@ export class AuthController {
   /** Password, then the authenticator code. Rate-limited per client. */
   @Post('login')
   @HttpCode(200)
-  @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   async login(@Body() body: unknown, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const { email, password, code } = parse(loginSchema, body);
@@ -78,7 +77,7 @@ export class AuthController {
 
   @Post('totp/confirm')
   @HttpCode(200)
-  @UseGuards(SessionGuard, ThrottlerGuard)
+  @UseGuards(SessionGuard)
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @AllowPendingMfa()
   async confirm(

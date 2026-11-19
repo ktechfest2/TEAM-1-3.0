@@ -1,3 +1,4 @@
+import { SkipThrottle } from '@nestjs/throttler';
 import { Body, Controller, Get, Header, HttpCode, Logger, NotFoundException, Param, Post, Req } from '@nestjs/common';
 import type { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
@@ -11,6 +12,8 @@ import { UssdService } from './ussd.service.js';
  * Africa's Talking callbacks for two-way SMS and USSD. Africa's Talking does not sign its
  * callbacks, so each address carries a long secret token; anything else is "not found".
  */
+/** Africa's Talking sends every USSD step; the secret address protects these */
+@SkipThrottle()
 @Controller('channels/:token')
 export class ChannelsController {
   private readonly logger = new Logger('Channels');

@@ -1,5 +1,5 @@
 import { BadRequestException, Body, Controller, Get, Header, HttpCode, Param, Post, Query, Req, Res, StreamableFile, UseGuards } from '@nestjs/common';
-import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import type { AuthenticatedAdmin } from '../auth/auth.service.js';
@@ -17,7 +17,7 @@ export class IncidentsController {
 
   /** Body: the raw evidence photo (live camera). Details in the query string. */
   @Post()
-  @UseGuards(CaptureSessionGuard, ThrottlerGuard)
+  @UseGuards(CaptureSessionGuard)
   // Generous per IP (shared mobile IPs); each number is limited to 5 reports an hour
   @Throttle({ default: { limit: 60, ttl: 60_000 } })
   report(@CurrentVoter() voter: CaptureVoter, @Query() query: unknown, @Req() req: Request) {

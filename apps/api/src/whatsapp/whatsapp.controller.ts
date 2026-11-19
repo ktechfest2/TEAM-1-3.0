@@ -1,3 +1,4 @@
+import { SkipThrottle } from '@nestjs/throttler';
 import { Controller, ForbiddenException, Get, Header, HttpCode, Post, Query, Req, type RawBodyRequest } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Request } from 'express';
@@ -36,6 +37,8 @@ const safeEqual = (a: string, b: string) => {
 };
 
 /** Meta WhatsApp Cloud API webhook. Every call must carry a valid X-Hub-Signature-256. */
+/** Meta's servers send bursts; every call is verified by signature instead */
+@SkipThrottle()
 @Controller('whatsapp/webhook')
 export class WhatsAppController {
   constructor(

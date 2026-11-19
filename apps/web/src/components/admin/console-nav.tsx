@@ -15,6 +15,7 @@ const LINKS = [
   { href: '/admin/parties', label: 'Parties' },
   { href: '/admin/register', label: 'Polling units' },
   { href: '/admin/audit', label: 'Audit log' },
+  { href: '/admin/privacy', label: 'Privacy' },
 ];
 
 /** Plain links, shown until the current page is known (no active highlight). */

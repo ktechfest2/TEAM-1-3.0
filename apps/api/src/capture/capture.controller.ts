@@ -18,7 +18,7 @@ import {
   type ExecutionContext,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import { readSessionToken } from '../auth/session.guard.js';
@@ -100,7 +100,6 @@ export class CaptureController {
   /** Default flow: phone number and consent, no SMS code */
   @Post('start')
   @HttpCode(200)
-  @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 60, ttl: 60_000 } })
   async start(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
     this.requireMode('none');
@@ -112,7 +111,6 @@ export class CaptureController {
 
   @Post('code')
   @HttpCode(200)
-  @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
   requestCode(@Body() body: unknown) {
     this.requireMode('sms');
@@ -121,7 +119,6 @@ export class CaptureController {
 
   @Post('verify')
   @HttpCode(200)
-  @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 60, ttl: 60_000 } })
   async verify(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
     this.requireMode('sms');
@@ -134,7 +131,6 @@ export class CaptureController {
   /** Opens a capture session from a one-time link sent by WhatsApp or SMS (CAP-02) */
   @Post('link')
   @HttpCode(200)
-  @UseGuards(ThrottlerGuard)
   @Throttle({ default: { limit: 60, ttl: 60_000 } })
   async link(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
     const { token: linkToken } = parseOrThrow(z.object({ token: z.string().regex(/^[A-Za-z0-9_-]{20,200}$/) }), body);

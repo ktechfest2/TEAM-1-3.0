@@ -230,10 +230,10 @@ export default function Home() {
       {/* Call to action */}
       <section className="bg-surface">
         <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
-          <div className="flex flex-wrap items-center justify-between gap-6 rounded-3xl bg-brand px-6 py-10 text-brand-ink sm:px-10">
+          <div className="flex flex-wrap items-center justify-between gap-6 rounded-3xl bg-brand-strong px-6 py-10 text-brand-ink sm:px-10">
             <div className="max-w-xl">
               <h2 className="text-2xl font-bold tracking-tight">Check your polling unit</h2>
-              <p className="mt-2 opacity-90">
+              <p className="mt-2">
                 Enter the code on your voter&apos;s card to see what voters recorded.
               </p>
             </div>

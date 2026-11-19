@@ -1,8 +1,10 @@
+import { SkipThrottle } from '@nestjs/throttler';
 import { Controller, Get } from '@nestjs/common';
 import { InjectDrizzle } from '@nestjs/drizzle';
 import { sql } from 'drizzle-orm';
 import type { Database } from '../database/database.module.js';
 
+@SkipThrottle()
 @Controller('health')
 export class HealthController {
   constructor(@InjectDrizzle() private readonly db: Database) {}

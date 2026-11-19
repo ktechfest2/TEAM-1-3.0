@@ -63,6 +63,25 @@ const SECTIONS: { id?: string; title: string; body: React.ReactNode }[] = [
     ),
   },
   {
+    id: 'processors',
+    title: 'Who helps us, and where',
+    body: (
+      <>
+        <p>These services process data for TrustElect, only for the purposes above:</p>
+        <ul className="mt-2 grid list-disc gap-1 pl-5">
+          <li>WhatsApp (Meta), for WhatsApp messages.</li>
+          <li>Africa&apos;s Talking and BulkSMSLive, for SMS, USSD and sign-in codes.</li>
+          <li>AI services through OpenRouter, to check photos and answer questions; they are asked not to keep or train on the data.</li>
+          <li>Our hosting providers, for the website and the servers that store the evidence.</li>
+        </ul>
+        <p className="mt-2">
+          Some of these process data outside Nigeria. By giving consent you agree to this transfer, which the Nigeria Data Protection Act
+          2023 allows with your consent.
+        </p>
+      </>
+    ),
+  },
+  {
     title: 'What we publish',
     body: (
       <p>

@@ -23,6 +23,7 @@ export default defineConfig({
       // Tests drive verification directly with a fake model
       VERIFICATION_WORKER: 'off',
       CHAIN_ANCHOR_WORKER: 'off',
+      RETENTION_WORKER: 'off',
       CHAIN_ANCHOR_EXTERNAL: 'none',
       // WhatsApp: messages go to an in-memory log; webhook secrets for signing test calls
       WHATSAPP_PROVIDER: 'log',

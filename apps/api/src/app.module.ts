@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module.js';
 import { ChainModule } from './chain/chain.module.js';
 import { EvidenceModule } from './chain/evidence.module.js';
@@ -17,6 +18,7 @@ import { TallyModule } from './tally/tally.module.js';
 import { ChannelsModule } from './channels/channels.module.js';
 import { FraudModule } from './fraud/fraud.module.js';
 import { OpsModule } from './ops/ops.module.js';
+import { PrivacyModule } from './privacy/privacy.module.js';
 import { IncidentsModule } from './incidents/incidents.module.js';
 import { KnowledgeModule } from './knowledge/knowledge.module.js';
 import { WhatsAppModule } from './whatsapp/whatsapp.module.js';
@@ -30,7 +32,9 @@ import { WhatsAppModule } from './whatsapp/whatsapp.module.js';
       ignoreEnvFile: process.env.NODE_ENV === 'test',
       validate: validateEnv,
     }),
-    ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 120 }]),
+    // A backstop on every endpoint, per IP. Generous: many phones share one mobile-network IP;
+    // the real limits are per phone number and on sensitive routes.
+    ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 300 }]),
     DatabaseModule,
     SecurityModule,
     ChainModule,
@@ -48,7 +52,9 @@ import { WhatsAppModule } from './whatsapp/whatsapp.module.js';
     IncidentsModule,
     FraudModule,
     OpsModule,
+    PrivacyModule,
   ],
   controllers: [HealthController],
+  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })
 export class AppModule {}

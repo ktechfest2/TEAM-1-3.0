@@ -21,6 +21,18 @@ async function bootstrap() {
   app.getHttpAdapter().getInstance().set('trust proxy', process.env.TRUST_PROXY ?? 'loopback');
   app.enableShutdownHooks();
 
+  // Security headers on every API response (the web app's own headers are set by its host)
+  const express = app.getHttpAdapter().getInstance();
+  express.disable('x-powered-by');
+  express.use((req: { path: string }, res: { setHeader: (k: string, v: string) => void }, next: () => void) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    res.setHeader('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'");
+    if (req.path.startsWith('/admin')) res.setHeader('Cache-Control', 'no-store');
+    next();
+  });
+
   await app.listen(config.get('API_PORT', { infer: true }));
 }
 await bootstrap();

@@ -60,6 +60,8 @@ export const envSchema = z.object({
   OPENROUTER_CHAT_MODEL: z.string().min(3).default('anthropic/claude-haiku-5.5'),
   /** Audio model that transcribes WhatsApp voice notes (INF-05) */
   OPENROUTER_AUDIO_MODEL: z.string().min(3).default('google/gemini-3.8-flash'),
+  /** Deletes expired codes, sessions and old message records every 6 hours: on, or off (tests) */
+  RETENTION_WORKER: z.enum(['on', 'off']).default('on'),
   /** Two-way SMS and USSD (Sprint 10): log = development and tests, africastalking = Africa's Talking */
   CHANNELS_PROVIDER: z.enum(['log', 'africastalking']).default('log'),
   /** Africa's Talking app username ("sandbox" for the free sandbox) */

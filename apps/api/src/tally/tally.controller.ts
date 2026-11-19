@@ -1,3 +1,4 @@
+import { SkipThrottle } from '@nestjs/throttler';
 import { Controller, Get, Header, Param, Query, Sse, type MessageEvent } from '@nestjs/common';
 import { filter, interval, map, merge, type Observable } from 'rxjs';
 import { z } from 'zod';
@@ -36,6 +37,8 @@ export class TallyController {
   }
 
   /** Server-Sent Events: "update" whenever this election's results change; a comment every 25 s keeps it open. */
+  // One long-lived connection per viewer
+  @SkipThrottle()
   @Sse(':id/stream')
   live(@Param('id') id: string): Observable<MessageEvent> {
     parseOrThrow(z.uuid(), id);
