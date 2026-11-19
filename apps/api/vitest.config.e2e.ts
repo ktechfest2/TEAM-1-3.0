@@ -33,6 +33,8 @@ export default defineConfig({
       // SMS and USSD callbacks (replies go to an in-memory log)
       CHANNELS_PROVIDER: 'log',
       CHANNELS_WEBHOOK_TOKEN: 'test-only-channels-token-0123456789',
+      // Most tests read public data without a key; api-keys.e2e-spec.ts turns the requirement on
+      PUBLIC_API_KEYS: 'optional',
     },
   },
 });

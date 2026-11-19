@@ -14,6 +14,7 @@ const LINKS = [
   { href: '/admin/elections', label: 'Elections' },
   { href: '/admin/parties', label: 'Parties' },
   { href: '/admin/register', label: 'Polling units' },
+  { href: '/admin/api-keys', label: 'API keys' },
   { href: '/admin/audit', label: 'Audit log' },
   { href: '/admin/privacy', label: 'Privacy' },
 ];

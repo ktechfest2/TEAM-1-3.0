@@ -566,3 +566,33 @@ export const chainAnchors = pgTable('chain_anchors', {
   externalProvider: text('external_provider'),
   externalProof: text('external_proof'),
 });
+
+/* ------------------------------------------------------------------ */
+/* API access for outside organisations (/developers)                 */
+/* ------------------------------------------------------------------ */
+
+export const apiClientStatus = pgEnum('api_client_status', ['pending', 'active', 'revoked', 'rejected']);
+
+/**
+ * An organisation registered to use the public API. The key is shown once at registration;
+ * only its SHA-256 is kept. It works once an administrator approves it, and can be revoked.
+ */
+export const apiClients = pgTable('api_clients', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  organisation: text('organisation').notNull(),
+  contactName: text('contact_name').notNull(),
+  email: text('email').notNull(),
+  website: text('website'),
+  purpose: text('purpose').notNull(),
+  /** First characters of the key (te_live_xxxxxx), to recognise it without revealing it */
+  keyPrefix: text('key_prefix').notNull(),
+  keyHash: text('key_hash').notNull().unique(),
+  status: apiClientStatus('status').notNull().default('pending'),
+  decidedBy: uuid('decided_by').references(() => adminUsers.id),
+  decidedAt: timestamp('decided_at', { withTimezone: true }),
+  /** Why it was rejected or revoked */
+  decisionNote: text('decision_note'),
+  lastUsedAt: timestamp('last_used_at', { withTimezone: true }),
+  requestCount: bigint('request_count', { mode: 'number' }).notNull().default(0),
+  createdAt: createdAt(),
+});

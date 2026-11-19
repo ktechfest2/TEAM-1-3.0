@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ApiAccessModule } from './api-access/api-access.module.js';
+import { ApiKeyGuard, type KeyedRequest } from './api-access/api-key.guard.js';
 import { AuthModule } from './auth/auth.module.js';
 import { ChainModule } from './chain/chain.module.js';
 import { EvidenceModule } from './chain/evidence.module.js';
@@ -23,6 +25,9 @@ import { IncidentsModule } from './incidents/incidents.module.js';
 import { KnowledgeModule } from './knowledge/knowledge.module.js';
 import { WhatsAppModule } from './whatsapp/whatsapp.module.js';
 
+/** Requests a minute for each approved API key */
+export const API_KEY_LIMIT_PER_MINUTE = 1200;
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -33,8 +38,18 @@ import { WhatsAppModule } from './whatsapp/whatsapp.module.js';
       validate: validateEnv,
     }),
     // A backstop on every endpoint, per IP. Generous: many phones share one mobile-network IP;
-    // the real limits are per phone number and on sensitive routes.
-    ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 300 }]),
+    // the real limits are per phone number and on sensitive routes. Requests with an API key
+    // are counted per key instead, with a higher limit.
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          name: 'default',
+          ttl: 60_000,
+          limit: (context) => (context.switchToHttp().getRequest<KeyedRequest>().apiClientId ? API_KEY_LIMIT_PER_MINUTE : 300),
+        },
+      ],
+      getTracker: (req: Record<string, unknown>) => (req.apiClientId ? `key:${String(req.apiClientId)}` : String(req.ip)),
+    }),
     DatabaseModule,
     SecurityModule,
     ChainModule,
@@ -53,8 +68,13 @@ import { WhatsAppModule } from './whatsapp/whatsapp.module.js';
     FraudModule,
     OpsModule,
     PrivacyModule,
+    ApiAccessModule,
   ],
   controllers: [HealthController],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  // The API key check runs first, so the rate limit can count keyed requests per key
+  providers: [
+    { provide: APP_GUARD, useExisting: ApiKeyGuard },
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
 })
 export class AppModule {}

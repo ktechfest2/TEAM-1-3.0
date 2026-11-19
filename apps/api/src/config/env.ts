@@ -77,6 +77,8 @@ export const envSchema = z.object({
   AFRICASTALKING_SHORTCODE: z.string().regex(/^\d{3,8}$/).optional(),
   /** Secret part of the SMS and USSD callback addresses (Africa's Talking does not sign callbacks) */
   CHANNELS_WEBHOOK_TOKEN: z.string().regex(/^[\w-]{24,128}$/).optional(),
+  /** Public data for outside organisations: required = a registered, approved API key (X-API-Key); optional = open (tests) */
+  PUBLIC_API_KEYS: z.enum(['required', 'optional']).default('required'),
 });
 
 export type Env = z.infer<typeof envSchema>;

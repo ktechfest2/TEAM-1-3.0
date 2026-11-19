@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CONFIDENCE_THRESHOLDS, UNOFFICIAL_LABEL } from '@trustelect/shared';
 import { API_URL } from '@/lib/api-url';
+import { RegisterForm } from './register-form';
 
 export const metadata: Metadata = {
   title: 'API for developers',
@@ -339,7 +340,7 @@ data: {"electionId":"…","at":"2027-03-06T19:42:10.511Z"}`,
         id: 'health-ready',
         method: 'GET',
         path: '/health/ready',
-        summary: 'Whether the API is serving. 503 when it is down.',
+        summary: 'Whether the API is serving. 503 when it is down. No key needed.',
         example: '/health/ready',
         response: '{ "status": "ok", "database": "up", "ai": "configured", "verification": { "pending": 0, "oldestMinutes": 0, "behind": false } }',
         notes: 'status is degraded when photos are waiting more than 15 minutes for verification; results are still served.',
@@ -390,7 +391,8 @@ function EndpointCard({ e }: { e: Endpoint }) {
       )}
       <div className="grid gap-2">
         <p className="text-sm font-semibold">Example</p>
-        <Code>{`curl "${API_URL}${e.example}"`}</Code>
+        <Code>{e.path.startsWith('/health') ? `curl "${API_URL}${e.example}"` : `curl -H "X-API-Key: $TRUSTELECT_API_KEY" \\
+  "${API_URL}${e.example}"`}</Code>
       </div>
       {e.response && (
         <div className="grid gap-2">
@@ -409,6 +411,7 @@ export default function DevelopersPage() {
       <nav aria-label="API sections" className="hidden lg:block">
         <ul className="sticky top-[calc(var(--header-height)+1.5rem)] grid gap-1 text-sm">
           <li><a href="#overview" className="block rounded-lg px-3 py-1.5 text-ink-muted hover:bg-surface-muted hover:text-ink">Overview</a></li>
+          <li><a href="#register" className="block rounded-lg px-3 py-1.5 text-ink-muted hover:bg-surface-muted hover:text-ink">Get an API key</a></li>
           {GROUPS.map((g) => (
             <li key={g.id}>
               <a href={`#${g.id}`} className="block rounded-lg px-3 py-1.5 text-ink-muted hover:bg-surface-muted hover:text-ink">{g.title}</a>
@@ -436,11 +439,11 @@ export default function DevelopersPage() {
             </div>
             <div className="grid gap-1 rounded-2xl border border-divider bg-surface p-5">
               <dt className="text-sm font-semibold text-ink-muted">Access</dt>
-              <dd>Public and read-only. No key or account needed. JSON over HTTPS.</dd>
+              <dd>Registered organisations only. Send your approved key in the <code className="font-mono text-sm">X-API-Key</code> header. Read-only JSON over HTTPS.</dd>
             </div>
             <div className="grid gap-1 rounded-2xl border border-divider bg-surface p-5">
               <dt className="text-sm font-semibold text-ink-muted">Rate limit</dt>
-              <dd>300 requests a minute per IP address. Over the limit you get 429: wait a minute and retry.</dd>
+              <dd>1,200 requests a minute per key. Over the limit you get 429: wait a minute and retry.</dd>
             </div>
             <div className="grid gap-1 rounded-2xl border border-divider bg-surface p-5">
               <dt className="text-sm font-semibold text-ink-muted">Freshness</dt>
@@ -452,13 +455,14 @@ export default function DevelopersPage() {
             <h2 className="text-xl font-semibold">Before you start</h2>
             <ul className="grid max-w-[70ch] list-disc gap-2 pl-5 text-ink-muted">
               <li>
-                <strong className="text-ink">Call the API from your server.</strong> Browsers only allow requests from TrustElect&apos;s
-                own site, so fetch from your back end and serve the data to your readers.
+                <strong className="text-ink">Register, then keep your key secret.</strong> Call the API from your server and serve the
+                data to your readers. Never put the key in a web page or app: anyone could copy it, and TrustElect will revoke keys
+                that leak or are misused.
               </li>
               <li>
                 <strong className="text-ink">Errors</strong> come back as JSON with an HTTP status: 400 for a malformed parameter (with
-                an <code className="font-mono text-sm">issues</code> list), 404 when the election, area or unit does not exist, 429 when
-                rate limited.
+                an <code className="font-mono text-sm">issues</code> list), 401 when the key is missing, wrong or revoked, 403 while it
+                waits for approval, 404 when the election, area or unit does not exist, 429 when rate limited.
               </li>
               <li>
                 <strong className="text-ink">Confidence</strong> comes from independent witnesses: {CONFIDENCE_THRESHOLDS.medium} matching
@@ -479,10 +483,22 @@ export default function DevelopersPage() {
           <div className="grid gap-2">
             <h2 className="text-xl font-semibold">Quick start</h2>
             <p className="text-ink-muted">Find an election, then read its national totals and one polling unit.</p>
-            <Code>{`curl "${API_URL}/elections"
-curl "${API_URL}/results/elections/{electionId}"
-curl "${API_URL}/results/units/24-05-01-003"`}</Code>
+            <Code>{`export TRUSTELECT_API_KEY="te_live_…"   # from the registration below
+curl -H "X-API-Key: $TRUSTELECT_API_KEY" "${API_URL}/elections"
+curl -H "X-API-Key: $TRUSTELECT_API_KEY" "${API_URL}/results/elections/{electionId}"
+curl -H "X-API-Key: $TRUSTELECT_API_KEY" "${API_URL}/results/units/24-05-01-003"`}</Code>
           </div>
+        </section>
+
+        <section id="register" aria-labelledby="register-h" className="grid scroll-mt-24 gap-4 rounded-2xl border-2 border-brand bg-surface p-6">
+          <div className="grid gap-2">
+            <h2 id="register-h" className="text-2xl font-bold tracking-tight">Get an API key</h2>
+            <p className="max-w-[70ch] text-ink-muted">
+              Tell us who you are and how you will use the data. You get your key straight away; it starts working once TrustElect
+              approves the registration. Approved keys can be revoked if they are misused.
+            </p>
+          </div>
+          <RegisterForm />
         </section>
 
         {GROUPS.map((g) => (
@@ -509,6 +525,7 @@ curl "${API_URL}/results/units/24-05-01-003"`}</Code>
             <li>Always show coverage (counted units out of total) and confidence beside totals.</li>
             <li>Do not present a comparison as proof of rigging, or totals as a projection of the winner.</li>
             <li>The API returns no personal data: no phone numbers, no names of the people who sent photos.</li>
+            <li>Keep your key secret and do not share it. One key per organisation; TrustElect may revoke a key at any time.</li>
           </ul>
         </section>
       </div>

@@ -15,6 +15,7 @@ const SECTIONS: { title: string; body: string; href?: string; sprint?: string }[
   { title: 'Abuse', body: 'One person posing as several witnesses, fakes and out-of-area captures; block numbers.', href: '/admin/abuse' },
   { title: 'Incident reports', body: 'Serious and sensitive reports held for review, with their evidence and the AI assessment.', href: '/admin/incidents' },
   { title: 'Assistant knowledge', body: 'The official facts the WhatsApp assistant may use; two-person approval.', href: '/admin/knowledge' },
+  { title: 'API keys', body: 'Approve or revoke organisations using the public API (system administrators).', href: '/admin/api-keys' },
   { title: 'Audit log', body: 'Search every administrative action (system administrators).', href: '/admin/audit' },
   { title: 'Evidence and audit', body: 'Hash chain, published anchors and the public check of evidence packs.', href: '/verify' },
 ];
