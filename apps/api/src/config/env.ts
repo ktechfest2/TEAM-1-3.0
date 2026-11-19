@@ -29,8 +29,12 @@ export const envSchema = z.object({
   SMS_SENDER_NAME: z.string().min(1).max(11).default('TrustElect'),
   /** Directory for evidence photographs in development (object storage in production) */
   EVIDENCE_DIR: z.string().default('storage/evidence'),
-  /** OpenRouter key for AI verification (required from Sprint 4) */
+  /** OpenRouter key for AI verification */
   OPENROUTER_API_KEY: z.string().min(1).optional(),
+  /** Vision model on OpenRouter used to read EC60E photos */
+  OPENROUTER_MODEL: z.string().min(3).default('anthropic/claude-sonnet-5.5'),
+  /** Background verification of submitted photos: on, or off (tests, maintenance) */
+  VERIFICATION_WORKER: z.enum(['on', 'off']).default('on'),
 });
 
 export type Env = z.infer<typeof envSchema>;

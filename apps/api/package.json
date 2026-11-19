@@ -22,7 +22,8 @@
     "db:migrate": "drizzle-kit migrate",
     "admin:create": "nest build && node dist/cli/create-admin.js",
     "register:import": "nest build && node dist/cli/import-register.js",
-    "register:fetch": "nest build && node dist/cli/fetch-register.js"
+    "register:fetch": "nest build && node dist/cli/fetch-register.js",
+    "ai:eval": "nest build && node dist/cli/ai-eval.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",

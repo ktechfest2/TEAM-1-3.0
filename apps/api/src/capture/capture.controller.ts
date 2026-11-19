@@ -6,6 +6,7 @@ import {
   HttpCode,
   Injectable,
   NotFoundException,
+  Param,
   Post,
   Query,
   Req,
@@ -23,6 +24,7 @@ import { z } from 'zod';
 import { readCookie } from '../auth/session.guard.js';
 import { parseOrThrow } from '../common/validation.js';
 import type { Env } from '../config/env.js';
+import { VerificationService } from '../verification/verification.service.js';
 import { CAPTURE_SESSION_HOURS, CaptureService, type CaptureVoter } from './capture.service.js';
 
 export const CAPTURE_COOKIE = 'te_capture';
@@ -72,21 +74,22 @@ const photoQuerySchema = z.object({
 export class CaptureController {
   constructor(
     private readonly capture: CaptureService,
+    private readonly verification: VerificationService,
     private readonly config: ConfigService<Env, true>,
   ) {}
 
-  private get verification() {
+  private get phoneVerificationMode() {
     return this.config.get('CAPTURE_PHONE_VERIFICATION', { infer: true });
   }
 
   private requireMode(mode: 'none' | 'sms') {
-    if (this.verification !== mode) throw new NotFoundException();
+    if (this.phoneVerificationMode !== mode) throw new NotFoundException();
   }
 
   /** Tells the app whether an SMS code is needed */
   @Get('config')
   captureConfig() {
-    return { phoneVerification: this.verification };
+    return { phoneVerification: this.phoneVerificationMode };
   }
 
   /** Default flow: phone number and consent, no SMS code */
@@ -170,5 +173,27 @@ export class CaptureController {
     );
     res.status(result.duplicate ? 200 : 201);
     return { id: result.id, status: result.status, receivedAt: result.receivedAt, sha256: result.imageSha256 };
+  }
+
+  /** The result of checking the voter's own photo: pending, verified, needs_confirmation or rejected. */
+  @Get('photos/:id')
+  @UseGuards(CaptureSessionGuard)
+  async photoStatus(@CurrentVoter() voter: CaptureVoter, @Param('id') id: string) {
+    const parsed = z.uuid().safeParse(id);
+    const status = parsed.success ? await this.verification.statusFor(id, voter.reporterId) : null;
+    if (!status) throw new NotFoundException();
+    return status;
+  }
+
+  /** The voter confirms or disputes figures that did not add up (VER-09). */
+  @Post('photos/:id/confirm')
+  @HttpCode(200)
+  @UseGuards(CaptureSessionGuard)
+  async confirmFigures(@CurrentVoter() voter: CaptureVoter, @Param('id') id: string, @Body() body: unknown) {
+    const { confirmed } = parseOrThrow(z.object({ confirmed: z.boolean() }), body);
+    const parsed = z.uuid().safeParse(id);
+    const status = parsed.success ? await this.verification.confirmFigures(id, voter.reporterId, confirmed) : null;
+    if (!status) throw new NotFoundException();
+    return status;
   }
 }

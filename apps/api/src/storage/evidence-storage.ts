@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import type { Env } from '../config/env.js';
 
@@ -28,5 +28,21 @@ export class EvidenceStorage {
       if ((err as NodeJS.ErrnoException).code !== 'EEXIST') throw err;
     }
     return key;
+  }
+
+  async get(key: string): Promise<Buffer> {
+    return readFile(this.path(key));
+  }
+
+  /** Only for images that fail verification: they must not be kept (VER-05). */
+  async remove(key: string): Promise<void> {
+    const path = this.path(key);
+    await chmod(path, 0o640).catch(() => undefined);
+    await rm(path, { force: true });
+  }
+
+  private path(key: string): string {
+    if (!/^[0-9a-f]{2}\/[0-9a-f]{64}\.(jpg|webp)$/.test(key)) throw new Error('Invalid evidence key');
+    return join(this.root, key);
   }
 }

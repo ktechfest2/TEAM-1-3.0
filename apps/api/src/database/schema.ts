@@ -39,7 +39,7 @@ export const electionStatus = pgEnum('election_status', ['draft', 'active', 'clo
 export const areaLevel = pgEnum('area_level', ['polling_unit', 'ward', 'lga', 'state', 'national']);
 export const channel = pgEnum('channel', ['web', 'whatsapp', 'sms', 'ussd']);
 export const submissionKind = pgEnum('submission_kind', ['photo', 'typed']);
-export const submissionStatus = pgEnum('submission_status', ['pending', 'verified', 'rejected']);
+export const submissionStatus = pgEnum('submission_status', ['pending', 'verified', 'needs_confirmation', 'rejected']);
 export const confidenceLevel = pgEnum('confidence_level', ['low', 'medium', 'high']);
 export const unitStatus = pgEnum('unit_status', [
   'not_confirmed',
@@ -192,8 +192,9 @@ export const captureSessions = pgTable('capture_sessions', {
 export type ResultFigures = {
   partyVotes: Record<string, number>;
   totalValid: number;
-  rejected: number;
-  totalCast: number;
+  /** Null when the poster does not show it */
+  rejected: number | null;
+  totalCast: number | null;
 };
 
 /** A distinct set of figures reported for one polling unit */
@@ -245,10 +246,22 @@ export const submissions = pgTable(
     imageType: text('image_type'),
     /** Reported GPS accuracy in metres */
     locationAccuracy: doublePrecision('location_accuracy'),
+    /** AI reading of the photo and the checks applied (VER), kept for audit */
+    verification: jsonb('verification'),
+    /** Plain-language reason shown to the voter when a retake, confirmation or rejection is needed */
+    reviewReason: text('review_reason'),
+    /** True when the voter is asked to retake rather than simply rejected */
+    retakeRequested: boolean('retake_requested').notNull().default(false),
+    processingAttempts: integer('processing_attempts').notNull().default(0),
+    nextAttemptAt: timestamp('next_attempt_at', { withTimezone: true }),
+    processedAt: timestamp('processed_at', { withTimezone: true }),
+    /** AI model that read the photo */
+    model: text('model'),
   },
   (t) => [
     index('submissions_unit_idx').on(t.electionId, t.pollingUnitId),
     index('submissions_reporter_idx').on(t.reporterId, t.receivedAt),
+    index('submissions_pending_idx').on(t.status, t.nextAttemptAt),
     uniqueIndex('submissions_reporter_client_uq').on(t.reporterId, t.clientId),
   ],
 );

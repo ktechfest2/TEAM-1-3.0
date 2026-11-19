@@ -58,6 +58,19 @@ Voters open `/capture`, verify their phone with an SMS code, choose the election
 
 Tests never read `.env` and always use the `log` provider, so they cannot send real SMS.
 
+## AI verification of photos
+
+A background worker in the API reads each submitted photo with a vision model through OpenRouter (`OPENROUTER_MODEL`, default `anthropic/claude-sonnet-5.5`). The model only describes what it sees; TrustElect's own rules (`apps/api/src/verification/decide.ts`) decide whether the photo is **accepted**, needs a **retake**, needs the voter to **confirm the figures** (arithmetic does not add up), or is **rejected**. Rejected images are deleted; only a short log entry is kept.
+
+Measure reading accuracy on a folder of labelled photos (each `photo.jpg` with a `photo.json` of correct answers):
+
+```sh
+npm run ai:eval -w @trustelect/api -- apps/api/data/ec60e-eval            # default model
+npm run ai:eval -w @trustelect/api -- apps/api/data/ec60e-eval anthropic/claude-haiku-5.5
+```
+
+Each photo is one paid model call. Set `VERIFICATION_WORKER=off` to pause verification.
+
 ## Ballot order
 
 Parties are always listed in ballot order, which TrustElect sets **alphabetically by party acronym**. The API enforces it, whatever order parties are submitted in.

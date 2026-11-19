@@ -7,6 +7,16 @@
 
 export type QueueStatus = 'waiting' | 'uploading' | 'sent' | 'failed';
 
+/** Result of TrustElect's check of a sent photo (from GET /capture/photos/:id) */
+export interface PhotoCheck {
+  status: 'pending' | 'verified' | 'needs_confirmation' | 'rejected';
+  reason: string | null;
+  retake: boolean;
+  figures: { partyVotes: Record<string, number>; totalValid: number; rejected: number | null; totalCast: number | null } | null;
+  unitCode: string | null;
+  unitName: string | null;
+}
+
 export interface QueuedPhoto {
   clientId: string;
   electionId: string;
@@ -22,6 +32,9 @@ export interface QueuedPhoto {
   createdAt: string;
   sentAt?: string;
   sha256?: string;
+  /** Submission id on the server, once sent */
+  serverId?: string;
+  check?: PhotoCheck;
 }
 
 const DB_NAME = 'trustelect-capture';
@@ -98,9 +111,17 @@ async function runFlush(onChange: () => void): Promise<FlushResult> {
     }
 
     if (res && (res.status === 200 || res.status === 201)) {
-      const data = (await res.json()) as { sha256: string };
+      const data = (await res.json()) as { id: string; sha256: string };
       // Sent: drop the image from the phone, keep the receipt
-      await queue.put({ ...item, blob: null, status: 'sent', sentAt: new Date().toISOString(), sha256: data.sha256, lastError: undefined });
+      await queue.put({
+        ...item,
+        blob: null,
+        status: 'sent',
+        sentAt: new Date().toISOString(),
+        sha256: data.sha256,
+        serverId: data.id,
+        lastError: undefined,
+      });
     } else if (res?.status === 401) {
       await queue.put({ ...item, status: 'waiting' });
       onChange();
@@ -115,4 +136,38 @@ async function runFlush(onChange: () => void): Promise<FlushResult> {
     onChange();
   }
   return 'done';
+}
+
+/** Fetches the check result for sent photos that are still being checked or need the voter. */
+export async function refreshChecks(): Promise<boolean> {
+  const open = (await queue.all()).filter(
+    (i) => i.status === 'sent' && i.serverId && (!i.check || i.check.status === 'pending' || i.check.status === 'needs_confirmation'),
+  );
+  let changed = false;
+  for (const item of open) {
+    try {
+      const res = await fetch(`/api/capture/photos/${item.serverId}`);
+      if (!res.ok) continue;
+      const check = (await res.json()) as PhotoCheck;
+      if (JSON.stringify(check) !== JSON.stringify(item.check)) {
+        await queue.put({ ...item, check });
+        changed = true;
+      }
+    } catch {
+      // Offline: try again on the next round
+    }
+  }
+  return changed;
+}
+
+/** Records the voter's answer to "do these figures match the poster?" */
+export async function answerConfirmation(item: QueuedPhoto, confirmed: boolean): Promise<string | null> {
+  const res = await fetch(`/api/capture/photos/${item.serverId}/confirm`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ confirmed }),
+  }).catch(() => null);
+  if (!res?.ok) return 'Could not send your answer. Check your connection and try again.';
+  await queue.put({ ...item, check: (await res.json()) as PhotoCheck });
+  return null;
 }

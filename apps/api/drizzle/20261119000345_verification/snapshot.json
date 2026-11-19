@@ -1,0 +1,329 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "75ebc0b0-439a-471c-b4eb-78e9d933c5f3",
+  "prevIds": [
+    "ab363b1a-b254-4721-943c-7ecf531bfaf0"
+  ],
+  "footprints": [
+    {
+      "statementType": "alter_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "submission_status"
+      ],
+      "writes": [
+        "s|enum|public.submission_status"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "submissions",
+        "verification"
+      ],
+      "writes": [
+        "s|col|public.submissions.verification",
+        "n|col|public.submissions.verification",
+        "e|col|public.submissions.verification"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "submissions",
+        "review_reason"
+      ],
+      "writes": [
+        "s|col|public.submissions.review_reason",
+        "n|col|public.submissions.review_reason",
+        "e|col|public.submissions.review_reason"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "submissions",
+        "retake_requested"
+      ],
+      "writes": [
+        "s|col|public.submissions.retake_requested",
+        "n|col|public.submissions.retake_requested",
+        "e|col|public.submissions.retake_requested"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "submissions",
+        "processing_attempts"
+      ],
+      "writes": [
+        "s|col|public.submissions.processing_attempts",
+        "n|col|public.submissions.processing_attempts",
+        "e|col|public.submissions.processing_attempts"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "submissions",
+        "next_attempt_at"
+      ],
+      "writes": [
+        "s|col|public.submissions.next_attempt_at",
+        "n|col|public.submissions.next_attempt_at",
+        "e|col|public.submissions.next_attempt_at"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "submissions",
+        "processed_at"
+      ],
+      "writes": [
+        "s|col|public.submissions.processed_at",
+        "n|col|public.submissions.processed_at",
+        "e|col|public.submissions.processed_at"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "submissions",
+        "model"
+      ],
+      "writes": [
+        "s|col|public.submissions.model",
+        "n|col|public.submissions.model",
+        "e|col|public.submissions.model"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "submissions",
+        "submissions_pending_idx"
+      ],
+      "writes": [
+        "s|idx|public.submissions_pending_idx",
+        "n|idx|public.submissions_pending_idx",
+        "e|idx|public.submissions_pending_idx",
+        "n|rel|public.submissions_pending_idx"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public",
+        "n|col|public.submissions.status",
+        "n|col|public.submissions.next_attempt_at"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "submissions",
+        "name": "verification",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "submissions",
+        "name": "review_reason",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "submissions",
+        "name": "retake_requested",
+        "type": "boolean",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "false",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "submissions",
+        "name": "processing_attempts",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "0",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "submissions",
+        "name": "next_attempt_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "submissions",
+        "name": "processed_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "submissions",
+        "name": "model",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "submissions",
+        "name": "submissions_pending_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "status",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "next_attempt_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "alter",
+      "key": "enums\u0000[\"public\",\"submission_status\"]",
+      "set": {
+        "values": [
+          "pending",
+          "verified",
+          "needs_confirmation",
+          "rejected"
+        ]
+      }
+    }
+  ]
+}

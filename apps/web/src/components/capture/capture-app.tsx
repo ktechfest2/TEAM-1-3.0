@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { Camera } from './camera';
 import { EnterPhone } from './enter-phone';
-import { flushQueue, queue, type QueuedPhoto } from './queue';
+import { answerConfirmation, flushQueue, queue, refreshChecks, type QueuedPhoto } from './queue';
 import { QueueList } from './queue-list';
 import { VerifyPhone } from './verify-phone';
 
@@ -13,6 +13,8 @@ type Step = 'loading' | 'intro' | 'verify' | 'election' | 'camera' | 'review';
 type Coords = { latitude: number; longitude: number; accuracy: number };
 
 const RETRY_MS = 30_000;
+/** How often to ask for the check result of sent photos */
+const CHECK_MS = 5_000;
 
 function subscribeOnline(onChange: () => void) {
   window.addEventListener('online', onChange);
@@ -72,7 +74,11 @@ export function CaptureApp() {
     const goOnline = () => void flush();
     window.addEventListener('online', goOnline);
     const timer = window.setInterval(() => void flush(), RETRY_MS);
+    const checks = window.setInterval(async () => {
+      if (navigator.onLine && (await refreshChecks())) await refresh();
+    }, CHECK_MS);
     return () => {
+      window.clearInterval(checks);
       window.removeEventListener('online', goOnline);
       window.clearInterval(timer);
     };
@@ -284,6 +290,15 @@ export function CaptureApp() {
         onRemove={async (id) => {
           await queue.remove(id);
           await refresh();
+        }}
+        onRetake={() => {
+          setStep(election ? 'camera' : 'election');
+          window.scrollTo({ top: 0 });
+        }}
+        onAnswer={async (item, confirmed) => {
+          const error = await answerConfirmation(item, confirmed);
+          await refresh();
+          return error;
         }}
       />
     </div>

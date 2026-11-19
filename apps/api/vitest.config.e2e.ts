@@ -19,6 +19,8 @@ export default defineConfig({
       // Never send real SMS from tests
       SMS_PROVIDER: 'log',
       CAPTURE_PHONE_VERIFICATION: 'none',
+      // Tests drive verification directly with a fake model
+      VERIFICATION_WORKER: 'off',
     },
   },
 });
