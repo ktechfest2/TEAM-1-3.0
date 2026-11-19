@@ -158,6 +158,9 @@ export const reporters = pgTable('reporters', {
   phoneEncrypted: text('phone_encrypted').notNull(),
   consentAt: timestamp('consent_at', { withTimezone: true }),
   blockedAt: timestamp('blocked_at', { withTimezone: true }),
+  /** ADM-03: why and by whom the number was blocked */
+  blockReason: text('block_reason'),
+  blockedBy: uuid('blocked_by'),
   createdAt: createdAt(),
 });
 
@@ -371,6 +374,8 @@ export const submissions = pgTable(
     /** Storage key and SHA-256 of the photograph; empty for typed submissions (EVD-01) */
     imageKey: text('image_key'),
     imageSha256: text('image_sha256'),
+    /** Perceptual hash: the same picture sent from several numbers is one witness (Sprint 13) */
+    imageDhash: text('image_dhash'),
     extracted: jsonb('extracted').$type<ResultFigures>(),
     voterConfirmed: boolean('voter_confirmed').notNull().default(false),
     versionId: uuid('version_id').references(() => resultVersions.id),

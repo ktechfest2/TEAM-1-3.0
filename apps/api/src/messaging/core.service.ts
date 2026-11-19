@@ -227,7 +227,13 @@ export class MessagingCore {
       };
     }
 
-    const reporterId = await this.capture.reporterFor(phone);
+    let reporterId: string;
+    try {
+      reporterId = await this.capture.reporterFor(phone);
+    } catch (err) {
+      if (err instanceof HttpException) return { text: 'This number cannot send results to TrustElect.' };
+      throw err;
+    }
     const [{ recent }] = await this.db
       .select({ recent: count() })
       .from(submissions)

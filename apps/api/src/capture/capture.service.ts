@@ -11,6 +11,7 @@ import { InjectDrizzle } from '@nestjs/drizzle';
 import { and, count, desc, eq, gt, isNull } from 'drizzle-orm';
 import { randomInt } from 'node:crypto';
 import { ChainService } from '../chain/chain.service.js';
+import { dHash } from '../fraud/dhash.js';
 import type { Env } from '../config/env.js';
 import type { Database } from '../database/database.module.js';
 import { parseUnitCode } from '@trustelect/shared';
@@ -273,6 +274,7 @@ export class CaptureService {
 
     const digest = sha256(bytes);
     const key = await this.storage.put(digest, bytes, type === 'image/webp' ? 'webp' : 'jpg');
+    const perceptual = await dHash(bytes);
 
     const now = Date.now();
     // A capture time in the future (beyond small clock drift) is not trusted
@@ -293,6 +295,7 @@ export class CaptureService {
         locationAccuracy: meta.accuracy ?? null,
         imageKey: key,
         imageSha256: digest,
+        imageDhash: perceptual,
         imageBytes: bytes.length,
         imageType: type,
         clientId: meta.clientId,

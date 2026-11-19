@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectDrizzle } from '@nestjs/drizzle';
 import { parseUnitCode } from '@trustelect/shared';
-import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
+import { and, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm';
 import { AuditService } from '../audit/audit.service.js';
 import { ChainService } from '../chain/chain.service.js';
 import type { Database } from '../database/database.module.js';
-import { pollingUnits, resultVersions, submissions, unitResults } from '../database/schema.js';
+import { pollingUnits, reporters, resultVersions, submissions, unitResults } from '../database/schema.js';
 import { RESULTS_CHANNEL } from '../tally/channel.js';
 import { computeUnit, figuresHash, type AcceptedPhoto } from './engine.js';
 
@@ -36,8 +36,14 @@ export class WitnessService {
           ipHash: submissions.ipHash,
           figures: submissions.extracted,
           strength: submissions.evidenceStrength,
+          imageSha256: submissions.imageSha256,
+          imageDhash: submissions.imageDhash,
+          receivedAt: submissions.receivedAt,
+          latitude: submissions.latitude,
+          longitude: submissions.longitude,
         })
         .from(submissions)
+        .innerJoin(reporters, eq(reporters.id, submissions.reporterId))
         .where(
           and(
             eq(submissions.electionId, electionId),
@@ -45,15 +51,24 @@ export class WitnessService {
             eq(submissions.status, 'verified'),
             eq(submissions.kind, 'photo'),
             isNotNull(submissions.extracted),
+            // ADM-03: blocked numbers no longer count
+            isNull(reporters.blockedAt),
           ),
         );
-      const photos: AcceptedPhoto[] = rows.map((r) => ({ ...r, figures: r.figures!, strength: r.strength ?? 'standard' }));
+      const photos: AcceptedPhoto[] = rows.map(({ latitude, longitude, receivedAt, ...r }) => ({
+        ...r,
+        figures: r.figures!,
+        strength: r.strength ?? 'standard',
+        receivedAt: receivedAt.getTime(),
+        location: latitude !== null && longitude !== null ? { lat: latitude, lng: longitude } : null,
+      }));
       const outcome = computeUnit(photos);
 
       // WIT-06: typed figures (WhatsApp, SMS) only support a photographed version; they never create one
       const typed = await tx
         .select({ reporterId: submissions.reporterId, figures: submissions.extracted })
         .from(submissions)
+        .innerJoin(reporters, eq(reporters.id, submissions.reporterId))
         .where(
           and(
             eq(submissions.electionId, electionId),
@@ -61,6 +76,7 @@ export class WitnessService {
             eq(submissions.status, 'verified'),
             eq(submissions.kind, 'typed'),
             isNotNull(submissions.extracted),
+            isNull(reporters.blockedAt),
           ),
         );
       const typedSupport = new Map<string, Set<string>>();

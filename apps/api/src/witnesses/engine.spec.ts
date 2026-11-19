@@ -100,3 +100,53 @@ describe('computeUnit', () => {
     expect(computeUnit([photo('r1'), photo('r2', withTotals)]).counted!.figures).toEqual(withTotals);
   });
 });
+
+describe('anti-fraud (Sprint 13)', () => {
+  const at = (lat: number, lng: number) => ({ lat, lng });
+
+  it('treats the same picture sent from several numbers as one witness', () => {
+    const u = computeUnit([
+      photo('r1', A, { imageSha256: 'aa', imageDhash: 'f0f0f0f0f0f0f0f0' }),
+      photo('r2', A, { imageSha256: 'aa', imageDhash: 'f0f0f0f0f0f0f0f0' }), // same bytes
+      photo('r3', A, { imageSha256: 'bb', imageDhash: 'f0f0f0f0f0f0f0f1' }), // re-saved: 1 bit apart
+      photo('r4', A, { imageSha256: 'cc', imageDhash: '0f0f0f0f0f0f0f0f' }), // a different photo of the poster
+    ]);
+    expect(u.counted?.witnesses).toBe(2);
+    expect(u.flags).toContain('same_picture_several_numbers');
+  });
+
+  it('flags and down-weights captures far from the other witnesses or outside Nigeria', () => {
+    const lagos = at(6.4541, 3.3947);
+    const u = computeUnit([
+      photo('r1', A, { location: lagos }),
+      photo('r2', A, { location: at(6.4545, 3.395) }),
+      photo('r3', A, { location: at(6.455, 3.3952) }),
+      photo('r4', A, { location: at(9.0765, 7.3986) }), // Abuja, ~530 km away
+      photo('r5', A, { location: at(51.5, -0.12) }), // London
+    ]);
+    expect(u.flags).toContain('out_of_area');
+    expect(u.counted?.witnesses).toBe(5);
+    expect(u.counted?.stampedWitnesses).toBe(3); // the two away lose their stamp credit
+  });
+
+  it('needs three located photos before judging distance', () => {
+    const u = computeUnit([photo('r1', A, { location: at(6.45, 3.39) }), photo('r2', A, { location: at(9.07, 7.39) })]);
+    expect(u.flags).not.toContain('out_of_area');
+  });
+
+  it('flags a burst of different numbers from one network', () => {
+    const t = Date.now();
+    const burst = computeUnit([
+      photo('r1', A, { ipHash: 'net', receivedAt: t }),
+      photo('r2', A, { ipHash: 'net', receivedAt: t + 30_000 }),
+      photo('r3', A, { ipHash: 'net', receivedAt: t + 90_000 }),
+    ]);
+    expect(burst.flags).toContain('burst');
+    const spread = computeUnit([
+      photo('r1', A, { ipHash: 'net', receivedAt: t }),
+      photo('r2', A, { ipHash: 'net', receivedAt: t + 600_000 }),
+      photo('r3', A, { ipHash: 'net', receivedAt: t + 1_200_000 }),
+    ]);
+    expect(spread.flags).not.toContain('burst');
+  });
+});

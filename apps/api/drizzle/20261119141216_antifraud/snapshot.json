@@ -1,0 +1,115 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "ee481674-1c82-4e9a-8f73-47f357e3e1c6",
+  "prevIds": [
+    "ce47d6a2-6ff8-4d6b-91bd-4d46ac7835fc"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "reporters",
+        "block_reason"
+      ],
+      "writes": [
+        "s|col|public.reporters.block_reason",
+        "n|col|public.reporters.block_reason",
+        "e|col|public.reporters.block_reason"
+      ],
+      "reads": [
+        "n|tbl|public.reporters",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "reporters",
+        "blocked_by"
+      ],
+      "writes": [
+        "s|col|public.reporters.blocked_by",
+        "n|col|public.reporters.blocked_by",
+        "e|col|public.reporters.blocked_by"
+      ],
+      "reads": [
+        "n|tbl|public.reporters",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "submissions",
+        "image_dhash"
+      ],
+      "writes": [
+        "s|col|public.submissions.image_dhash",
+        "n|col|public.submissions.image_dhash",
+        "e|col|public.submissions.image_dhash"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reporters",
+        "name": "block_reason",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "reporters",
+        "name": "blocked_by",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "submissions",
+        "name": "image_dhash",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    }
+  ]
+}

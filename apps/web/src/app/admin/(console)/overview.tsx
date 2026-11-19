@@ -11,6 +11,7 @@ const SECTIONS: { title: string; body: string; href?: string; sprint?: string }[
   { title: 'Review queue', body: 'Resolve provisional and disputed polling units, with the photos behind each version.', href: '/admin/review' },
   { title: 'Live results dashboard', body: 'Real-time citizen-collated counts, coverage and confidence by area.', href: '/results/elections' },
   { title: 'Declared results', body: 'Record official declarations with their source; a second administrator approves.', href: '/admin/declarations' },
+  { title: 'Abuse', body: 'One person posing as several witnesses, fakes and out-of-area captures; block numbers.', href: '/admin/abuse' },
   { title: 'Incident reports', body: 'Serious and sensitive reports held for review, with their evidence and the AI assessment.', href: '/admin/incidents' },
   { title: 'Assistant knowledge', body: 'The official facts the WhatsApp assistant may use; two-person approval.', href: '/admin/knowledge' },
   { title: 'Evidence and audit', body: 'Hash chain, published anchors and the public check of evidence packs.', href: '/verify' },
