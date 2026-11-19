@@ -4,12 +4,13 @@ import { parseUnitCode } from '@trustelect/shared';
 import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { AuditService } from '../audit/audit.service.js';
+import { ChainService } from '../chain/chain.service.js';
 import { imageType } from '../capture/capture.service.js';
 import type { Database } from '../database/database.module.js';
 import { adminUsers, declarations, electionParties, elections, lgas, parties, states, wards } from '../database/schema.js';
 import { sha256 } from '../security/encryption.js';
 import { EvidenceStorage } from '../storage/evidence-storage.js';
-import { RESULTS_CHANNEL } from '../tally/results-stream.service.js';
+import { RESULTS_CHANNEL } from '../tally/channel.js';
 import { normaliseParty } from '../verification/decide.js';
 import { VisionModel } from '../verification/vision-model.js';
 
@@ -54,6 +55,7 @@ export class DeclarationsService {
     private readonly audit: AuditService,
     private readonly storage: EvidenceStorage,
     private readonly model: VisionModel,
+    private readonly chain: ChainService,
   ) {}
 
   private async ballot(electionId: string) {
@@ -186,6 +188,7 @@ export class DeclarationsService {
         enteredBy: adminId,
       })
       .returning();
+    await this.chain.syncDeclaration(row.id);
     await this.audit.record({
       adminUserId: adminId,
       action: 'declaration.entered',
@@ -201,6 +204,7 @@ export class DeclarationsService {
     const row = await this.pendingOrThrow(id);
     if (row.enteredBy === adminId) throw new ForbiddenException('A second administrator must approve a declaration you entered');
     await this.db.update(declarations).set({ status: 'approved', approvedBy: adminId, approvedAt: new Date() }).where(eq(declarations.id, id));
+    await this.chain.syncDeclaration(id);
     await this.audit.record({ adminUserId: adminId, action: 'declaration.approved', targetType: 'declaration', targetId: id });
     // Dashboards show the comparison straight away
     await this.db.execute(sql`select pg_notify(${RESULTS_CHANNEL}, ${row.electionId})`);
@@ -214,6 +218,7 @@ export class DeclarationsService {
       .update(declarations)
       .set({ status: 'rejected', approvedBy: adminId, approvedAt: new Date(), rejectionReason: reason })
       .where(eq(declarations.id, id));
+    await this.chain.syncDeclaration(id);
     await this.audit.record({ adminUserId: adminId, action: 'declaration.rejected', targetType: 'declaration', targetId: id, details: { reason } });
     return this.get(id);
   }

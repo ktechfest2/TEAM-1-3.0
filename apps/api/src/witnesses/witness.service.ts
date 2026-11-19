@@ -3,9 +3,10 @@ import { InjectDrizzle } from '@nestjs/drizzle';
 import { parseUnitCode } from '@trustelect/shared';
 import { and, eq, inArray, isNotNull, sql } from 'drizzle-orm';
 import { AuditService } from '../audit/audit.service.js';
+import { ChainService } from '../chain/chain.service.js';
 import type { Database } from '../database/database.module.js';
 import { pollingUnits, resultVersions, submissions, unitResults } from '../database/schema.js';
-import { RESULTS_CHANNEL } from '../tally/results-stream.service.js';
+import { RESULTS_CHANNEL } from '../tally/channel.js';
 import { computeUnit, type AcceptedPhoto } from './engine.js';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class WitnessService {
   constructor(
     @InjectDrizzle() private readonly db: Database,
     private readonly audit: AuditService,
+    private readonly chain: ChainService,
   ) {}
 
   /**
@@ -96,6 +98,7 @@ export class WitnessService {
           .update(unitResults)
           .set({ ...base, flags })
           .where(and(eq(unitResults.electionId, electionId), eq(unitResults.pollingUnitId, pollingUnitId)));
+        await this.chain.syncUnitResult(electionId, pollingUnitId, tx);
         return;
       }
 
@@ -127,8 +130,9 @@ export class WitnessService {
             to: { status: outcome.status, versionId: countedVersionId },
             witnesses: outcome.counted?.witnesses ?? 0,
           },
-        });
+        }, tx);
       }
+      await this.chain.syncUnitResult(electionId, pollingUnitId, tx);
     });
   }
 
@@ -172,6 +176,7 @@ export class WitnessService {
         updatedAt: new Date(),
       })
       .where(and(eq(unitResults.electionId, input.electionId), eq(unitResults.pollingUnitId, unit.id)));
+    await this.chain.syncUnitResult(input.electionId, unit.id);
     await this.db.execute(sql`select pg_notify(${RESULTS_CHANNEL}, ${input.electionId})`);
     await this.audit.record({
       adminUserId: adminId,

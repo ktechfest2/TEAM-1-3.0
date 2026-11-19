@@ -23,7 +23,7 @@ describe('BulkSmsLiveSender', () => {
     expect(calls[0].url).toBe(BULKSMSLIVE_URL);
     const headers = calls[0].init.headers as Record<string, string>;
     expect(headers.Authorization).toBe('Bearer test-key');
-    const body = new URLSearchParams(String(calls[0].init.body));
+    const body = new URLSearchParams(calls[0].init.body as string);
     expect(body.get('recipients')).toBe('2348031234567');
     expect(body.get('sender_name')).toBe('TrustElect');
     expect(body.get('message')).toBe('Your TrustElect code is 123456.');

@@ -161,7 +161,18 @@ async function Dashboard({ params, searchParams }: PageProps<'/results/elections
             <p className="text-sm font-semibold text-brand-strong">{data.election.title}</p>
             <h1 className="text-3xl font-bold tracking-tight">{area.name}</h1>
           </div>
-          <LiveRefresh electionId={data.election.id} generatedAt={data.generatedAt} />
+          <div className="flex flex-wrap items-center gap-4">
+            {area.level === 'ward' && area.code && (
+              <a
+                href={`/api/evidence/elections/${data.election.id}/wards/${area.code}`}
+                download
+                className="inline-flex min-h-10 items-center rounded-xl border border-border bg-surface px-4 text-sm font-semibold hover:bg-surface-muted"
+              >
+                Download ward evidence pack
+              </a>
+            )}
+            <LiveRefresh electionId={data.election.id} generatedAt={data.generatedAt} />
+          </div>
         </div>
       </div>
 

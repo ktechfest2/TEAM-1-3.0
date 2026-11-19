@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { AuthModule } from './auth/auth.module.js';
+import { ChainModule } from './chain/chain.module.js';
+import { EvidenceModule } from './chain/evidence.module.js';
 import { CaptureModule } from './capture/capture.module.js';
 import { validateEnv } from './config/env.js';
 import { DatabaseModule } from './database/database.module.js';
@@ -25,6 +27,7 @@ import { TallyModule } from './tally/tally.module.js';
     ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 120 }]),
     DatabaseModule,
     SecurityModule,
+    ChainModule,
     AuthModule,
     GeographyModule,
     ElectionsModule,
@@ -32,6 +35,7 @@ import { TallyModule } from './tally/tally.module.js';
     ResultsModule,
     TallyModule,
     DeclarationsModule,
+    EvidenceModule,
   ],
   controllers: [HealthController],
 })

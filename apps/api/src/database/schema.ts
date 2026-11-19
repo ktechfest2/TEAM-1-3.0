@@ -14,6 +14,7 @@ import {
   pgEnum,
   pgTable,
   primaryKey,
+  serial,
   text,
   timestamp,
   uniqueIndex,
@@ -397,15 +398,32 @@ export const auditLog = pgTable('audit_log', {
 /* Append-only hash chain (EVD-02, EVD-03)                             */
 /* ------------------------------------------------------------------ */
 
-export const chainEntries = pgTable('chain_entries', {
-  /** Position in the chain; gaps are not allowed */
-  seq: bigserial('seq', { mode: 'number' }).primaryKey(),
-  entryType: text('entry_type').notNull(),
-  refId: text('ref_id').notNull(),
-  /** SHA-256 of the canonical payload being recorded */
-  payloadSha256: text('payload_sha256').notNull(),
-  prevHash: text('prev_hash').notNull(),
-  /** SHA-256(seq | entryType | refId | payloadSha256 | prevHash | createdAt) */
-  hash: text('hash').notNull().unique(),
-  createdAt: createdAt(),
+export const chainEntries = pgTable(
+  'chain_entries',
+  {
+    /** Position in the chain, assigned under a lock: no gaps */
+    seq: bigint('seq', { mode: 'number' }).primaryKey(),
+    /** submission, unit_result, declaration or audit */
+    entryType: text('entry_type').notNull(),
+    refId: text('ref_id').notNull(),
+    /** Canonical JSON of the record at this point (see canonicalJson in @trustelect/shared) */
+    payload: text('payload').notNull(),
+    payloadSha256: text('payload_sha256').notNull(),
+    prevHash: text('prev_hash').notNull(),
+    /** SHA-256(seq | entryType | refId | payloadSha256 | prevHash | createdAt) */
+    hash: text('hash').notNull().unique(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+  },
+  (t) => [index('chain_entries_ref_idx').on(t.entryType, t.refId, t.seq)],
+);
+
+/** The latest chain hash, published at regular intervals (EVD-03) */
+export const chainAnchors = pgTable('chain_anchors', {
+  id: serial('id').primaryKey(),
+  seq: bigint('seq', { mode: 'number' }).notNull().unique(),
+  hash: text('hash').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+  /** External public record of the anchor, e.g. an OpenTimestamps proof */
+  externalProvider: text('external_provider'),
+  externalProof: text('external_proof'),
 });

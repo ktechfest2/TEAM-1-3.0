@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectDrizzle } from '@nestjs/drizzle';
 import { and, count, desc, eq, gt, isNull } from 'drizzle-orm';
 import { randomInt } from 'node:crypto';
+import { ChainService } from '../chain/chain.service.js';
 import type { Env } from '../config/env.js';
 import type { Database } from '../database/database.module.js';
 import { parseUnitCode } from '@trustelect/shared';
@@ -59,6 +60,7 @@ export class CaptureService {
     private readonly encryptor: Encryptor,
     private readonly sms: SmsSender,
     private readonly storage: EvidenceStorage,
+    private readonly chain: ChainService,
   ) {}
 
   private phoneHash(e164: string) {
@@ -276,6 +278,8 @@ export class CaptureService {
         .limit(1);
       return { ...again, duplicate: true };
     }
+    // EVD-02: the photo's hash and arrival time are chained on arrival
+    await this.chain.syncSubmission(row.id);
     return { ...row, duplicate: false };
   }
 }

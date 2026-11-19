@@ -35,6 +35,12 @@ export const envSchema = z.object({
   OPENROUTER_MODEL: z.string().min(3).default('anthropic/claude-sonnet-5.5'),
   /** Background verification of submitted photos: on, or off (tests, maintenance) */
   VERIFICATION_WORKER: z.enum(['on', 'off']).default('on'),
+  /** Publishing the latest chain hash (EVD-03): on, or off (tests) */
+  CHAIN_ANCHOR_WORKER: z.enum(['on', 'off']).default('on'),
+  /** Minutes between published anchors (only when the chain has grown) */
+  CHAIN_ANCHOR_MINUTES: z.coerce.number().int().min(1).max(1440).default(10),
+  /** External public record of each anchor: none, or opentimestamps (Bitcoin-backed, free, sends only a hash) */
+  CHAIN_ANCHOR_EXTERNAL: z.enum(['none', 'opentimestamps']).default('none'),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -71,6 +71,21 @@ npm run ai:eval -w @trustelect/api -- apps/api/data/ec60e-eval anthropic/claude-
 
 Each photo is one paid model call. Set `VERIFICATION_WORKER=off` to pause verification.
 
+## Tamper evidence
+
+Every photo submission, polling unit result (with its versions), declaration and administrator
+action is written to an append-only hash chain (`chain_entries`; the database refuses updates and
+deletes). The latest hash is published as an anchor every `CHAIN_ANCHOR_MINUTES` (default 10).
+Set `CHAIN_ANCHOR_EXTERNAL=opentimestamps` to also timestamp each anchor on the public
+OpenTimestamps record (only a hash is sent).
+
+Anyone can download an evidence pack per polling unit or ward and check it at `/verify`; the
+check runs in the browser. Operators can check the whole chain and every stored record with:
+
+```bash
+npm run chain:verify -w @trustelect/api
+```
+
 ## Ballot order
 
 Parties are always listed in ballot order, which TrustElect sets **alphabetically by party acronym**. The API enforces it, whatever order parties are submitted in.

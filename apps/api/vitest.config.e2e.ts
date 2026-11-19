@@ -21,6 +21,7 @@ export default defineConfig({
       CAPTURE_PHONE_VERIFICATION: 'none',
       // Tests drive verification directly with a fake model
       VERIFICATION_WORKER: 'off',
+      CHAIN_ANCHOR_WORKER: 'off',
     },
   },
 });

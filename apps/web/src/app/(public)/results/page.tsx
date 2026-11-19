@@ -59,7 +59,7 @@ async function UnitLookup({ searchParams }: { searchParams: PageProps<'/results'
                 {found.results.length === 0 ? (
                   <p className="text-ink-muted">No published election covers this polling unit yet.</p>
                 ) : (
-                  found.results.map((r) => <UnitResultCard key={r.election.id} result={r} />)
+                  found.results.map((r) => <UnitResultCard key={r.election.id} result={r} unitCode={found.unit.code} />)
                 )}
               </div>
             </>

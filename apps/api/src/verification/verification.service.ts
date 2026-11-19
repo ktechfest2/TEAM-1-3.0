@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectDrizzle } from '@nestjs/drizzle';
 import { and, asc, eq, ne, sql } from 'drizzle-orm';
+import { ChainService } from '../chain/chain.service.js';
 import type { Database } from '../database/database.module.js';
 import {
   electionParties,
@@ -33,6 +34,7 @@ export class VerificationService {
     private readonly model: VisionModel,
     private readonly storage: EvidenceStorage,
     private readonly witnesses: WitnessService,
+    private readonly chain: ChainService,
   ) {}
 
   /**
@@ -135,6 +137,7 @@ export class VerificationService {
           .update(submissions)
           .set({ ...common, status: 'verified', extracted: decision.figures, evidenceStrength: decision.strength, reviewReason: null })
           .where(eq(submissions.id, sub.id));
+        await this.chain.syncSubmission(sub.id);
         await this.witnesses.recalculate(sub.electionId, unit.id);
         break;
       case 'needs_confirmation':
@@ -166,6 +169,7 @@ export class VerificationService {
         await this.db.insert(rejectionLog).values({ reporterId: sub.reporterId, electionId: sub.electionId, reason: decision.code });
         break;
     }
+    if (decision.outcome !== 'verified') await this.chain.syncSubmission(sub.id);
     this.logger.log(`submission ${sub.id}: ${decision.outcome}${'code' in decision ? ` (${decision.code})` : ''}`);
     return decision;
   }
@@ -185,6 +189,7 @@ export class VerificationService {
         .update(submissions)
         .set({ status: 'verified', voterConfirmed: true, reviewReason: 'Voter confirmed the figures match the poster, although they do not add up.' })
         .where(eq(submissions.id, sub.id));
+      await this.chain.syncSubmission(sub.id);
       if (sub.pollingUnitId) await this.witnesses.recalculate(sub.electionId, sub.pollingUnitId);
     } else {
       if (sub.imageKey) await this.discardImage(sub.imageKey, sub.id);
@@ -198,6 +203,7 @@ export class VerificationService {
         })
         .where(eq(submissions.id, sub.id));
       await this.db.insert(rejectionLog).values({ reporterId, electionId: sub.electionId, reason: 'voter_disputed_reading' });
+      await this.chain.syncSubmission(sub.id);
     }
     return this.statusFor(submissionId, reporterId);
   }

@@ -22,7 +22,10 @@ export function SiteFooter() {
             does not declare winners. Figures come from EC60E posters already pasted at polling
             units. Official results are declared by INEC.
           </p>
-          <p>
+          <p className="flex flex-wrap gap-x-5 gap-y-1">
+            <Link href="/verify" className="font-medium text-brand-strong hover:underline">
+              Verify evidence
+            </Link>
             <Link href="/privacy" className="font-medium text-brand-strong hover:underline">
               Privacy notice
             </Link>

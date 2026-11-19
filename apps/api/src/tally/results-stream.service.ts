@@ -1,3 +1,4 @@
+import { RESULTS_CHANNEL } from './channel.js';
 import { Injectable, Logger, type OnApplicationBootstrap, type OnApplicationShutdown } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import pg from 'pg';
@@ -5,8 +6,6 @@ import { Subject } from 'rxjs';
 import type { Env } from '../config/env.js';
 import { TallyService } from './tally.service.js';
 
-/** Postgres channel announcing that a unit result of an election changed (payload: election id). */
-export const RESULTS_CHANNEL = 'trustelect_results';
 
 /** At most one update per election per interval, however many units change. */
 const THROTTLE_MS = 2_000;
@@ -78,3 +77,5 @@ export class ResultsStreamService implements OnApplicationBootstrap, OnApplicati
     );
   }
 }
+
+export { RESULTS_CHANNEL };

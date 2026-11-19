@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { UNOFFICIAL_LABEL } from '@trustelect/shared';
 import { UnitStatusBadge } from './status-badge';
 
@@ -24,7 +25,7 @@ function when(iso: string) {
   return new Date(iso).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Lagos' });
 }
 
-export function UnitResultCard({ result }: { result: PublicUnitResult }) {
+export function UnitResultCard({ result, unitCode }: { result: PublicUnitResult; unitCode?: string }) {
   const { figures } = result;
   return (
     <article className="rounded-2xl border border-divider bg-surface" aria-labelledby={`r-${result.election.id}`}>
@@ -105,7 +106,19 @@ export function UnitResultCard({ result }: { result: PublicUnitResult }) {
         )}
       </div>
 
-      <footer className="border-t border-divider px-5 py-3 text-xs text-ink-subtle">{UNOFFICIAL_LABEL}</footer>
+      <footer className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-divider px-5 py-3 text-xs text-ink-subtle">
+        <span>{UNOFFICIAL_LABEL}</span>
+        {unitCode && result.status !== 'not_confirmed' && (
+          <span className="flex flex-wrap gap-x-4 text-sm">
+            <a href={`/api/evidence/elections/${result.election.id}/units/${unitCode}`} download className="font-medium text-brand-strong hover:underline">
+              Download evidence pack
+            </a>
+            <Link href="/verify" className="font-medium text-brand-strong hover:underline">
+              Verify it
+            </Link>
+          </span>
+        )}
+      </footer>
     </article>
   );
 }

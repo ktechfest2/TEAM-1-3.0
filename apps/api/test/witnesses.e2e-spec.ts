@@ -14,9 +14,7 @@ import {
   electionParties,
   elections,
   parties,
-  rejectionLog,
   reporters,
-  resultVersions,
   submissions,
   unitResults,
 } from '../src/database/schema.js';
