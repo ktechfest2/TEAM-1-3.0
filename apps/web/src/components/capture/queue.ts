@@ -75,6 +75,24 @@ export const queue = {
     (await tx<QueuedPhoto[]>('readonly', (s) => s.getAll())).sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
 };
 
+/**
+ * Random id for this phone, created once. Photos from one device count as one witness, so
+ * several SIM cards in one phone cannot pose as several people. It identifies nothing else.
+ */
+export function deviceId(): string {
+  const KEY = 'trustelect-device-id';
+  try {
+    const existing = localStorage.getItem(KEY);
+    if (existing) return existing;
+    const id = crypto.randomUUID();
+    localStorage.setItem(KEY, id);
+    return id;
+  } catch {
+    // Storage blocked (private mode): a fresh id per session still works, just less strictly
+    return crypto.randomUUID();
+  }
+}
+
 export type FlushResult = 'done' | 'offline' | 'signed-out';
 
 let flushing: Promise<FlushResult> | null = null;
@@ -112,7 +130,7 @@ async function runFlush(onChange: () => void): Promise<FlushResult> {
     try {
       res = await fetch(`/api/capture/photos?${params}`, {
         method: 'POST',
-        headers: { 'content-type': item.blob.type || 'image/jpeg' },
+        headers: { 'content-type': item.blob.type || 'image/jpeg', 'x-device-id': deviceId() },
         body: item.blob,
       });
     } catch {

@@ -10,7 +10,7 @@ import { AppModule } from '../src/app.module.js';
 import type { Database } from '../src/database/database.module.js';
 import { captureSessions, elections, reporters, submissions } from '../src/database/schema.js';
 import { keyedHash } from '../src/security/encryption.js';
-import { addTestUnits, removeTestUnits, TEST_UNIT, TEST_UNIT_OUTSIDE_LAGOS } from './helpers.js';
+import { addTestUnits, removeElection, removeTestUnits, TEST_UNIT, TEST_UNIT_OUTSIDE_LAGOS } from './helpers.js';
 
 const jpeg = (fill: number) => Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(2048, fill)]);
 
@@ -50,7 +50,8 @@ describe('Voter capture (e2e)', () => {
       await db.delete(captureSessions).where(eq(captureSessions.reporterId, reporter.id));
       await db.delete(reporters).where(eq(reporters.id, reporter.id));
     }
-    await db.delete(elections).where(inArray(elections.id, [activeElection, draftElection]));
+    await removeElection(app, activeElection);
+    await removeElection(app, draftElection);
     await removeTestUnits(app);
     await rm(process.env.EVIDENCE_DIR!, { recursive: true, force: true });
     await app.close();

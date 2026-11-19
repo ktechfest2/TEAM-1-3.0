@@ -35,7 +35,7 @@ class FakeVisionModel extends VisionModel {
 
 const tag = Date.now().toString(36).toUpperCase().slice(-4);
 const P = [`TA${tag}`, `TB${tag}`];
-import { addTestUnits, removeTestUnits, TEST_UNIT as UNIT } from './helpers.js';
+import { addTestUnits, removeElection, removeTestUnits, TEST_UNIT as UNIT } from './helpers.js';
 
 const reading = (over: Partial<Ec60eReading> = {}): Ec60eReading => ({
   is_ec60e: true,
@@ -106,14 +106,14 @@ describe('Photo verification (e2e)', () => {
   afterAll(async () => {
     const subs = await db.select({ id: submissions.id, reporterId: submissions.reporterId }).from(submissions).where(eq(submissions.electionId, electionId));
     const reporterIds = [...new Set(subs.map((s) => s.reporterId))];
-    await db.delete(submissions).where(eq(submissions.electionId, electionId));
-    await db.delete(rejectionLog).where(eq(rejectionLog.electionId, electionId));
+    if (reporterIds.length) {
+      await db.delete(submissions).where(inArray(submissions.reporterId, reporterIds));
+    }
+    await removeElection(app, electionId);
     if (reporterIds.length) {
       await db.delete(captureSessions).where(inArray(captureSessions.reporterId, reporterIds));
       await db.delete(reporters).where(inArray(reporters.id, reporterIds));
     }
-    await db.delete(electionParties).where(eq(electionParties.electionId, electionId));
-    await db.delete(elections).where(eq(elections.id, electionId));
     await db.delete(parties).where(inArray(parties.acronym, P));
     await removeTestUnits(app);
     await rm(process.env.EVIDENCE_DIR!, { recursive: true, force: true });

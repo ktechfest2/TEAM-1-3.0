@@ -1,0 +1,432 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "e0cc2e73-fc14-4d5a-8cce-73785c802f5f",
+  "prevIds": [
+    "5b2b7d40-85e7-455e-ad7e-21d2696f99d3"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "result_versions",
+        "stamped_witness_count"
+      ],
+      "writes": [
+        "s|col|public.result_versions.stamped_witness_count",
+        "n|col|public.result_versions.stamped_witness_count",
+        "e|col|public.result_versions.stamped_witness_count"
+      ],
+      "reads": [
+        "n|tbl|public.result_versions",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "result_versions",
+        "strong_witness_count"
+      ],
+      "writes": [
+        "s|col|public.result_versions.strong_witness_count",
+        "n|col|public.result_versions.strong_witness_count",
+        "e|col|public.result_versions.strong_witness_count"
+      ],
+      "reads": [
+        "n|tbl|public.result_versions",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "result_versions",
+        "updated_at"
+      ],
+      "writes": [
+        "s|col|public.result_versions.updated_at",
+        "n|col|public.result_versions.updated_at",
+        "e|col|public.result_versions.updated_at"
+      ],
+      "reads": [
+        "n|tbl|public.result_versions",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "submissions",
+        "device_hash"
+      ],
+      "writes": [
+        "s|col|public.submissions.device_hash",
+        "n|col|public.submissions.device_hash",
+        "e|col|public.submissions.device_hash"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "submissions",
+        "ip_hash"
+      ],
+      "writes": [
+        "s|col|public.submissions.ip_hash",
+        "n|col|public.submissions.ip_hash",
+        "e|col|public.submissions.ip_hash"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "unit_results",
+        "witness_count"
+      ],
+      "writes": [
+        "s|col|public.unit_results.witness_count",
+        "n|col|public.unit_results.witness_count",
+        "e|col|public.unit_results.witness_count"
+      ],
+      "reads": [
+        "n|tbl|public.unit_results",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "unit_results",
+        "confidence"
+      ],
+      "writes": [
+        "s|col|public.unit_results.confidence",
+        "n|col|public.unit_results.confidence",
+        "e|col|public.unit_results.confidence"
+      ],
+      "reads": [
+        "n|tbl|public.unit_results",
+        "n|sch|public",
+        "n|enum|public.confidence_level"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "unit_results",
+        "version_count"
+      ],
+      "writes": [
+        "s|col|public.unit_results.version_count",
+        "n|col|public.unit_results.version_count",
+        "e|col|public.unit_results.version_count"
+      ],
+      "reads": [
+        "n|tbl|public.unit_results",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "unit_results",
+        "flags"
+      ],
+      "writes": [
+        "s|col|public.unit_results.flags",
+        "n|col|public.unit_results.flags",
+        "e|col|public.unit_results.flags"
+      ],
+      "reads": [
+        "n|tbl|public.unit_results",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "submissions",
+        "submissions_unit_status_idx"
+      ],
+      "writes": [
+        "s|idx|public.submissions_unit_status_idx",
+        "n|idx|public.submissions_unit_status_idx",
+        "e|idx|public.submissions_unit_status_idx",
+        "n|rel|public.submissions_unit_status_idx"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public",
+        "n|col|public.submissions.election_id",
+        "n|col|public.submissions.polling_unit_id",
+        "n|col|public.submissions.status"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "unit_results",
+        "unit_results_status_idx"
+      ],
+      "writes": [
+        "s|idx|public.unit_results_status_idx",
+        "n|idx|public.unit_results_status_idx",
+        "e|idx|public.unit_results_status_idx",
+        "n|rel|public.unit_results_status_idx"
+      ],
+      "reads": [
+        "n|tbl|public.unit_results",
+        "n|sch|public",
+        "n|col|public.unit_results.election_id",
+        "n|col|public.unit_results.status"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "result_versions",
+        "name": "stamped_witness_count",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "0",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "result_versions",
+        "name": "strong_witness_count",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "0",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "result_versions",
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "submissions",
+        "name": "device_hash",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "submissions",
+        "name": "ip_hash",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "unit_results",
+        "name": "witness_count",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "0",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "unit_results",
+        "name": "confidence",
+        "type": "confidence_level",
+        "typeSchema": "public",
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "unit_results",
+        "name": "version_count",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "0",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "unit_results",
+        "name": "flags",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'[]'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "submissions",
+        "name": "submissions_unit_status_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "election_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "polling_unit_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "status",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "unit_results",
+        "name": "unit_results_status_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "election_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "status",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    }
+  ]
+}

@@ -8,6 +8,7 @@ import { DatabaseModule } from './database/database.module.js';
 import { ElectionsModule } from './elections/elections.module.js';
 import { GeographyModule } from './geography/geography.module.js';
 import { HealthController } from './health/health.controller.js';
+import { ResultsModule } from './results/results.module.js';
 import { SecurityModule } from './security/security.module.js';
 
 @Module({
@@ -26,6 +27,7 @@ import { SecurityModule } from './security/security.module.js';
     GeographyModule,
     ElectionsModule,
     CaptureModule,
+    ResultsModule,
   ],
   controllers: [HealthController],
 })

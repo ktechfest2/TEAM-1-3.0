@@ -213,6 +213,10 @@ export const resultVersions = pgTable(
     witnessCount: integer('witness_count').notNull().default(0),
     /** Typed submissions matching these figures; never decide selection (WIT-06) */
     typedSupportCount: integer('typed_support_count').notNull().default(0),
+    /** Witnesses with at least one stamped photo / with a matching code on the poster */
+    stampedWitnessCount: integer('stamped_witness_count').notNull().default(0),
+    strongWitnessCount: integer('strong_witness_count').notNull().default(0),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
     confidence: confidenceLevel('confidence'),
     createdAt: createdAt(),
   },
@@ -248,6 +252,10 @@ export const submissions = pgTable(
     imageType: text('image_type'),
     /** Reported GPS accuracy in metres */
     locationAccuracy: doublePrecision('location_accuracy'),
+    /** Keyed hash of the phone app's random device id: photos from one device are one witness */
+    deviceHash: text('device_hash'),
+    /** Keyed hash of the network address, used only to flag patterns for review */
+    ipHash: text('ip_hash'),
     /** Evidence strength of an accepted photo; used by the confidence engine */
     evidenceStrength: evidenceStrength('evidence_strength'),
     /** AI reading of the photo and the checks applied (VER), kept for audit */
@@ -266,6 +274,7 @@ export const submissions = pgTable(
     index('submissions_unit_idx').on(t.electionId, t.pollingUnitId),
     index('submissions_reporter_idx').on(t.reporterId, t.receivedAt),
     index('submissions_pending_idx').on(t.status, t.nextAttemptAt),
+    index('submissions_unit_status_idx').on(t.electionId, t.pollingUnitId, t.status),
     uniqueIndex('submissions_reporter_client_uq').on(t.reporterId, t.clientId),
   ],
 );
@@ -287,11 +296,17 @@ export const unitResults = pgTable(
     pollingUnitId: integer('polling_unit_id').notNull().references(() => pollingUnits.id),
     status: unitStatus('status').notNull().default('not_confirmed'),
     countedVersionId: uuid('counted_version_id').references(() => resultVersions.id),
+    /** Witnesses behind the counted version, and its confidence */
+    witnessCount: integer('witness_count').notNull().default(0),
+    confidence: confidenceLevel('confidence'),
+    versionCount: integer('version_count').notNull().default(0),
+    /** Reasons a reviewer should look at this unit, e.g. shared_network, new_evidence_after_resolution */
+    flags: jsonb('flags').$type<string[]>().notNull().default([]),
     resolvedBy: uuid('resolved_by').references(() => adminUsers.id),
     resolutionReason: text('resolution_reason'),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [primaryKey({ columns: [t.electionId, t.pollingUnitId] })],
+  (t) => [primaryKey({ columns: [t.electionId, t.pollingUnitId] }), index('unit_results_status_idx').on(t.electionId, t.status)],
 );
 
 /* ------------------------------------------------------------------ */

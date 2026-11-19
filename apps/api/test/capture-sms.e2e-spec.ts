@@ -9,7 +9,7 @@ import type { App } from 'supertest/types.js';
 import type { Database } from '../src/database/database.module.js';
 import { captureSessions, elections, reporters, submissions, voterOtps } from '../src/database/schema.js';
 import { keyedHash } from '../src/security/encryption.js';
-import { addTestUnits, removeTestUnits, TEST_UNIT } from './helpers.js';
+import { addTestUnits, removeElection, removeTestUnits, TEST_UNIT } from './helpers.js';
 
 /** A minimal byte sequence that starts like a JPEG */
 const jpeg = (fill: number) => Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(2048, fill)]);
@@ -55,7 +55,8 @@ describe('Voter capture with SMS verification switched on (e2e)', () => {
       await db.delete(reporters).where(eq(reporters.id, reporter.id));
     }
     await db.delete(voterOtps).where(eq(voterOtps.phoneHash, phoneHash));
-    await db.delete(elections).where(inArray(elections.id, [activeElection, draftElection]));
+    await removeElection(app, activeElection);
+    await removeElection(app, draftElection);
     await removeTestUnits(app);
     await rm(process.env.EVIDENCE_DIR!, { recursive: true, force: true });
     await app.close();

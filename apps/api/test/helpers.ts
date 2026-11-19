@@ -5,7 +5,20 @@ import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { AuthService, type AdminRole } from '../src/auth/auth.service.js';
 import type { Database } from '../src/database/database.module.js';
-import { adminSessions, adminUsers, auditLog, lgas, pollingUnits, wards } from '../src/database/schema.js';
+import {
+  adminSessions,
+  adminUsers,
+  auditLog,
+  electionParties,
+  elections,
+  lgas,
+  pollingUnits,
+  rejectionLog,
+  resultVersions,
+  submissions,
+  unitResults,
+  wards,
+} from '../src/database/schema.js';
 import { GeographyService } from '../src/geography/geography.service.js';
 import { parseRegister } from '../src/geography/register.js';
 import { totp } from '../src/security/totp.js';
@@ -54,9 +67,29 @@ export async function addTestUnits(app: INestApplication<App>) {
   await app.get(GeographyService).importRegister(rows);
 }
 
+/** Removes an election and everything recorded for it, in foreign-key order. */
+export async function removeElection(app: INestApplication<App>, electionId: string) {
+  const db = app.get<Database>(getDrizzleToken());
+  await db.delete(unitResults).where(eq(unitResults.electionId, electionId));
+  await db.update(submissions).set({ versionId: null }).where(eq(submissions.electionId, electionId));
+  await db.delete(resultVersions).where(eq(resultVersions.electionId, electionId));
+  await db.delete(submissions).where(eq(submissions.electionId, electionId));
+  await db.delete(rejectionLog).where(eq(rejectionLog.electionId, electionId));
+  await db.delete(auditLog).where(like(auditLog.targetId, `${electionId}%`));
+  await db.delete(electionParties).where(eq(electionParties.electionId, electionId));
+  await db.delete(elections).where(eq(elections.id, electionId));
+}
+
 export async function removeTestUnits(app: INestApplication<App>) {
   const db = app.get<Database>(getDrizzleToken());
   for (const prefix of ['24-98', '19-98']) {
+    const ids = (await db.select({ id: pollingUnits.id }).from(pollingUnits).where(like(pollingUnits.code, `${prefix}-%`))).map((u) => u.id);
+    if (ids.length) {
+      await db.delete(unitResults).where(inArray(unitResults.pollingUnitId, ids));
+      await db.update(submissions).set({ versionId: null }).where(inArray(submissions.pollingUnitId, ids));
+      await db.delete(resultVersions).where(inArray(resultVersions.pollingUnitId, ids));
+      await db.update(submissions).set({ pollingUnitId: null }).where(inArray(submissions.pollingUnitId, ids));
+    }
     await db.delete(pollingUnits).where(like(pollingUnits.code, `${prefix}-%`));
     await db.delete(wards).where(like(wards.code, `${prefix}-%`));
     await db.delete(lgas).where(eq(lgas.code, prefix));

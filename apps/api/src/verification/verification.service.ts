@@ -14,6 +14,7 @@ import {
   wards,
 } from '../database/schema.js';
 import { EvidenceStorage } from '../storage/evidence-storage.js';
+import { WitnessService } from '../witnesses/witness.service.js';
 import { decide, type Decision } from './decide.js';
 import { TemporaryAiError, VisionModel } from './vision-model.js';
 
@@ -31,6 +32,7 @@ export class VerificationService {
     @InjectDrizzle() private readonly db: Database,
     private readonly model: VisionModel,
     private readonly storage: EvidenceStorage,
+    private readonly witnesses: WitnessService,
   ) {}
 
   /**
@@ -133,6 +135,7 @@ export class VerificationService {
           .update(submissions)
           .set({ ...common, status: 'verified', extracted: decision.figures, evidenceStrength: decision.strength, reviewReason: null })
           .where(eq(submissions.id, sub.id));
+        await this.witnesses.recalculate(sub.electionId, unit.id);
         break;
       case 'needs_confirmation':
         await this.db
@@ -182,6 +185,7 @@ export class VerificationService {
         .update(submissions)
         .set({ status: 'verified', voterConfirmed: true, reviewReason: 'Voter confirmed the figures match the poster, although they do not add up.' })
         .where(eq(submissions.id, sub.id));
+      if (sub.pollingUnitId) await this.witnesses.recalculate(sub.electionId, sub.pollingUnitId);
     } else {
       if (sub.imageKey) await this.discardImage(sub.imageKey, sub.id);
       await this.db

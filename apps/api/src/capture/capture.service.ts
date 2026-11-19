@@ -42,6 +42,9 @@ export interface PhotoMeta {
   clientId: string;
   /** Polling unit code entered by the voter (from their voter's card) */
   unitCode: string;
+  /** Random id generated once by the capture app on this phone */
+  deviceId?: string;
+  ip?: string;
   capturedAt?: Date;
   latitude?: number;
   longitude?: number;
@@ -257,6 +260,9 @@ export class CaptureService {
         imageBytes: bytes.length,
         imageType: type,
         clientId: meta.clientId,
+        // Hashed with a server-side key: used to merge witnesses and flag patterns, never shown
+        deviceHash: meta.deviceId ? this.phoneHash(`device:${meta.deviceId}`) : null,
+        ipHash: meta.ip ? this.phoneHash(`ip:${meta.ip}`) : null,
       })
       .onConflictDoNothing({ target: [submissions.reporterId, submissions.clientId] })
       .returning({ id: submissions.id, status: submissions.status, receivedAt: submissions.receivedAt, imageSha256: submissions.imageSha256 });

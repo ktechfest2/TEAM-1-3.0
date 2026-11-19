@@ -166,6 +166,8 @@ export class CaptureController {
         electionId: q.electionId,
         clientId: q.clientId,
         unitCode: q.unitCode,
+        deviceId: z.uuid().safeParse(req.headers['x-device-id']).data,
+        ip: req.ip,
         capturedAt: q.capturedAt ? new Date(q.capturedAt) : undefined,
         latitude: q.lat,
         longitude: q.lng,

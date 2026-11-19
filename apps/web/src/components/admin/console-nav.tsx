@@ -5,18 +5,27 @@ import { usePathname } from 'next/navigation';
 
 const LINKS = [
   { href: '/admin', label: 'Overview' },
+  { href: '/admin/review', label: 'Review' },
   { href: '/admin/elections', label: 'Elections' },
   { href: '/admin/parties', label: 'Parties' },
   { href: '/admin/register', label: 'Polling units' },
 ];
 
+/** Plain links, shown until the current page is known (no active highlight). */
+export function ConsoleNavFallback() {
+  return <NavList pathname={null} />;
+}
+
 export function ConsoleNav() {
-  const pathname = usePathname();
+  return <NavList pathname={usePathname()} />;
+}
+
+function NavList({ pathname }: { pathname: string | null }) {
   return (
     <nav aria-label="Console">
       <ul className="flex flex-wrap gap-1">
         {LINKS.map((l) => {
-          const current = l.href === '/admin' ? pathname === '/admin' : pathname.startsWith(l.href);
+          const current = pathname !== null && (l.href === '/admin' ? pathname === '/admin' : pathname.startsWith(l.href));
           return (
             <li key={l.href}>
               <Link

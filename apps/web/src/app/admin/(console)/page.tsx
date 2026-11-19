@@ -10,7 +10,7 @@ const SECTIONS = [
   { title: 'Elections', body: 'Set up elections, their area and the parties on the ballot.', href: '/admin/elections' },
   { title: 'Parties', body: 'Registered parties available for elections.', href: '/admin/parties' },
   { title: 'Polling units', body: 'The INEC polling unit register by state, LGA and ward.', href: '/admin/register' },
-  { title: 'Review queue', body: 'Resolve provisional and disputed polling units and serious incident reports.', sprint: 'Sprint 5' },
+  { title: 'Review queue', body: 'Resolve provisional and disputed polling units, with the photos behind each version.', href: '/admin/review' },
   { title: 'Live results dashboard', body: 'Real-time citizen-collated counts, coverage and confidence by area.', sprint: 'Sprint 6' },
   { title: 'Declared results', body: 'Record official declarations with their source; a second administrator approves.', sprint: 'Sprint 7' },
   { title: 'Evidence and audit', body: 'Hash chain, evidence packs and the audit log of every administrative action.', sprint: 'Sprint 8' },
