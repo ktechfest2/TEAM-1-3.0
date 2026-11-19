@@ -1,3 +1,14 @@
+import type { ComparisonStatus } from '@trustelect/shared';
+
+export type Comparison = {
+  status: ComparisonStatus;
+  disputeExists: boolean;
+  fullCoverage: boolean;
+  parties: { party: string; declared: number; citizen: number; exceedsDeclared: boolean }[];
+  reasons: string[];
+  unitDifferences: string[];
+};
+
 export type Mix = { high: number; medium: number; low: number; provisional: number; disputed: number; notConfirmed: number };
 
 export type AreaTally = {
@@ -11,6 +22,7 @@ export type AreaTally = {
   rejected: number;
   rejectedReportedUnits: number;
   status?: string;
+  comparison?: Comparison;
 };
 
 export type Level = 'national' | 'state' | 'lga' | 'ward';

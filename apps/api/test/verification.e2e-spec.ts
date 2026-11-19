@@ -25,6 +25,9 @@ import { VisionModel } from '../src/verification/vision-model.js';
 /** Fake model: returns whatever reading the test queues next. */
 class FakeVisionModel extends VisionModel {
   readonly name = 'fake-model';
+  async readDeclaration(): Promise<never> {
+    throw new Error('not used');
+  }
   next: Ec60eReading[] = [];
   async read(): Promise<Ec60eReading> {
     const r = this.next.shift();

@@ -19,6 +19,7 @@ const COMPARISON: Record<ComparisonStatus, { label: string; tone: Tone }> = {
   match_so_far: { label: 'Match so far', tone: 'match' },
   does_not_match: { label: 'Does not match', tone: 'mismatch' },
   possible_mismatch_low_confidence: { label: 'Possible mismatch (low confidence)', tone: 'dispute' },
+  conflicting_declarations: { label: 'Conflicting declarations, under review', tone: 'dispute' },
   awaiting_data: { label: 'Awaiting data', tone: 'pending' },
 };
 

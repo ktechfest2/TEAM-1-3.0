@@ -9,6 +9,7 @@ import {
   adminSessions,
   adminUsers,
   auditLog,
+  declarations,
   electionParties,
   elections,
   lgas,
@@ -80,6 +81,7 @@ export async function removeElection(app: INestApplication<App>, electionId: str
   await db.delete(submissions).where(eq(submissions.electionId, electionId));
   await db.delete(rejectionLog).where(eq(rejectionLog.electionId, electionId));
   await db.delete(auditLog).where(like(auditLog.targetId, `${electionId}%`));
+  await db.delete(declarations).where(eq(declarations.electionId, electionId));
   await db.delete(electionParties).where(eq(electionParties.electionId, electionId));
   await db.delete(elections).where(eq(elections.id, electionId));
 }

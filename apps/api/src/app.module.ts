@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { CaptureModule } from './capture/capture.module.js';
 import { validateEnv } from './config/env.js';
 import { DatabaseModule } from './database/database.module.js';
+import { DeclarationsModule } from './declarations/declarations.module.js';
 import { ElectionsModule } from './elections/elections.module.js';
 import { GeographyModule } from './geography/geography.module.js';
 import { HealthController } from './health/health.controller.js';
@@ -30,6 +31,7 @@ import { TallyModule } from './tally/tally.module.js';
     CaptureModule,
     ResultsModule,
     TallyModule,
+    DeclarationsModule,
   ],
   controllers: [HealthController],
 })

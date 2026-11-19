@@ -43,6 +43,8 @@ export const COMPARISON_STATUSES = [
   'match_so_far',
   'does_not_match',
   'possible_mismatch_low_confidence',
+  /** Two approved declarations for the same area disagree: comparison paused for review (CMP-10) */
+  'conflicting_declarations',
   'awaiting_data',
 ] as const;
 export type ComparisonStatus = (typeof COMPARISON_STATUSES)[number];

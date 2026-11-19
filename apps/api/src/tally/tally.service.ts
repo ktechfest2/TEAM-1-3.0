@@ -2,6 +2,8 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectDrizzle } from '@nestjs/drizzle';
 import { asc, eq, sql, type SQL } from 'drizzle-orm';
 import type { Database } from '../database/database.module.js';
+import { compare, type Comparison } from '../declarations/compare.js';
+import { DeclarationsService } from '../declarations/declarations.service.js';
 import { electionParties, elections, lgas, parties, states, wards } from '../database/schema.js';
 
 /**
@@ -42,6 +44,10 @@ export interface AreaTally {
   rejectedReportedUnits: number;
   /** Only for polling units: their status */
   status?: string;
+  /** Totals without low-confidence units, to judge how strong a difference is */
+  strong: { partyVotes: Record<string, number>; totalValid: number };
+  /** Comparison with an approved declaration for this area (ward, LGA, state, national) */
+  comparison?: Comparison;
 }
 
 interface Row {
@@ -57,6 +63,7 @@ interface Row {
   total_valid: string | null;
   rejected: string | null;
   rejected_units: string;
+  total_valid_strong: string | null;
   status: string | null;
 }
 
@@ -66,7 +73,10 @@ const CACHE_MS = 5_000;
 export class TallyService {
   private readonly cache = new Map<string, { at: number; value: unknown }>();
 
-  constructor(@InjectDrizzle() private readonly db: Database) {}
+  constructor(
+    @InjectDrizzle() private readonly db: Database,
+    private readonly declarations: DeclarationsService,
+  ) {}
 
   /** Forget cached tallies of an election (called when one of its units changes). */
   invalidate(electionId: string) {
@@ -146,6 +156,7 @@ export class TallyService {
           sum((figures->>'totalValid')::int) filter (where ${counted}) as total_valid,
           sum((figures->>'rejected')::int) filter (where ${counted} and figures->>'rejected' is not null) as rejected,
           count(*) filter (where ${counted} and figures->>'rejected' is not null) as rejected_units,
+          sum((figures->>'totalValid')::int) filter (where ${counted} and confidence <> 'low') as total_valid_strong,
           max(status::text) as status
         from area
         group by code, name
@@ -161,12 +172,26 @@ export class TallyService {
         group by code, kv.key`)
     ).rows;
 
-    const votesByChild = new Map<string, Record<string, number>>();
-    for (const r of partyRows) {
-      const v = votesByChild.get(r.code) ?? {};
-      v[r.party] = Number(r.votes);
-      votesByChild.set(r.code, v);
-    }
+    const strongRows = (
+      await this.db.execute<{ code: string; party: string; votes: string }>(sql`
+        with area as (${area})
+        select code, kv.key as party, sum(kv.value::int) as votes
+        from area, jsonb_each_text(figures->'partyVotes') as kv
+        where ${counted} and confidence <> 'low'
+        group by code, kv.key`)
+    ).rows;
+
+    const group = (list: { code: string; party: string; votes: string }[]) => {
+      const out = new Map<string, Record<string, number>>();
+      for (const r of list) {
+        const v = out.get(r.code) ?? {};
+        v[r.party] = Number(r.votes);
+        out.set(r.code, v);
+      }
+      return out;
+    };
+    const votesByChild = group(partyRows);
+    const strongByChild = group(strongRows);
 
     const children: AreaTally[] = rows.map((r) => {
       const t: AreaTally = {
@@ -186,6 +211,7 @@ export class TallyService {
         totalValid: Number(r.total_valid ?? 0),
         rejected: Number(r.rejected ?? 0),
         rejectedReportedUnits: Number(r.rejected_units),
+        strong: { partyVotes: strongByChild.get(r.code) ?? {}, totalValid: Number(r.total_valid_strong ?? 0) },
       };
       if (childLevel === 'polling_unit') t.status = r.status ?? 'not_confirmed';
       return t;
@@ -193,16 +219,83 @@ export class TallyService {
 
     const total = sumTallies(children);
     const names = await this.areaNames(level, code);
+    const acronyms = ballot.map((b) => b.acronym);
+
+    // Comparison with approved declarations: for this area, and for each child area
+    const [own] = await this.comparisons(electionId, level, [{ code, tally: total }], acronyms);
+    if (childLevel !== 'polling_unit') {
+      const childComparisons = await this.comparisons(
+        electionId,
+        childLevel,
+        children.map((c) => ({ code: c.code, tally: c })),
+        acronyms,
+      );
+      children.forEach((c, i) => (c.comparison = childComparisons[i]));
+    }
 
     return {
       election: { id: election.id, title: election.title, type: election.type, electionDate: election.electionDate, status: election.status },
       parties: ballot,
       area: { level, code, name: names.at(-1)?.name ?? 'Nigeria', path: names },
       childLevel,
-      totals: { ...total, code, name: names.at(-1)?.name ?? 'Nigeria' },
+      totals: { ...total, code, name: names.at(-1)?.name ?? 'Nigeria', comparison: own },
       children,
       generatedAt: new Date().toISOString(),
     };
+  }
+
+  private async comparisons(
+    electionId: string,
+    level: TallyLevel,
+    areas: { code: string | null; tally: Omit<AreaTally, 'code' | 'name'> }[],
+    ballot: string[],
+  ): Promise<Comparison[]> {
+    const approved = await this.declarations.approvedFor(electionId, level, areas.map((a) => a.code));
+    return Promise.all(
+      areas.map(async ({ code, tally }) => {
+        const mine = approved.filter((d) => d.areaCode === code);
+        const unitDifferences = await this.unitDifferences(electionId, mine.flatMap((d) => (d.unitFigures ? [d.unitFigures] : [])));
+        return compare({
+          ballot,
+          declarations: mine.map((d) => ({ partyVotes: d.figures.partyVotes, totalValid: d.figures.totalValid })),
+          citizen: {
+            partyVotes: tally.partyVotes,
+            totalValid: tally.totalValid,
+            countedUnits: tally.countedUnits,
+            totalUnits: tally.totalUnits,
+            provisionalUnits: tally.mix.provisional,
+            disputedUnits: tally.mix.disputed,
+          },
+          citizenExcludingLow: tally.strong,
+          unitDifferences,
+        });
+      }),
+    );
+  }
+
+  /** Units listed in a declaration whose figures differ from their counted citizen result (CMP-08). */
+  private async unitDifferences(electionId: string, listed: Record<string, { partyVotes: Record<string, number> }>[]) {
+    const codes = [...new Set(listed.flatMap((l) => Object.keys(l)))];
+    if (!codes.length) return [];
+    const counted = (
+      await this.db.execute<{ code: string; confidence: string | null; figures: { partyVotes: Record<string, number> } }>(sql`
+        select pu.code, ur.confidence, rv.figures
+        from polling_units pu
+        join unit_results ur on ur.polling_unit_id = pu.id and ur.election_id = ${electionId}
+        join result_versions rv on rv.id = ur.counted_version_id
+        where pu.code in (${sql.join(codes.map((c) => sql`${c}`), sql`, `)})
+          and ur.status in ('counted', 'provisional', 'resolved')`)
+    ).rows;
+    const diffs: { unitCode: string; lowConfidence: boolean }[] = [];
+    for (const row of counted) {
+      const declared = listed.find((l) => l[row.code])?.[row.code];
+      if (!declared) continue;
+      const keys = new Set([...Object.keys(declared.partyVotes), ...Object.keys(row.figures.partyVotes)]);
+      if ([...keys].some((k) => (declared.partyVotes[k] ?? 0) !== (row.figures.partyVotes[k] ?? 0))) {
+        diffs.push({ unitCode: row.code, lowConfidence: row.confidence === 'low' });
+      }
+    }
+    return diffs;
   }
 
   /** Breadcrumb from the national level down to the requested area. */
@@ -224,7 +317,7 @@ export class TallyService {
   }
 }
 
-export function sumTallies(children: AreaTally[]): Omit<AreaTally, 'code' | 'name'> {
+export function sumTallies(children: AreaTally[]): Omit<AreaTally, 'code' | 'name' | 'comparison'> {
   const out = {
     totalUnits: 0,
     countedUnits: 0,
@@ -233,6 +326,7 @@ export function sumTallies(children: AreaTally[]): Omit<AreaTally, 'code' | 'nam
     totalValid: 0,
     rejected: 0,
     rejectedReportedUnits: 0,
+    strong: { partyVotes: {} as Record<string, number>, totalValid: 0 },
   };
   for (const c of children) {
     out.totalUnits += c.totalUnits;
@@ -242,6 +336,8 @@ export function sumTallies(children: AreaTally[]): Omit<AreaTally, 'code' | 'nam
     out.totalValid += c.totalValid;
     out.rejected += c.rejected;
     out.rejectedReportedUnits += c.rejectedReportedUnits;
+    for (const [p, v] of Object.entries(c.strong.partyVotes)) out.strong.partyVotes[p] = (out.strong.partyVotes[p] ?? 0) + v;
+    out.strong.totalValid += c.strong.totalValid;
   }
   return out;
 }

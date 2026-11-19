@@ -27,6 +27,9 @@ import { addTestUnits, ORIGIN, removeAdmins, removeElection, removeTestUnits, si
 
 class FakeVisionModel extends VisionModel {
   readonly name = 'fake-model';
+  async readDeclaration(): Promise<never> {
+    throw new Error('not used');
+  }
   next: Ec60eReading[] = [];
   async read(): Promise<Ec60eReading> {
     return this.next.shift()!;

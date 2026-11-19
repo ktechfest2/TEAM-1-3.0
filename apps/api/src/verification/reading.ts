@@ -93,3 +93,72 @@ and set votes to null if you cannot read it at all. Where a score is written in 
 to resolve an unclear figure. Do not compute totals: copy them exactly as written, or null if absent.
 If the image is not an EC60E poster (for example an EC8A sheet, a screenshot, a different document, or a person),
 set is_ec60e to false and describe what it is.`;
+
+/* ------------------------------------------------------------------ */
+/* Declared results: collation sheets and official announcements      */
+/* ------------------------------------------------------------------ */
+
+export const declarationReadingSchema = z.object({
+  is_result_document: z.boolean(),
+  document_type: z.enum(['EC8B', 'EC8C', 'EC8D', 'EC8E', 'announcement', 'other']),
+  document_description: z.string(),
+  area_name: z.string().nullable(),
+  image_quality: z.enum(IMAGE_QUALITY),
+  party_results: z.array(z.object({ party: z.string(), votes: z.number().int().min(0).nullable(), legible: z.boolean() })),
+  total_valid_votes: z.number().int().min(0).nullable(),
+  rejected_votes: z.number().int().min(0).nullable(),
+  total_votes_cast: z.number().int().min(0).nullable(),
+  notes: z.string(),
+});
+
+export type DeclarationReading = z.infer<typeof declarationReadingSchema>;
+
+export const DECLARATION_JSON_SCHEMA = {
+  type: 'object',
+  additionalProperties: false,
+  required: [
+    'is_result_document',
+    'document_type',
+    'document_description',
+    'area_name',
+    'image_quality',
+    'party_results',
+    'total_valid_votes',
+    'rejected_votes',
+    'total_votes_cast',
+    'notes',
+  ],
+  properties: {
+    is_result_document: { type: 'boolean', description: 'True if this shows an official collated or declared election result.' },
+    document_type: {
+      type: 'string',
+      enum: ['EC8B', 'EC8C', 'EC8D', 'EC8E', 'announcement', 'other'],
+      description: 'EC8B ward, EC8C LGA, EC8D state collation, EC8E declaration; announcement for a statement or broadcast screenshot.',
+    },
+    document_description: { type: 'string', description: 'What the image shows, in at most 15 words.' },
+    area_name: { ...nullableString, description: 'Ward, LGA or state the result is for, as written.' },
+    image_quality: { type: 'string', enum: [...IMAGE_QUALITY] },
+    party_results: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['party', 'votes', 'legible'],
+        properties: {
+          party: { type: 'string', description: 'Party acronym as written.' },
+          votes: { ...nullableInt, description: 'Total votes for the party in this area. Null if unreadable.' },
+          legible: { type: 'boolean' },
+        },
+      },
+    },
+    total_valid_votes: { ...nullableInt, description: 'As written, not computed.' },
+    rejected_votes: nullableInt,
+    total_votes_cast: nullableInt,
+    notes: { type: 'string', description: 'Corrections, overwriting or anything unusual. Empty if none.' },
+  },
+} as const;
+
+export const DECLARATION_PROMPT = `You are reading an official Nigerian election result document for TrustElect, to help an administrator
+record a declared result. It may be an INEC collation form (EC8B ward, EC8C LGA, EC8D state, EC8E declaration)
+or a screenshot of an official announcement. Report only what you can see. Never guess a number: if a figure is unclear,
+set legible to false, or votes to null if unreadable. Copy totals exactly as written; do not compute them.`;

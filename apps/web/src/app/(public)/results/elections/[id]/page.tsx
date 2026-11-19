@@ -3,8 +3,8 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import { UNOFFICIAL_LABEL } from '@trustelect/shared';
 import { LiveRefresh } from '@/components/results/live-refresh';
-import { CHILD_HEADING, CHILD_LABEL, n, pct, type TallyResponse } from '@/components/results/tally-types';
-import { UnitStatusBadge } from '@/components/status-badge';
+import { CHILD_HEADING, CHILD_LABEL, n, pct, type Comparison, type TallyResponse } from '@/components/results/tally-types';
+import { ComparisonBadge, UnitStatusBadge } from '@/components/status-badge';
 
 export const metadata: Metadata = { title: 'Live results' };
 
@@ -46,6 +46,78 @@ function MixList({ mix }: { mix: TallyResponse['totals']['mix'] }) {
   );
 }
 
+function DeclaredComparison({ comparison, areaName }: { comparison?: Comparison; areaName: string }) {
+  if (!comparison) return null;
+  const declared = comparison.parties.length > 0;
+  return (
+    <section aria-labelledby="declared-heading" className="rounded-2xl border border-divider bg-surface">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-divider px-5 py-4">
+        <h2 id="declared-heading" className="font-semibold">Declared result compared with citizen results</h2>
+        <ComparisonBadge status={comparison.status} />
+      </div>
+      {!declared ? (
+        <p className="px-5 py-4 text-ink-muted">
+          No approved official declaration for {areaName} yet. The comparison appears here once one is recorded and approved.
+        </p>
+      ) : (
+        <>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <caption className="sr-only">Declared votes and citizen-confirmed votes by party, in ballot order</caption>
+              <thead>
+                <tr className="text-left text-ink-muted">
+                  <th scope="col" className="px-5 py-2 font-medium">Party</th>
+                  <th scope="col" className="px-5 py-2 text-right font-medium">Declared</th>
+                  <th scope="col" className="px-5 py-2 text-right font-medium">Citizen confirmed</th>
+                  <th scope="col" className="px-5 py-2 text-right font-medium">Difference</th>
+                </tr>
+              </thead>
+              <tbody className="tabular">
+                {comparison.parties.map((p) => (
+                  <tr key={p.party} className={`border-t border-divider ${p.exceedsDeclared ? 'bg-mismatch-bg' : ''}`}>
+                    <th scope="row" className="px-5 py-2 text-left font-medium">{p.party}</th>
+                    <td className="px-5 py-2 text-right">{n(p.declared)}</td>
+                    <td className="px-5 py-2 text-right">{n(p.citizen)}</td>
+                    <td className={`px-5 py-2 text-right ${p.exceedsDeclared ? 'font-semibold text-mismatch' : ''}`}>
+                      {p.citizen - p.declared > 0 ? '+' : ''}
+                      {n(p.citizen - p.declared)}
+                      {p.exceedsDeclared && <span className="sr-only"> (citizen votes exceed the declared figure)</span>}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {comparison.reasons.length > 0 && (
+            <ul className="grid gap-1 border-t border-divider px-5 py-3 text-sm">
+              {comparison.reasons.map((r) => (
+                <li key={r}>{r}</li>
+              ))}
+            </ul>
+          )}
+          {comparison.unitDifferences.length > 0 && (
+            <p className="border-t border-divider px-5 py-3 text-sm">
+              Polling units listed differently from their counted result:{' '}
+              <span className="font-mono">{comparison.unitDifferences.join(', ')}</span>
+            </p>
+          )}
+        </>
+      )}
+      {comparison.disputeExists && (
+        <p className="border-t border-divider bg-dispute-bg px-5 py-3 text-sm text-dispute">
+          Some polling units in this area are disputed or provisional. Their outcome could change this comparison.
+        </p>
+      )}
+      {declared && !comparison.fullCoverage && (
+        <p className="border-t border-divider px-5 py-3 text-sm text-ink-muted">
+          Citizen results do not yet cover every polling unit, so citizen totals are expected to be lower than declared
+          totals. A difference is only flagged when confirmed citizen votes are higher than declared.
+        </p>
+      )}
+    </section>
+  );
+}
+
 async function Dashboard({ params, searchParams }: PageProps<'/results/elections/[id]'>) {
   const { id } = await params;
   const sp = await searchParams;
@@ -59,13 +131,14 @@ async function Dashboard({ params, searchParams }: PageProps<'/results/elections
   }
 
   const { totals, parties, area, childLevel } = data;
+  const hasComparisons = data.children.some((c) => c.comparison);
   const childHref = (code: string) =>
     childLevel === 'polling_unit'
       ? `/results?unit=${code}`
       : `/results/elections/${data.election.id}?level=${NEXT_LEVEL[childLevel]}&code=${code}`;
 
   return (
-    <div className="grid gap-8">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
       <div className="grid gap-3">
         <nav aria-label="Area">
           <ol className="flex flex-wrap items-center gap-1 text-sm text-ink-muted">
@@ -149,6 +222,8 @@ async function Dashboard({ params, searchParams }: PageProps<'/results/elections
         </p>
       </section>
 
+      <DeclaredComparison comparison={totals.comparison} areaName={area.name} />
+
       <section aria-labelledby="areas-heading" className="grid gap-3">
         <h2 id="areas-heading" className="text-xl font-semibold">{CHILD_HEADING[childLevel]}</h2>
         <div
@@ -168,6 +243,7 @@ async function Dashboard({ params, searchParams }: PageProps<'/results/elections
                   <th key={p.acronym} scope="col" className="px-4 py-2 text-right font-medium">{p.acronym}</th>
                 ))}
                 <th scope="col" className="px-4 py-2 text-right font-medium whitespace-nowrap">Total valid</th>
+                {hasComparisons && <th scope="col" className="px-4 py-2 text-left font-medium whitespace-nowrap">Compared with declaration</th>}
               </tr>
             </thead>
             <tbody className="tabular">
@@ -187,6 +263,11 @@ async function Dashboard({ params, searchParams }: PageProps<'/results/elections
                     </td>
                   ))}
                   <td className="border-t border-divider px-4 py-2 text-right">{c.countedUnits ? n(c.totalValid) : '–'}</td>
+                  {hasComparisons && (
+                    <td className="border-t border-divider px-4 py-2 whitespace-nowrap">
+                      {c.comparison && <ComparisonBadge status={c.comparison.status} />}
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

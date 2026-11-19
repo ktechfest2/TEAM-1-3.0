@@ -1,0 +1,81 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "98f76e6f-8ace-4e65-8e48-77493ac0e704",
+  "prevIds": [
+    "e0cc2e73-fc14-4d5a-8cce-73785c802f5f"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "declarations",
+        "rejection_reason"
+      ],
+      "writes": [
+        "s|col|public.declarations.rejection_reason",
+        "n|col|public.declarations.rejection_reason",
+        "e|col|public.declarations.rejection_reason"
+      ],
+      "reads": [
+        "n|tbl|public.declarations",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "declarations",
+        "ai_reading"
+      ],
+      "writes": [
+        "s|col|public.declarations.ai_reading",
+        "n|col|public.declarations.ai_reading",
+        "e|col|public.declarations.ai_reading"
+      ],
+      "reads": [
+        "n|tbl|public.declarations",
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "declarations",
+        "name": "rejection_reason",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "declarations",
+        "name": "ai_reading",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    }
+  ]
+}

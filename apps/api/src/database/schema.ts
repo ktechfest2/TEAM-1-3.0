@@ -331,8 +331,12 @@ export const declarations = pgTable(
     sourceSha256: text('source_sha256'),
     status: declarationStatus('status').notNull().default('pending'),
     enteredBy: uuid('entered_by').notNull().references(() => adminUsers.id),
+    /** The second administrator who approved or rejected it (never the one who entered it) */
     approvedBy: uuid('approved_by').references(() => adminUsers.id),
     approvedAt: timestamp('approved_at', { withTimezone: true }),
+    rejectionReason: text('rejection_reason'),
+    /** AI reading of the source document, when the figures were prefilled from it */
+    aiReading: jsonb('ai_reading'),
     createdAt: createdAt(),
   },
   (t) => [index('declarations_area_idx').on(t.electionId, t.level, t.areaCode)],
