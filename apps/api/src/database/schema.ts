@@ -202,6 +202,26 @@ export const captureLinks = pgTable('capture_links', {
 /* WhatsApp channel (CAP-06, CNT-08, INF)                               */
 /* ------------------------------------------------------------------ */
 
+export const knowledgeStatus = pgEnum('knowledge_status', ['pending', 'approved', 'retired']);
+
+/**
+ * Facts the information assistant may use (ADM-04, INF-07): from official sources only,
+ * entered by one administrator and approved by another before the assistant uses them.
+ */
+export const knowledgeEntries = pgTable('knowledge_entries', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  topic: text('topic').notNull(),
+  fact: text('fact').notNull(),
+  sourceName: text('source_name').notNull(),
+  sourceUrl: text('source_url'),
+  status: knowledgeStatus('status').notNull().default('pending'),
+  enteredBy: uuid('entered_by').references(() => adminUsers.id),
+  approvedBy: uuid('approved_by').references(() => adminUsers.id),
+  approvedAt: timestamp('approved_at', { withTimezone: true }),
+  createdAt: createdAt(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
 /** A WhatsApp user. No message text is stored. */
 export const whatsappContacts = pgTable('whatsapp_contacts', {
   id: uuid('id').primaryKey().defaultRandom(),

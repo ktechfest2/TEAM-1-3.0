@@ -24,6 +24,7 @@
     "register:import": "nest build && node dist/cli/import-register.js",
     "register:fetch": "nest build && node dist/cli/fetch-register.js",
     "ai:eval": "nest build && node dist/cli/ai-eval.js",
+    "assistant:eval": "nest build && VERIFICATION_WORKER=off CHAIN_ANCHOR_WORKER=off WHATSAPP_PROVIDER=log node dist/cli/assistant-eval.js",
     "chain:verify": "nest build && VERIFICATION_WORKER=off CHAIN_ANCHOR_WORKER=off node dist/cli/chain-verify.js"
   },
   "dependencies": {

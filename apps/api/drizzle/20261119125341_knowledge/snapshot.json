@@ -1,0 +1,347 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "4ecec3be-1b2d-4849-9611-d43b8dec5c89",
+  "prevIds": [
+    "b1c95966-eea6-4358-9b74-2ce437b41f29"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "knowledge_status"
+      ],
+      "writes": [
+        "s|enum|public.knowledge_status",
+        "n|enum|public.knowledge_status",
+        "e|enum|public.knowledge_status",
+        "n|type|public.knowledge_status"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "knowledge_entries"
+      ],
+      "writes": [
+        "s|tbl|public.knowledge_entries",
+        "n|tbl|public.knowledge_entries",
+        "e|tbl|public.knowledge_entries",
+        "n|rel|public.knowledge_entries",
+        "n|type|public.knowledge_entries",
+        "n|rel|public.knowledge_entries_pkey"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.knowledge_status"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "knowledge_entries"
+      ],
+      "writes": [
+        "s|fk|public.knowledge_entries.knowledge_entries_entered_by_admin_users_id_fkey",
+        "n|fk|public.knowledge_entries.knowledge_entries_entered_by_admin_users_id_fkey",
+        "e|fk|public.knowledge_entries.knowledge_entries_entered_by_admin_users_id_fkey",
+        "n|con|public.knowledge_entries.knowledge_entries_entered_by_admin_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.knowledge_entries",
+        "n|sch|public",
+        "n|tbl|public.admin_users",
+        "n|sch|public",
+        "n|col|public.knowledge_entries.entered_by",
+        "n|col|public.admin_users.id",
+        "e|uniqueness|public.admin_users.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "knowledge_entries"
+      ],
+      "writes": [
+        "s|fk|public.knowledge_entries.knowledge_entries_approved_by_admin_users_id_fkey",
+        "n|fk|public.knowledge_entries.knowledge_entries_approved_by_admin_users_id_fkey",
+        "e|fk|public.knowledge_entries.knowledge_entries_approved_by_admin_users_id_fkey",
+        "n|con|public.knowledge_entries.knowledge_entries_approved_by_admin_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.knowledge_entries",
+        "n|sch|public",
+        "n|tbl|public.admin_users",
+        "n|sch|public",
+        "n|col|public.knowledge_entries.approved_by",
+        "n|col|public.admin_users.id",
+        "e|uniqueness|public.admin_users.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "knowledge_entries",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "knowledge_status",
+        "values": [
+          "pending",
+          "approved",
+          "retired"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "knowledge_entries",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "knowledge_entries",
+        "name": "topic",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "knowledge_entries",
+        "name": "fact",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "knowledge_entries",
+        "name": "source_name",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "knowledge_entries",
+        "name": "source_url",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "knowledge_entries",
+        "name": "status",
+        "type": "knowledge_status",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'pending'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "knowledge_entries",
+        "name": "entered_by",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "knowledge_entries",
+        "name": "approved_by",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "knowledge_entries",
+        "name": "approved_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "knowledge_entries",
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "knowledge_entries",
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "knowledge_entries",
+        "name": "knowledge_entries_entered_by_admin_users_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "entered_by"
+        ],
+        "schemaTo": "public",
+        "tableTo": "admin_users",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "NO ACTION",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "knowledge_entries",
+        "name": "knowledge_entries_approved_by_admin_users_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "approved_by"
+        ],
+        "schemaTo": "public",
+        "tableTo": "admin_users",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "NO ACTION",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "knowledge_entries",
+        "name": "knowledge_entries_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    }
+  ]
+}

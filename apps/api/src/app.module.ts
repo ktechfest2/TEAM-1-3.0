@@ -14,6 +14,7 @@ import { HealthController } from './health/health.controller.js';
 import { ResultsModule } from './results/results.module.js';
 import { SecurityModule } from './security/security.module.js';
 import { TallyModule } from './tally/tally.module.js';
+import { KnowledgeModule } from './knowledge/knowledge.module.js';
 import { WhatsAppModule } from './whatsapp/whatsapp.module.js';
 
 @Module({
@@ -37,6 +38,7 @@ import { WhatsAppModule } from './whatsapp/whatsapp.module.js';
     TallyModule,
     DeclarationsModule,
     EvidenceModule,
+    KnowledgeModule,
     WhatsAppModule,
   ],
   controllers: [HealthController],

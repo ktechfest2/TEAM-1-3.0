@@ -238,8 +238,13 @@ describe('WhatsApp channel (e2e)', () => {
     await text(voter, 'what do I need to vote?');
     expect(last(voter).text).toBe('Bring your Permanent Voter Card (PVC).');
 
+    // INF-08: voting advice gets a fixed, neutral reply; the model only recognises the question
+    assistant.next = { intent: 'voting_advice', language: 'en', unit_code: null, area_code: null, answer: null };
+    await text(voter, 'who should I vote for?');
+    expect(last(voter).text).toMatch(/does not give voting advice/);
+
     assistant.next = { intent: 'question', language: 'en', unit_code: null, area_code: null, answer: null };
-    await text(voter, 'who is the best candidate?');
+    await text(voter, 'who are the candidates?');
     expect(last(voter).text).toMatch(/only answer from official INEC information/);
 
     // A Yoruba speaker gets translated replies; a translation that changes numbers is not used

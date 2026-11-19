@@ -22,6 +22,7 @@ import {
   whatsappContacts,
   whatsappMessages,
 } from '../database/schema.js';
+import { KnowledgeService } from '../knowledge/knowledge.service.js';
 import { ResultsService } from '../results/results.service.js';
 import { Encryptor, keyedHash } from '../security/encryption.js';
 import { TallyService } from '../tally/tally.service.js';
@@ -107,6 +108,7 @@ export class WhatsAppService {
     private readonly tally: TallyService,
     private readonly witnesses: WitnessService,
     private readonly chain: ChainService,
+    private readonly knowledge: KnowledgeService,
   ) {}
 
   /** Records the message (ignoring Meta's repeats) and queues it for handling. */
@@ -178,7 +180,11 @@ export class WhatsAppService {
     }
 
     // Free text: the assistant classifies it; figures and links still come from fixed code
-    const u = await this.assistant.understand(text, { rememberedUnit: contact.rememberedUnitCode, language: contact.language as Language });
+    const u = await this.assistant.understand(text, {
+      rememberedUnit: contact.rememberedUnitCode,
+      language: contact.language as Language,
+      facts: await this.knowledge.approvedFacts(),
+    });
     if (u.language !== contact.language) {
       await this.db.update(whatsappContacts).set({ language: u.language }).where(eq(whatsappContacts.id, contact.id));
       contact.language = u.language;
@@ -193,6 +199,8 @@ export class WhatsAppService {
         if (!asked) return this.say(contact, 'Which polling unit? Send its code, for example 24-05-01-003. It is printed on your voter\'s card.', { translate: true });
         return this.lookup(contact, asked);
       }
+      case 'voting_advice':
+        return this.say(contact, 'TrustElect does not give voting advice or predict winners, and has no view on any party or candidate. Your vote is your choice, and it is secret.', { translate: true });
       case 'rumour_check':
         return this.say(
           contact,
