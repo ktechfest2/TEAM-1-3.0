@@ -32,7 +32,11 @@ export class ChannelsController {
     const expected = this.config.get('CHANNELS_WEBHOOK_TOKEN', { infer: true });
     const a = Buffer.from(token ?? '');
     const b = Buffer.from(expected ?? '');
-    if (!expected || a.length !== b.length || !timingSafeEqual(a, b)) throw new NotFoundException();
+    if (!expected || a.length !== b.length || !timingSafeEqual(a, b)) {
+      // Diagnose misconfigured callback addresses; the secret itself is never logged
+      this.logger.warn(`callback with a wrong secret (length ${token?.length ?? 0}, expected ${expected?.length ?? 0})`);
+      throw new NotFoundException();
+    }
   }
 
   /** Africa's Talking checks a callback address before saving it: answer OK when the secret is right */
