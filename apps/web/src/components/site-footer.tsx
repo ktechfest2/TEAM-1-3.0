@@ -38,6 +38,9 @@ export function SiteFooter() {
             <Link href="/verify" className="font-medium text-brand-strong hover:underline">
               Verify evidence
             </Link>
+            <Link href="/developers" className="font-medium text-brand-strong hover:underline">
+              Developers API
+            </Link>
             <Link href="/privacy" className="font-medium text-brand-strong hover:underline">
               Privacy notice
             </Link>
