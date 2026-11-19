@@ -1,4 +1,4 @@
-import { Body, Controller, Header, HttpCode, NotFoundException, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Header, HttpCode, NotFoundException, Param, Post } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { timingSafeEqual } from 'node:crypto';
 import { z } from 'zod';
@@ -19,18 +19,26 @@ export class ChannelsController {
     private readonly ussd: UssdService,
   ) {}
 
-  private check(token: string) {
+  private checkToken(token: string) {
     const expected = this.config.get('CHANNELS_WEBHOOK_TOKEN', { infer: true });
     const a = Buffer.from(token ?? '');
     const b = Buffer.from(expected ?? '');
     if (!expected || a.length !== b.length || !timingSafeEqual(a, b)) throw new NotFoundException();
   }
 
+  /** Africa's Talking checks a callback address before saving it: answer OK when the secret is right */
+  @Get(['sms', 'ussd'])
+  @Header('Content-Type', 'text/plain; charset=utf-8')
+  check(@Param('token') token: string) {
+    this.checkToken(token);
+    return 'OK';
+  }
+
   /** Incoming SMS: from, to, text, id, date, linkId */
   @Post('sms')
   @HttpCode(200)
   async incomingSms(@Param('token') token: string, @Body() body: unknown) {
-    this.check(token);
+    this.checkToken(token);
     const m = parseOrThrow(z.object({ from: z.string().min(5).max(20), text: z.string().max(1000).default(''), id: z.string().min(1).max(100) }), body);
     await this.sms.receive(m);
     return 'OK';
@@ -41,7 +49,7 @@ export class ChannelsController {
   @HttpCode(200)
   @Header('Content-Type', 'text/plain; charset=utf-8')
   async ussdStep(@Param('token') token: string, @Body() body: unknown) {
-    this.check(token);
+    this.checkToken(token);
     const s = parseOrThrow(
       z.object({ sessionId: z.string().min(1).max(100), phoneNumber: z.string().min(5).max(20), text: z.string().max(300).default('') }),
       body,

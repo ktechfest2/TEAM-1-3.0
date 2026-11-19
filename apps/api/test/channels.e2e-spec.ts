@@ -112,6 +112,12 @@ describe('SMS and USSD channels (e2e)', () => {
     await app.close();
   });
 
+  it('answers the address check from Africa\'s Talking only with the secret token', async () => {
+    expect((await request(app.getHttpServer()).get(`/channels/${TOKEN}/ussd`).expect(200)).text).toBe('OK');
+    await request(app.getHttpServer()).get(`/channels/${TOKEN}/sms`).expect(200);
+    await request(app.getHttpServer()).get('/channels/wrong-token-wrong-token-wrong/ussd').expect(404);
+  });
+
   it('refuses callbacks without the secret token', async () => {
     await request(app.getHttpServer()).post('/channels/wrong-token-wrong-token-wrong/sms').type('form').send({ from: smsVoter, text: 'hi', id: 'x' }).expect(404);
     await request(app.getHttpServer()).post('/channels/wrong-token-wrong-token-wrong/ussd').type('form').send({ phoneNumber: ussdVoter, text: '' }).expect(404);
