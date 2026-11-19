@@ -187,6 +187,61 @@ export const captureSessions = pgTable('capture_sessions', {
   createdAt: createdAt(),
 });
 
+/* ------------------------------------------------------------------ */
+/* Incident reports (INC)                                              */
+/* ------------------------------------------------------------------ */
+
+export const incidentType = pgEnum('incident_type', [
+  'late_officials',
+  'bvas_problem',
+  'vote_buying',
+  'intimidation_violence',
+  'ballot_snatching',
+  'missing_ec60e',
+  'other',
+]);
+/** Table 5: never "true" or "fake" */
+export const incidentLabel = pgEnum('incident_label', ['supported', 'partly_supported', 'not_supported', 'unconfirmed', 'under_review']);
+export const incidentStatus = pgEnum('incident_status', ['pending', 'published', 'held', 'hidden']);
+
+export const incidentReports = pgTable(
+  'incident_reports',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    /** Given to the sender to follow the label (INC-04) */
+    reference: text('reference').notNull().unique(),
+    pollingUnitId: integer('polling_unit_id').notNull().references(() => pollingUnits.id),
+    reporterId: uuid('reporter_id').notNull().references(() => reporters.id),
+    type: incidentType('type').notNull(),
+    claim: text('claim').notNull(),
+    channel: channel('channel').notNull(),
+    status: incidentStatus('status').notNull().default('pending'),
+    label: incidentLabel('label').notNull().default('unconfirmed'),
+    capturedAt: timestamp('captured_at', { withTimezone: true }),
+    receivedAt: timestamp('received_at', { withTimezone: true }).notNull().defaultNow(),
+    latitude: doublePrecision('latitude'),
+    longitude: doublePrecision('longitude'),
+    locationAccuracy: doublePrecision('location_accuracy'),
+    evidenceKey: text('evidence_key'),
+    evidenceSha256: text('evidence_sha256').notNull(),
+    evidenceType: text('evidence_type').notNull(),
+    /** AI reading of the evidence against the claim, and the checks applied (INC-03) */
+    assessment: jsonb('assessment'),
+    /** Independent reports of the same type at the same unit around the same time */
+    corroboration: integer('corroboration').notNull().default(0),
+    reviewedBy: uuid('reviewed_by').references(() => adminUsers.id),
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+    reviewNote: text('review_note'),
+    publishedAt: timestamp('published_at', { withTimezone: true }),
+    clientId: uuid('client_id'),
+  },
+  (t) => [
+    index('incident_reports_unit_idx').on(t.pollingUnitId, t.receivedAt),
+    index('incident_reports_status_idx').on(t.status, t.receivedAt),
+    uniqueIndex('incident_reports_client_idx').on(t.reporterId, t.clientId),
+  ],
+);
+
 /** One-time links that open a capture session, sent by WhatsApp or SMS (CAP-02, INF-06) */
 export const captureLinks = pgTable('capture_links', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -236,6 +291,8 @@ export const whatsappContacts = pgTable('whatsapp_contacts', {
   rememberedUnitCode: text('remembered_unit_code'),
   /** Typed figures waiting for the voter to choose the election */
   pendingFigures: jsonb('pending_figures'),
+  /** A WhatsApp incident report being put together (type, claim, unit) */
+  pendingReport: jsonb('pending_report'),
   lastInboundAt: timestamp('last_inbound_at', { withTimezone: true }),
   createdAt: createdAt(),
 });

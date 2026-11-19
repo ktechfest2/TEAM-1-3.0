@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectDrizzle } from '@nestjs/drizzle';
 import { and, count, eq, gt } from 'drizzle-orm';
@@ -8,6 +8,8 @@ import { normaliseNigerianMobile } from '../capture/phone.js';
 import type { Env } from '../config/env.js';
 import type { Database } from '../database/database.module.js';
 import { whatsappContacts, whatsappMessages } from '../database/schema.js';
+import { IncidentsService, MAX_EVIDENCE_BYTES } from '../incidents/incidents.service.js';
+import { DANGER, INCIDENT_TYPES, type IncidentType } from '../incidents/rules.js';
 import { KnowledgeService } from '../knowledge/knowledge.service.js';
 import { MessagingCore, type Area, type Reply } from '../messaging/core.service.js';
 import { Encryptor, keyedHash } from '../security/encryption.js';
@@ -25,12 +27,14 @@ export type Inbound = {
   text?: string;
   /** Quick-reply button or list choice */
   choice?: string;
-  /** Voice note media id */
+  /** Voice note or image media id */
   mediaId?: string;
+  mediaKind?: 'image';
 };
 
 type Contact = typeof whatsappContacts.$inferSelect;
 type PendingFigures = { unitCode: string; votes: Record<string, number> };
+type PendingReport = { type: IncidentType; claim?: string; unitCode?: string };
 
 /** Messages per contact in 10 minutes before TrustElect asks them to slow down */
 const MESSAGES_PER_10_MIN = 20;
@@ -74,6 +78,7 @@ export class WhatsAppService {
     private readonly capture: CaptureService,
     private readonly knowledge: KnowledgeService,
     private readonly core: MessagingCore,
+    private readonly incidents: IncidentsService,
   ) {}
 
   /** Records the message (ignoring Meta's repeats) and queues it for handling. */
@@ -123,10 +128,13 @@ export class WhatsAppService {
     if (!contact.consentAt) return this.consentStep(contact, m.choice);
 
     if (m.choice?.startsWith('election:')) return this.figuresForElection(contact, m.choice.slice(9));
+    if (m.choice?.startsWith('report:')) return this.reportType(contact, m.choice.slice(7));
+    const report = contact.pendingReport as PendingReport | null;
+    if (m.type === 'media' && report?.claim && m.mediaKind === 'image' && m.mediaId) return this.reportEvidence(contact, report, m.mediaId);
     if (m.type === 'media') {
       return this.say(
         contact,
-        `Photos sent on WhatsApp cannot be accepted: they may be old, forwarded or edited. Use this one-time camera link instead (it works for ${30} minutes):\n${await this.linkFor(contact)}`,
+        `Photos sent on WhatsApp cannot be accepted as results: they may be old, forwarded or edited. Use this one-time camera link instead (it works for ${30} minutes):\n${await this.linkFor(contact)}\n\nTo report an incident instead, send REPORT.`,
         { translate: true },
       );
     }
@@ -146,6 +154,16 @@ export class WhatsAppService {
       if (isEmergency(text)) return this.say(contact, EMERGENCY_TEXT, { translate: true });
     }
     if (!text) return this.say(contact, HELP, { translate: true });
+
+    // Incident reports (INC-01, INC-02)
+    if (/^cancel\b/i.test(text) && report) {
+      await this.db.update(whatsappContacts).set({ pendingReport: null }).where(eq(whatsappContacts.id, contact.id));
+      return this.say(contact, 'Report cancelled.', { translate: true });
+    }
+    const ref = /\b(TE-[A-Za-z0-9]{6})\b/i.exec(text);
+    if (ref && text.length <= 30) return this.followReference(contact, ref[1]);
+    if (/^report\b/i.test(text)) return this.startReport(contact);
+    if (report && !report.claim) return this.reportClaim(contact, report, text);
 
     const typed = parseTypedFigures(text);
     if (typed) return 'error' in typed ? this.say(contact, `${typed.error}\nFormat: PU 24-05-01-003 APC 112 LP 98 PDP 140`) : this.typedFigures(contact, typed);
@@ -253,6 +271,75 @@ export class WhatsAppService {
       kind,
       status: waMessageId ? 'sent' : 'failed',
     });
+  }
+
+  /* ----------------------------- incident reports ---------------------------- */
+
+  private async startReport(contact: Contact) {
+    const id = await this.client.sendList(
+      this.phoneOf(contact).slice(1),
+      'What do you want to report? Choose one. In danger? Call 112 first.',
+      'Report type',
+      Object.entries(INCIDENT_TYPES).map(([type, title]) => ({ id: `report:${type}`, title })),
+    );
+    await this.track(contact, id, 'list');
+  }
+
+  private async reportType(contact: Contact, type: string) {
+    if (!(type in INCIDENT_TYPES)) return this.startReport(contact);
+    await this.db.update(whatsappContacts).set({ pendingReport: { type } }).where(eq(whatsappContacts.id, contact.id));
+    if (DANGER.has(type as IncidentType)) await this.say(contact, EMERGENCY_TEXT, { translate: true });
+    return this.say(
+      contact,
+      `In one or two sentences, what happened? Include the polling unit code, e.g. 24-05-01-003${contact.rememberedUnitCode ? ` (or we will use ${contact.rememberedUnitCode})` : ''}. Do not name private people. Send CANCEL to stop.`,
+      { translate: true },
+    );
+  }
+
+  private async reportClaim(contact: Contact, report: PendingReport, text: string) {
+    const code = findAreaCode(text);
+    const unitCode = code?.level === 'polling_unit' ? code.code : contact.rememberedUnitCode;
+    if (!unitCode) return this.say(contact, 'Please include the polling unit code, for example 24-05-01-003.', { translate: true });
+    if (text.length < 10) return this.say(contact, 'Please describe what happened in a sentence.', { translate: true });
+    await this.db
+      .update(whatsappContacts)
+      .set({ pendingReport: { ...report, claim: text.slice(0, 280), unitCode } })
+      .where(eq(whatsappContacts.id, contact.id));
+    return this.say(contact, `Now send a photo of what you saw at ${unitCode}. Take it now; old or forwarded photos count for less.`, { translate: true });
+  }
+
+  private async reportEvidence(contact: Contact, report: PendingReport, mediaId: string) {
+    const phone = normaliseNigerianMobile(this.phoneOf(contact));
+    if (!phone) return this.say(contact, 'Reports can only be sent from Nigerian mobile numbers.', { translate: true });
+    const media = await this.client.downloadMedia(mediaId, MAX_EVIDENCE_BYTES);
+    if (!media) return this.say(contact, 'Sorry, that photo could not be received. Please send it again.', { translate: true });
+    try {
+      const receipt = await this.incidents.submit(
+        await this.capture.reporterFor(phone),
+        { type: report.type, unitCode: report.unitCode!, claim: report.claim!, clientId: randomUUID(), channel: 'whatsapp' },
+        media.bytes,
+      );
+      await this.db.update(whatsappContacts).set({ pendingReport: null, rememberedUnitCode: report.unitCode }).where(eq(whatsappContacts.id, contact.id));
+      return this.say(
+        contact,
+        `Thank you. Your report number is ${receipt.reference}. We check the photo against what you said and label the report; serious reports are checked by a person before anything is published. Your number is never shown. Send ${receipt.reference} at any time to see its label.`,
+        { translate: true },
+      );
+    } catch (err) {
+      if (err instanceof HttpException) return this.say(contact, err.message);
+      throw err;
+    }
+  }
+
+  private async followReference(contact: Contact, reference: string) {
+    try {
+      const r = await this.incidents.byReference(reference);
+      const state = r.published ? 'published' : r.status === 'hidden' ? 'not published' : 'not published yet';
+      return this.say(contact, `${r.reference} (${r.typeText}, ${r.unitCode}): ${r.labelText}. ${state[0].toUpperCase()}${state.slice(1)}.`, { translate: true });
+    } catch (err) {
+      if (err instanceof HttpException) return this.say(contact, `No report found with the number ${reference.toUpperCase()}.`, { translate: true });
+      throw err;
+    }
   }
 
   /* ------------------------- shared with SMS and USSD ------------------------ */

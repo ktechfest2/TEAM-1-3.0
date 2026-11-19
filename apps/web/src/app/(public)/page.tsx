@@ -126,8 +126,13 @@ export default function Home() {
               Photograph a result poster
             </Link>
           </div>
-          <div className="rounded-2xl border border-divider bg-surface p-5">
+          <div className="grid gap-4 rounded-2xl border border-divider bg-surface p-5">
             <UnitSearch />
+            <p className="text-sm text-ink-muted">
+              Saw a problem at a polling unit?{' '}
+              <Link href="/capture/report" className="font-semibold text-brand-strong hover:underline">Report an incident</Link> with a photo, or{' '}
+              <Link href="/incidents" className="font-semibold text-brand-strong hover:underline">see published reports</Link>.
+            </p>
           </div>
         </div>
       </section>

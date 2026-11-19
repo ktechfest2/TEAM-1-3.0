@@ -5,7 +5,7 @@ import { and, asc, desc, eq, gte, inArray, sql } from 'drizzle-orm';
 import { createHash } from 'node:crypto';
 import type { Database } from '../database/database.module.js';
 import { chainAnchors, chainEntries } from '../database/schema.js';
-import { declarationRecord, submissionRecord, unitResultRecord, type Executor } from './records.js';
+import { declarationRecord, incidentRecord, submissionRecord, unitResultRecord, type Executor } from './records.js';
 
 /** Advisory lock that serialises appends, so sequence numbers have no gaps */
 const CHAIN_LOCK = 7_303_281;
@@ -75,6 +75,13 @@ export class ChainService {
   syncDeclaration(id: string, exec?: Executor) {
     return this.append('declaration', async (tx) => {
       const record = await declarationRecord(tx, id);
+      return record && { ref: id, record };
+    }, exec);
+  }
+
+  syncIncident(id: string, exec?: Executor) {
+    return this.append('incident', async (tx) => {
+      const record = await incidentRecord(tx, id);
       return record && { ref: id, record };
     }, exec);
   }
@@ -158,6 +165,7 @@ export class ChainService {
     for (const e of latest.values()) {
       let current: unknown = null;
       if (e.entryType === 'submission') current = await submissionRecord(this.db, e.refId);
+      else if (e.entryType === 'incident') current = await incidentRecord(this.db, e.refId);
       else if (e.entryType === 'declaration') current = await declarationRecord(this.db, e.refId);
       else if (e.entryType === 'unit_result') {
         const [electionId, unitCode] = e.refId.split(':');

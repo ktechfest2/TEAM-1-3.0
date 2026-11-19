@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CaptureModule } from '../capture/capture.module.js';
+import { IncidentsModule } from '../incidents/incidents.module.js';
 import { KnowledgeModule } from '../knowledge/knowledge.module.js';
 import { MessagingModule } from '../messaging/messaging.module.js';
 import type { Env } from '../config/env.js';
@@ -10,7 +11,7 @@ import { WhatsAppController } from './whatsapp.controller.js';
 import { WhatsAppService } from './whatsapp.service.js';
 
 @Module({
-  imports: [CaptureModule, KnowledgeModule, MessagingModule],
+  imports: [CaptureModule, IncidentsModule, KnowledgeModule, MessagingModule],
   controllers: [WhatsAppController],
   providers: [
     WhatsAppService,

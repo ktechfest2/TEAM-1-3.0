@@ -23,6 +23,9 @@ export function SiteFooter() {
             units. Official results are declared by INEC.
           </p>
           <p className="flex flex-wrap gap-x-5 gap-y-1">
+            <Link href="/incidents" className="font-medium text-brand-strong hover:underline">
+              Incident reports
+            </Link>
             <Link href="/verify" className="font-medium text-brand-strong hover:underline">
               Verify evidence
             </Link>

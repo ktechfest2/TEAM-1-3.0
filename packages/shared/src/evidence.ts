@@ -8,7 +8,7 @@ export const GENESIS_HASH = '0'.repeat(64);
 export const PACK_FORMAT = 'trustelect-evidence-pack/1';
 
 /** Record types written to the chain. Audit entries are chained but never published in packs. */
-export type ChainEntryType = 'submission' | 'unit_result' | 'declaration' | 'audit';
+export type ChainEntryType = 'submission' | 'unit_result' | 'declaration' | 'incident' | 'audit';
 
 /** One chain entry without its payload: this is what the public chain listing shows. */
 export interface ChainEntry {

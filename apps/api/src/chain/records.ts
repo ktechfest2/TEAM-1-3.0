@@ -1,6 +1,6 @@
 import { and, asc, eq } from 'drizzle-orm';
 import type { Database } from '../database/database.module.js';
-import { declarations, pollingUnits, resultVersions, submissions, unitResults } from '../database/schema.js';
+import { declarations, incidentReports, pollingUnits, resultVersions, submissions, unitResults } from '../database/schema.js';
 
 /** A database handle or an open transaction */
 export type Executor = Database | Parameters<Parameters<Database['transaction']>[0]>[0];
@@ -107,4 +107,31 @@ export async function declarationRecord(db: Executor, id: string) {
     .where(eq(declarations.id, id))
     .limit(1);
   return d ?? null;
+}
+
+/** An incident report as chained: no reporter, no exact location (INC-06) */
+export async function incidentRecord(db: Executor, id: string) {
+  const [r] = await db
+    .select({
+      id: incidentReports.id,
+      reference: incidentReports.reference,
+      unitCode: pollingUnits.code,
+      type: incidentReports.type,
+      claim: incidentReports.claim,
+      channel: incidentReports.channel,
+      status: incidentReports.status,
+      label: incidentReports.label,
+      capturedAt: incidentReports.capturedAt,
+      receivedAt: incidentReports.receivedAt,
+      evidenceSha256: incidentReports.evidenceSha256,
+      corroboration: incidentReports.corroboration,
+      reviewedBy: incidentReports.reviewedBy,
+      reviewNote: incidentReports.reviewNote,
+      publishedAt: incidentReports.publishedAt,
+    })
+    .from(incidentReports)
+    .innerJoin(pollingUnits, eq(pollingUnits.id, incidentReports.pollingUnitId))
+    .where(eq(incidentReports.id, id))
+    .limit(1);
+  return r ?? null;
 }

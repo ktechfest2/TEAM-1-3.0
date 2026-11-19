@@ -25,7 +25,7 @@ import { LogSmsSender, SmsSender } from './sms.js';
           : new LogSmsSender(config),
     },
   ],
-  exports: [CaptureService],
+  exports: [CaptureService, CaptureSessionGuard],
 })
 export class CaptureModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

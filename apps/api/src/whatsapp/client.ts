@@ -14,7 +14,7 @@ export abstract class WhatsAppClient {
   abstract sendList(to: string, body: string, buttonLabel: string, rows: ListRow[]): Promise<string | null>;
   abstract markRead(messageId: string): Promise<void>;
   /** Downloads an incoming media file (e.g. a voice note) */
-  abstract downloadMedia(mediaId: string): Promise<{ bytes: Buffer; mimeType: string } | null>;
+  abstract downloadMedia(mediaId: string, maxBytes?: number): Promise<{ bytes: Buffer; mimeType: string } | null>;
 }
 
 export type SentMessage = { to: string; kind: 'text' | 'buttons' | 'list'; text: string; options?: string[] };

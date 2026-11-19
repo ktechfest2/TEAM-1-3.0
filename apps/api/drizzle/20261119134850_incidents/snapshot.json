@@ -1,0 +1,873 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "ce47d6a2-6ff8-4d6b-91bd-4d46ac7835fc",
+  "prevIds": [
+    "4ecec3be-1b2d-4849-9611-d43b8dec5c89"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "incident_label"
+      ],
+      "writes": [
+        "s|enum|public.incident_label",
+        "n|enum|public.incident_label",
+        "e|enum|public.incident_label",
+        "n|type|public.incident_label"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "incident_status"
+      ],
+      "writes": [
+        "s|enum|public.incident_status",
+        "n|enum|public.incident_status",
+        "e|enum|public.incident_status",
+        "n|type|public.incident_status"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "incident_type"
+      ],
+      "writes": [
+        "s|enum|public.incident_type",
+        "n|enum|public.incident_type",
+        "e|enum|public.incident_type",
+        "n|type|public.incident_type"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_table",
+      "statementTarget": [
+        "table",
+        "public",
+        "incident_reports"
+      ],
+      "writes": [
+        "s|tbl|public.incident_reports",
+        "n|tbl|public.incident_reports",
+        "e|tbl|public.incident_reports",
+        "n|rel|public.incident_reports",
+        "n|type|public.incident_reports",
+        "n|rel|public.incident_reports_pkey",
+        "n|rel|public.incident_reports_reference_key"
+      ],
+      "reads": [
+        "n|sch|public",
+        "n|enum|public.incident_type",
+        "n|enum|public.channel",
+        "n|enum|public.incident_status",
+        "n|enum|public.incident_label"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "whatsapp_contacts",
+        "pending_report"
+      ],
+      "writes": [
+        "s|col|public.whatsapp_contacts.pending_report",
+        "n|col|public.whatsapp_contacts.pending_report",
+        "e|col|public.whatsapp_contacts.pending_report"
+      ],
+      "reads": [
+        "n|tbl|public.whatsapp_contacts",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "incident_reports",
+        "incident_reports_unit_idx"
+      ],
+      "writes": [
+        "s|idx|public.incident_reports_unit_idx",
+        "n|idx|public.incident_reports_unit_idx",
+        "e|idx|public.incident_reports_unit_idx",
+        "n|rel|public.incident_reports_unit_idx"
+      ],
+      "reads": [
+        "n|tbl|public.incident_reports",
+        "n|sch|public",
+        "n|col|public.incident_reports.polling_unit_id",
+        "n|col|public.incident_reports.received_at"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "incident_reports",
+        "incident_reports_status_idx"
+      ],
+      "writes": [
+        "s|idx|public.incident_reports_status_idx",
+        "n|idx|public.incident_reports_status_idx",
+        "e|idx|public.incident_reports_status_idx",
+        "n|rel|public.incident_reports_status_idx"
+      ],
+      "reads": [
+        "n|tbl|public.incident_reports",
+        "n|sch|public",
+        "n|col|public.incident_reports.status",
+        "n|col|public.incident_reports.received_at"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "incident_reports",
+        "incident_reports_client_idx"
+      ],
+      "writes": [
+        "s|idx|public.incident_reports_client_idx",
+        "n|idx|public.incident_reports_client_idx",
+        "e|idx|public.incident_reports_client_idx",
+        "n|rel|public.incident_reports_client_idx"
+      ],
+      "reads": [
+        "n|tbl|public.incident_reports",
+        "n|sch|public",
+        "n|col|public.incident_reports.reporter_id",
+        "n|col|public.incident_reports.client_id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "incident_reports"
+      ],
+      "writes": [
+        "s|fk|public.incident_reports.incident_reports_polling_unit_id_polling_units_id_fkey",
+        "n|fk|public.incident_reports.incident_reports_polling_unit_id_polling_units_id_fkey",
+        "e|fk|public.incident_reports.incident_reports_polling_unit_id_polling_units_id_fkey",
+        "n|con|public.incident_reports.incident_reports_polling_unit_id_polling_units_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.incident_reports",
+        "n|sch|public",
+        "n|tbl|public.polling_units",
+        "n|sch|public",
+        "n|col|public.incident_reports.polling_unit_id",
+        "n|col|public.polling_units.id",
+        "e|uniqueness|public.polling_units.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "incident_reports"
+      ],
+      "writes": [
+        "s|fk|public.incident_reports.incident_reports_reporter_id_reporters_id_fkey",
+        "n|fk|public.incident_reports.incident_reports_reporter_id_reporters_id_fkey",
+        "e|fk|public.incident_reports.incident_reports_reporter_id_reporters_id_fkey",
+        "n|con|public.incident_reports.incident_reports_reporter_id_reporters_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.incident_reports",
+        "n|sch|public",
+        "n|tbl|public.reporters",
+        "n|sch|public",
+        "n|col|public.incident_reports.reporter_id",
+        "n|col|public.reporters.id",
+        "e|uniqueness|public.reporters.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "incident_reports"
+      ],
+      "writes": [
+        "s|fk|public.incident_reports.incident_reports_reviewed_by_admin_users_id_fkey",
+        "n|fk|public.incident_reports.incident_reports_reviewed_by_admin_users_id_fkey",
+        "e|fk|public.incident_reports.incident_reports_reviewed_by_admin_users_id_fkey",
+        "n|con|public.incident_reports.incident_reports_reviewed_by_admin_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.incident_reports",
+        "n|sch|public",
+        "n|tbl|public.admin_users",
+        "n|sch|public",
+        "n|col|public.incident_reports.reviewed_by",
+        "n|col|public.admin_users.id",
+        "e|uniqueness|public.admin_users.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "incident_reports",
+        "isRlsEnabled": false,
+        "entityType": "tables"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "incident_label",
+        "values": [
+          "supported",
+          "partly_supported",
+          "not_supported",
+          "unconfirmed",
+          "under_review"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "incident_status",
+        "values": [
+          "pending",
+          "published",
+          "held",
+          "hidden"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "incident_type",
+        "values": [
+          "late_officials",
+          "bvas_problem",
+          "vote_buying",
+          "intimidation_violence",
+          "ballot_snatching",
+          "missing_ec60e",
+          "other"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "gen_random_uuid()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "reference",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "polling_unit_id",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "reporter_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "type",
+        "type": "incident_type",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "claim",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "channel",
+        "type": "channel",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "status",
+        "type": "incident_status",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'pending'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "label",
+        "type": "incident_label",
+        "typeSchema": "public",
+        "notNull": true,
+        "dimensions": 0,
+        "default": "'unconfirmed'",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "captured_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "received_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "now()",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "latitude",
+        "type": "double precision",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "longitude",
+        "type": "double precision",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "location_accuracy",
+        "type": "double precision",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "evidence_key",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "evidence_sha256",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "evidence_type",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "assessment",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "corroboration",
+        "type": "integer",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "0",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "reviewed_by",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "reviewed_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "review_note",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "published_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "client_id",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "whatsapp_contacts",
+        "name": "pending_report",
+        "type": "jsonb",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "incident_reports_unit_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "polling_unit_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "received_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "incident_reports_status_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "status",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "received_at",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "incident_reports_client_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "reporter_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          },
+          {
+            "value": "client_id",
+            "isExpression": false,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": true,
+        "where": null,
+        "with": "",
+        "method": "btree",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "incident_reports_polling_unit_id_polling_units_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "polling_unit_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "polling_units",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "NO ACTION",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "incident_reports_reporter_id_reporters_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "reporter_id"
+        ],
+        "schemaTo": "public",
+        "tableTo": "reporters",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "NO ACTION",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "incident_reports_reviewed_by_admin_users_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "reviewed_by"
+        ],
+        "schemaTo": "public",
+        "tableTo": "admin_users",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "NO ACTION",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "incident_reports_pkey",
+        "columns": [
+          "id"
+        ],
+        "nameExplicit": false,
+        "entityType": "pks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "incident_reports_reference_key",
+        "nameExplicit": false,
+        "columns": [
+          "reference"
+        ],
+        "nullsNotDistinct": false,
+        "entityType": "uniques"
+      }
+    }
+  ]
+}

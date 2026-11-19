@@ -13,6 +13,7 @@ type WebhookMessage = {
   interactive?: { button_reply?: { id: string }; list_reply?: { id: string } };
   button?: { payload?: string; text?: string };
   audio?: { id?: string };
+  image?: { id?: string };
 };
 type WebhookBody = {
   object?: string;
@@ -87,6 +88,7 @@ function toInbound(m: WebhookMessage): Inbound {
     case 'button':
       return { ...base, type: 'text', text: m.button?.text ?? m.button?.payload ?? '' };
     case 'image':
+      return { ...base, type: 'media', mediaId: m.image?.id, mediaKind: 'image' };
     case 'video':
     case 'document':
     case 'sticker':

@@ -45,7 +45,7 @@ export class CaptureSessionGuard implements CanActivate {
   }
 }
 
-const CurrentVoter = createParamDecorator(
+export const CurrentVoter = createParamDecorator(
   (_: unknown, ctx: ExecutionContext) => ctx.switchToHttp().getRequest<VoterRequest>().voter!,
 );
 
@@ -71,6 +71,10 @@ const photoQuerySchema = z.object({
   accuracy: z.coerce.number().min(0).max(100_000).optional(),
 });
 
+/**
+ * Per-IP limits only stop floods: on Nigerian mobile networks many phones share one IP
+ * (carrier-grade NAT), so the real limits are per phone number (codes and photos per hour).
+ */
 @Controller('capture')
 export class CaptureController {
   constructor(
@@ -97,7 +101,7 @@ export class CaptureController {
   @Post('start')
   @HttpCode(200)
   @UseGuards(ThrottlerGuard)
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
   async start(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
     this.requireMode('none');
     const { phone } = parseOrThrow(startSchema, body);
@@ -109,7 +113,7 @@ export class CaptureController {
   @Post('code')
   @HttpCode(200)
   @UseGuards(ThrottlerGuard)
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
   requestCode(@Body() body: unknown) {
     this.requireMode('sms');
     return this.capture.requestCode(parseOrThrow(requestSchema, body).phone);
@@ -118,7 +122,7 @@ export class CaptureController {
   @Post('verify')
   @HttpCode(200)
   @UseGuards(ThrottlerGuard)
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
   async verify(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
     this.requireMode('sms');
     const { phone, code } = parseOrThrow(verifySchema, body);
@@ -131,7 +135,7 @@ export class CaptureController {
   @Post('link')
   @HttpCode(200)
   @UseGuards(ThrottlerGuard)
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @Throttle({ default: { limit: 60, ttl: 60_000 } })
   async link(@Body() body: unknown, @Res({ passthrough: true }) res: Response) {
     const { token: linkToken } = parseOrThrow(z.object({ token: z.string().regex(/^[A-Za-z0-9_-]{20,200}$/) }), body);
     const opened = await this.capture.redeemLink(linkToken);
