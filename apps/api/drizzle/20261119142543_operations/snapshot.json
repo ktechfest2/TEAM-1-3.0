@@ -1,0 +1,303 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "f150a331-e2bb-4c2c-8b7f-3cb74ac7f8ff",
+  "prevIds": [
+    "ee481674-1c82-4e9a-8f73-47f357e3e1c6"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "incident_reports",
+        "assigned_to"
+      ],
+      "writes": [
+        "s|col|public.incident_reports.assigned_to",
+        "n|col|public.incident_reports.assigned_to",
+        "e|col|public.incident_reports.assigned_to"
+      ],
+      "reads": [
+        "n|tbl|public.incident_reports",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "incident_reports",
+        "assigned_at"
+      ],
+      "writes": [
+        "s|col|public.incident_reports.assigned_at",
+        "n|col|public.incident_reports.assigned_at",
+        "e|col|public.incident_reports.assigned_at"
+      ],
+      "reads": [
+        "n|tbl|public.incident_reports",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "unit_results",
+        "assigned_to"
+      ],
+      "writes": [
+        "s|col|public.unit_results.assigned_to",
+        "n|col|public.unit_results.assigned_to",
+        "e|col|public.unit_results.assigned_to"
+      ],
+      "reads": [
+        "n|tbl|public.unit_results",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "unit_results",
+        "assigned_at"
+      ],
+      "writes": [
+        "s|col|public.unit_results.assigned_at",
+        "n|col|public.unit_results.assigned_at",
+        "e|col|public.unit_results.assigned_at"
+      ],
+      "reads": [
+        "n|tbl|public.unit_results",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "unit_results",
+        "review_since"
+      ],
+      "writes": [
+        "s|col|public.unit_results.review_since",
+        "n|col|public.unit_results.review_since",
+        "e|col|public.unit_results.review_since"
+      ],
+      "reads": [
+        "n|tbl|public.unit_results",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "unit_results",
+        "resolved_at"
+      ],
+      "writes": [
+        "s|col|public.unit_results.resolved_at",
+        "n|col|public.unit_results.resolved_at",
+        "e|col|public.unit_results.resolved_at"
+      ],
+      "reads": [
+        "n|tbl|public.unit_results",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "incident_reports"
+      ],
+      "writes": [
+        "s|fk|public.incident_reports.incident_reports_assigned_to_admin_users_id_fkey",
+        "n|fk|public.incident_reports.incident_reports_assigned_to_admin_users_id_fkey",
+        "e|fk|public.incident_reports.incident_reports_assigned_to_admin_users_id_fkey",
+        "n|con|public.incident_reports.incident_reports_assigned_to_admin_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.incident_reports",
+        "n|sch|public",
+        "n|tbl|public.admin_users",
+        "n|sch|public",
+        "n|col|public.incident_reports.assigned_to",
+        "n|col|public.admin_users.id",
+        "e|uniqueness|public.admin_users.id"
+      ]
+    },
+    {
+      "statementType": "create_fk",
+      "statementTarget": [
+        "table",
+        "public",
+        "unit_results"
+      ],
+      "writes": [
+        "s|fk|public.unit_results.unit_results_assigned_to_admin_users_id_fkey",
+        "n|fk|public.unit_results.unit_results_assigned_to_admin_users_id_fkey",
+        "e|fk|public.unit_results.unit_results_assigned_to_admin_users_id_fkey",
+        "n|con|public.unit_results.unit_results_assigned_to_admin_users_id_fkey"
+      ],
+      "reads": [
+        "n|tbl|public.unit_results",
+        "n|sch|public",
+        "n|tbl|public.admin_users",
+        "n|sch|public",
+        "n|col|public.unit_results.assigned_to",
+        "n|col|public.admin_users.id",
+        "e|uniqueness|public.admin_users.id"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "assigned_to",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "assigned_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "unit_results",
+        "name": "assigned_to",
+        "type": "uuid",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "unit_results",
+        "name": "assigned_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "unit_results",
+        "name": "review_since",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "unit_results",
+        "name": "resolved_at",
+        "type": "timestamp with time zone",
+        "typeSchema": null,
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "incident_reports",
+        "name": "incident_reports_assigned_to_admin_users_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "assigned_to"
+        ],
+        "schemaTo": "public",
+        "tableTo": "admin_users",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "NO ACTION",
+        "entityType": "fks"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "unit_results",
+        "name": "unit_results_assigned_to_admin_users_id_fkey",
+        "nameExplicit": false,
+        "columns": [
+          "assigned_to"
+        ],
+        "schemaTo": "public",
+        "tableTo": "admin_users",
+        "columnsTo": [
+          "id"
+        ],
+        "onUpdate": "NO ACTION",
+        "onDelete": "NO ACTION",
+        "entityType": "fks"
+      }
+    }
+  ]
+}

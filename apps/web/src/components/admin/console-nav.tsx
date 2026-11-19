@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 
 const LINKS = [
   { href: '/admin', label: 'Overview' },
+  { href: '/admin/ops', label: 'Operations' },
   { href: '/admin/review', label: 'Review' },
   { href: '/admin/declarations', label: 'Declarations' },
   { href: '/admin/incidents', label: 'Incidents' },
@@ -13,6 +14,7 @@ const LINKS = [
   { href: '/admin/elections', label: 'Elections' },
   { href: '/admin/parties', label: 'Parties' },
   { href: '/admin/register', label: 'Polling units' },
+  { href: '/admin/audit', label: 'Audit log' },
 ];
 
 /** Plain links, shown until the current page is known (no active highlight). */

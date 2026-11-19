@@ -16,6 +16,7 @@ import { SecurityModule } from './security/security.module.js';
 import { TallyModule } from './tally/tally.module.js';
 import { ChannelsModule } from './channels/channels.module.js';
 import { FraudModule } from './fraud/fraud.module.js';
+import { OpsModule } from './ops/ops.module.js';
 import { IncidentsModule } from './incidents/incidents.module.js';
 import { KnowledgeModule } from './knowledge/knowledge.module.js';
 import { WhatsAppModule } from './whatsapp/whatsapp.module.js';
@@ -46,6 +47,7 @@ import { WhatsAppModule } from './whatsapp/whatsapp.module.js';
     ChannelsModule,
     IncidentsModule,
     FraudModule,
+    OpsModule,
   ],
   controllers: [HealthController],
 })

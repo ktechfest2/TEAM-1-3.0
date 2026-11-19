@@ -236,6 +236,8 @@ export const incidentReports = pgTable(
     reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
     reviewNote: text('review_note'),
     publishedAt: timestamp('published_at', { withTimezone: true }),
+    assignedTo: uuid('assigned_to').references(() => adminUsers.id),
+    assignedAt: timestamp('assigned_at', { withTimezone: true }),
     clientId: uuid('client_id'),
   },
   (t) => [
@@ -437,6 +439,11 @@ export const unitResults = pgTable(
     flags: jsonb('flags').$type<string[]>().notNull().default([]),
     resolvedBy: uuid('resolved_by').references(() => adminUsers.id),
     resolutionReason: text('resolution_reason'),
+    /** Review at scale (ADM-01): who is handling the unit, since when it needs review, when it was resolved */
+    assignedTo: uuid('assigned_to').references(() => adminUsers.id),
+    assignedAt: timestamp('assigned_at', { withTimezone: true }),
+    reviewSince: timestamp('review_since', { withTimezone: true }),
+    resolvedAt: timestamp('resolved_at', { withTimezone: true }),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.electionId, t.pollingUnitId] }), index('unit_results_status_idx').on(t.electionId, t.status)],

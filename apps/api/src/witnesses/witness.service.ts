@@ -133,7 +133,7 @@ export class WitnessService {
         await tx.execute(sql`select pg_notify(${RESULTS_CHANNEL}, ${electionId})`);
         await tx
           .update(unitResults)
-          .set({ ...base, flags })
+          .set({ ...base, flags, reviewSince: current.reviewSince ?? new Date(), resolvedAt: null })
           .where(and(eq(unitResults.electionId, electionId), eq(unitResults.pollingUnitId, pollingUnitId)));
         await this.chain.syncUnitResult(electionId, pollingUnitId, tx);
         return;
@@ -149,6 +149,9 @@ export class WitnessService {
         witnessCount: outcome.counted?.witnesses ?? 0,
         confidence: outcome.counted?.confidence ?? null,
         flags: outcome.flags,
+        // ADM-01: since when the unit has needed a reviewer (kept while it still does)
+        reviewSince:
+          outcome.status === 'provisional' || outcome.status === 'disputed' || outcome.flags.length ? (current?.reviewSince ?? new Date()) : null,
       };
       await tx
         .insert(unitResults)
@@ -209,6 +212,9 @@ export class WitnessService {
         confidence: version.confidence,
         resolvedBy: adminId,
         resolutionReason: input.reason,
+        resolvedAt: new Date(),
+        assignedTo: null,
+        assignedAt: null,
         flags: [],
         updatedAt: new Date(),
       })
