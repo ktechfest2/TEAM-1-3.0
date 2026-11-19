@@ -52,6 +52,7 @@ export class ChannelsController {
     // The provider checks the address with a request that carries no message: answer OK
     if (!parsed.success) return this.probe(req, 'OK');
     const m = parsed.data;
+    this.logger.log(`sms in (${m.text.length} chars)`);
     await this.sms.receive(m);
     return 'OK';
   }
@@ -67,6 +68,9 @@ export class ChannelsController {
       .safeParse(body);
     if (!parsed.success) return this.probe(req, 'END TrustElect');
     const s = parsed.data;
-    return this.ussd.handle(s.sessionId, `+${s.phoneNumber.replace(/\D/g, '')}`, s.text);
+    const reply = await this.ussd.handle(s.sessionId, `+${s.phoneNumber.replace(/\D/g, '')}`, s.text);
+    // Session shape only (no number, no input): depth of the menu and the answer type
+    this.logger.log(`ussd session …${s.sessionId.slice(-4)} step ${s.text === '' ? 0 : s.text.split('*').length} -> ${reply.slice(0, 3)} (${reply.length} chars)`);
+    return reply;
   }
 }
