@@ -64,8 +64,18 @@ describe('Admin authentication (e2e)', () => {
       .set('Origin', origin)
       .send({ email, password })
       .expect(200);
-    expect(login.body).toEqual({ status: 'totp_setup_required' });
+    expect(login.body).toEqual({ status: 'totp_setup_required', token: expect.stringMatching(/^[A-Za-z0-9_-]{20,}$/) });
     const pending = cookieFrom(login);
+
+    // The web app on another site sends the same session as a Bearer token instead of the cookie
+    const viaBearer = await request(server).get('/admin/auth/me').set('Authorization', `Bearer ${login.body.token}`).expect(200);
+    expect(viaBearer.body.mfaVerified).toBe(false);
+    await request(server).get('/admin/auth/me').set('Authorization', 'Bearer not-a-real-session-token-000000').expect(401);
+    await request(server)
+      .post('/admin/auth/totp/setup')
+      .set('Authorization', `Bearer ${login.body.token}`)
+      .set('Origin', 'https://evil.example')
+      .expect(403);
     expect(login.headers['set-cookie']![0]).toMatch(/HttpOnly/i);
     expect(login.headers['set-cookie']![0]).toMatch(/SameSite=Strict/i);
 
@@ -127,7 +137,7 @@ describe('Admin authentication (e2e)', () => {
       .set('Origin', origin)
       .send({ email, password, code: nextCode })
       .expect(200);
-    expect(second.body).toEqual({ status: 'ok' });
+    expect(second.body).toEqual({ status: 'ok', token: expect.any(String) });
     await request(server).get('/admin/auth/me').set('Cookie', cookieFrom(second)).expect(200);
   });
 });

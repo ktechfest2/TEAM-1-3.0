@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { apiUrl } from '@/lib/api-url';
 import { verifyPack, type ChainEntry, type Check, type PublishedChain, type VerifyResult } from '@trustelect/shared';
 
 const published: PublishedChain = {
   async entries(from) {
     const all: ChainEntry[] = [];
     for (;;) {
-      const res = await fetch(`/api/chain/entries?from=${from}&limit=5000`, { cache: 'no-store' });
+      const res = await fetch(apiUrl(`/chain/entries?from=${from}&limit=5000`), { cache: 'no-store' });
       if (!res.ok) throw new Error('chain unavailable');
       const page = (await res.json()) as ChainEntry[];
       all.push(...page);
@@ -16,7 +17,7 @@ const published: PublishedChain = {
     }
   },
   async anchors() {
-    const res = await fetch('/api/chain/anchors?limit=500', { cache: 'no-store' });
+    const res = await fetch(apiUrl('/chain/anchors?limit=500'), { cache: 'no-store' });
     if (!res.ok) throw new Error('anchors unavailable');
     return res.json();
   },

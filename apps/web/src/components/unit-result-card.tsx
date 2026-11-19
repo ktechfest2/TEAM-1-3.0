@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { apiUrl } from '@/lib/api-url';
 import { UNOFFICIAL_LABEL } from '@trustelect/shared';
 import { UnitStatusBadge } from './status-badge';
 
@@ -110,7 +111,7 @@ export function UnitResultCard({ result, unitCode }: { result: PublicUnitResult;
         <span>{UNOFFICIAL_LABEL}</span>
         {unitCode && result.status !== 'not_confirmed' && (
           <span className="flex flex-wrap gap-x-4 text-sm">
-            <a href={`/api/evidence/elections/${result.election.id}/units/${unitCode}`} download className="font-medium text-brand-strong hover:underline">
+            <a href={apiUrl(`/evidence/elections/${result.election.id}/units/${unitCode}`)} download className="font-medium text-brand-strong hover:underline">
               Download evidence pack
             </a>
             <Link href="/verify" className="font-medium text-brand-strong hover:underline">

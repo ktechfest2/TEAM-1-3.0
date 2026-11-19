@@ -1,0 +1,16 @@
+**/node_modules
+**/dist
+**/.next
+**/out
+**/coverage
+apps/api/storage
+**/.env
+**/.env.*
+apps/api/data
+apps/web
+docs
+*.pdf
+*.docx
+*.png
+.git
+.claude

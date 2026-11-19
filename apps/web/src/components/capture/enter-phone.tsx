@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { FormError, inputClass, primaryButtonClass } from '@/components/admin/auth-card';
-import { apiPost } from '@/lib/admin-client';
+import { apiPost, sessionToken } from '@/lib/api';
 
 /** Default flow: the voter's phone number, no SMS code. Consent was given on the previous step. */
 export function EnterPhone({ onStarted }: { onStarted: (phoneMasked: string) => void }) {
@@ -18,9 +18,10 @@ export function EnterPhone({ onStarted }: { onStarted: (phoneMasked: string) => 
         const phone = String(new FormData(e.currentTarget).get('phone') ?? '');
         setBusy(true);
         setError(null);
-        const result = await apiPost<{ phoneMasked: string }>('/capture/start', { phone, consent: true });
+        const result = await apiPost<{ phoneMasked: string; token: string }>('/capture/start', { phone, consent: true });
         setBusy(false);
         if (!result.ok) return setError(result.message);
+        sessionToken.set('voter', result.data.token);
         onStarted(result.data.phoneMasked);
       }}
     >

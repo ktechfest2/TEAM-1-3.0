@@ -1,12 +1,12 @@
 'use client';
 
+import { useAdminRefresh } from '@/lib/admin-session';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { FormError, inputClass } from '@/components/admin/auth-card';
 import { adminPost } from '@/lib/admin-client';
 
 export function AddPartyForm() {
-  const router = useRouter();
+  const refresh = useAdminRefresh();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -28,7 +28,7 @@ export function AddPartyForm() {
         setBusy(false);
         if (!result.ok) return setError(result.message);
         form.reset();
-        router.refresh();
+        refresh();
       }}
     >
       <h2 id="add-party-heading" className="text-lg font-semibold">

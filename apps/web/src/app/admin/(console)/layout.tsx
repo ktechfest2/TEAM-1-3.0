@@ -1,8 +1,11 @@
+'use client';
+
 import { Suspense } from 'react';
 import { ConsoleNav, ConsoleNavFallback } from '@/components/admin/console-nav';
 import { SignOutButton } from '@/components/admin/sign-out-button';
+import { AdminGate } from '@/lib/admin-session';
 
-/** Console chrome. Each page checks the session itself with requireAdmin(). */
+/** Console chrome. Nothing is shown until the session is confirmed. */
 export default function ConsoleLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
@@ -14,7 +17,7 @@ export default function ConsoleLayout({ children }: { children: React.ReactNode 
           <SignOutButton />
         </div>
       </div>
-      {children}
+      <AdminGate>{children}</AdminGate>
     </>
   );
 }

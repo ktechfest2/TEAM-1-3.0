@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FormError, inputClass, primaryButtonClass } from '@/components/admin/auth-card';
 import { QrCode } from '@/components/admin/qr-code';
+import { apiUrl, authHeaders, sessionToken } from '@/lib/api';
 
 type Setup = { secret: string; uri: string };
 
@@ -21,10 +22,13 @@ export function SetupForm() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const res = await fetch('/api/admin/auth/totp/setup', { method: 'POST' }).catch(() => null);
+      const res = await fetch(apiUrl('/admin/auth/totp/setup'), { method: 'POST', headers: authHeaders('admin') }).catch(() => null);
       if (cancelled) return;
       if (!res) return setError('Could not reach TrustElect. Reload the page to try again.');
-      if (res.status === 401) return router.replace('/admin/login');
+      if (res.status === 401) {
+        sessionToken.clear('admin');
+        return router.replace('/admin/login');
+      }
       if (res.status === 400) return router.replace('/admin');
       if (!res.ok) return setError('Could not start two-factor setup. Reload the page to try again.');
       setSetup((await res.json()) as Setup);
@@ -38,9 +42,9 @@ export function SetupForm() {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch('/api/admin/auth/totp/confirm', {
+      const res = await fetch(apiUrl('/admin/auth/totp/confirm'), {
         method: 'POST',
-        headers: { 'content-type': 'application/json' },
+        headers: { 'content-type': 'application/json', ...authHeaders('admin') },
         body: JSON.stringify({ code }),
       });
       if (res.ok) return router.replace('/admin');

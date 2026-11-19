@@ -1,5 +1,6 @@
 'use client';
 
+import { apiUrl } from '@/lib/api-url';
 import { useState } from 'react';
 import { parseUnitCode } from '@trustelect/shared';
 import { FormError, inputClass, primaryButtonClass } from '@/components/admin/auth-card';
@@ -52,7 +53,7 @@ export function ChooseUnit({
     if (!parsed) return setError('Enter the code in the format 24-05-01-003 (slashes are fine too).');
     setBusy(true);
     try {
-      const res = await fetch(`/api/geo/units/${parsed.unit}`);
+      const res = await fetch(apiUrl(`/geo/units/${parsed.unit}`));
       if (res.status === 404) return setError(`${parsed.unit} is not in INEC's register. Check the code on your voter's card.`);
       if (!res.ok) return setError('Could not look up the code. Check your connection and try again.');
       const u = (await res.json()) as UnitResponse;

@@ -16,7 +16,7 @@ import type { Request, Response } from 'express';
 import { z } from 'zod';
 import type { Env } from '../config/env.js';
 import { AuthService, type AuthenticatedAdmin } from './auth.service.js';
-import { AllowPendingMfa, CurrentAdmin, SESSION_COOKIE, SessionGuard, readCookie } from './session.guard.js';
+import { AllowPendingMfa, CurrentAdmin, SESSION_COOKIE, SessionGuard, readSessionToken } from './session.guard.js';
 
 const loginSchema = z.object({
   email: z.email().max(254),
@@ -54,10 +54,10 @@ export class AuthController {
     switch (outcome.status) {
       case 'ok':
         this.setCookie(res, outcome.token, true);
-        return { status: 'ok' };
+        return { status: 'ok', token: outcome.token };
       case 'totp_setup_required':
         this.setCookie(res, outcome.token, false);
-        return { status: 'totp_setup_required' };
+        return { status: 'totp_setup_required', token: outcome.token };
       case 'totp_required':
         return { status: 'totp_required' };
       case 'locked':
@@ -90,7 +90,7 @@ export class AuthController {
     const { code } = parse(codeSchema, body);
     if (!(await this.auth.confirmTotpSetup(admin, code))) throw new UnauthorizedException('Incorrect code');
     // Re-issue the same session cookie with the full session lifetime
-    this.setCookie(res, readCookie(req, SESSION_COOKIE) ?? '', true);
+    this.setCookie(res, readSessionToken(req, SESSION_COOKIE) ?? '', true);
     return { status: 'ok' };
   }
 

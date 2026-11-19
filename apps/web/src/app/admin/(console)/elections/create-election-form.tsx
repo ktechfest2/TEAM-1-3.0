@@ -1,7 +1,7 @@
 'use client';
 
+import { useAdminRefresh } from '@/lib/admin-session';
 import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { NIGERIAN_STATES } from '@trustelect/shared';
 import { FormError, inputClass } from '@/components/admin/auth-card';
 import { adminPost } from '@/lib/admin-client';
@@ -11,7 +11,7 @@ type Party = { acronym: string; name: string };
 type Scope = 'national' | 'state' | 'lga';
 
 export function CreateElectionForm({ parties }: { parties: Party[] }) {
-  const router = useRouter();
+  const refresh = useAdminRefresh();
   const [scope, setScope] = useState<Scope>('national');
   const [selected, setSelected] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +47,7 @@ export function CreateElectionForm({ parties }: { parties: Party[] }) {
         form.reset();
         setSelected([]);
         setScope('national');
-        router.refresh();
+        refresh();
       }}
     >
       <h2 id="create-election-heading" className="text-lg font-semibold">

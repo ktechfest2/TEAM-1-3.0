@@ -11,6 +11,12 @@ export const envSchema = z.object({
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
   /** Origin of the web app, allowed by CORS and checked on admin requests */
   WEB_ORIGIN: z.url().default('http://localhost:3000'),
+  /** Other origins serving the same web app, comma-separated (e.g. https://trustelect.firebaseapp.com) */
+  WEB_EXTRA_ORIGINS: z
+    .string()
+    .default('')
+    .transform((v) => v.split(',').map((o) => o.trim()).filter(Boolean))
+    .pipe(z.array(z.url())),
   /** AES-256-GCM key for secrets at rest (TOTP secrets, phone numbers) */
   APP_ENCRYPTION_KEY: base64Key32,
   /** HMAC key for hashing phone numbers to count distinct witnesses */
@@ -44,6 +50,9 @@ export const envSchema = z.object({
 });
 
 export type Env = z.infer<typeof envSchema>;
+
+/** Every origin allowed to call the API from a browser */
+export const webOrigins = (env: Pick<Env, 'WEB_ORIGIN' | 'WEB_EXTRA_ORIGINS'>) => [env.WEB_ORIGIN, ...env.WEB_EXTRA_ORIGINS];
 
 const refinedSchema = envSchema.refine((e) => e.SMS_PROVIDER !== 'bulksmslive' || !!e.BULKSMSLIVE_API_KEY, {
   message: 'BULKSMSLIVE_API_KEY is required when SMS_PROVIDER=bulksmslive',

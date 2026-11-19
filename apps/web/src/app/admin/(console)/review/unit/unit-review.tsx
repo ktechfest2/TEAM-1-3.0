@@ -1,12 +1,13 @@
-import type { Metadata } from 'next';
-import Link from 'next/link';
-import { UnitStatusBadge } from '@/components/status-badge';
-import { cardClass, PageShell } from '@/components/admin/page-shell';
-import { adminFetch, requireAdmin } from '@/lib/admin-session';
-import { FLAG_LABELS } from '../../flags';
-import { ResolveForm } from './resolve-form';
+'use client';
 
-export const metadata: Metadata = { title: 'Review polling unit' };
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
+import { AuthImage } from '@/components/admin/auth-image';
+import { UnitStatusBadge } from '@/components/status-badge';
+import { cardClass } from '@/components/admin/page-shell';
+import { useAdmin, useAdminApi } from '@/lib/admin-session';
+import { FLAG_LABELS } from '../flags';
+import { ResolveForm } from './resolve-form';
 
 type Figures = { partyVotes: Record<string, number>; totalValid: number; rejected: number | null; totalCast: number | null };
 
@@ -41,10 +42,18 @@ function time(iso: string) {
   return new Date(iso).toLocaleString('en-NG', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Lagos' });
 }
 
-async function UnitReview({ params }: { params: PageProps<'/admin/review/[electionId]/[code]'>['params'] }) {
-  const admin = await requireAdmin();
-  const { electionId, code } = await params;
-  const d = await adminFetch<Detail>(`/admin/review/elections/${encodeURIComponent(electionId)}/units/${encodeURIComponent(code)}`);
+export function UnitReview() {
+  const admin = useAdmin();
+  const sp = useSearchParams();
+  const electionId = sp.get('election') ?? '';
+  const code = sp.get('code') ?? '';
+  const q = useAdminApi<Detail>(
+    electionId && code ? `/admin/review/elections/${encodeURIComponent(electionId)}/units/${encodeURIComponent(code)}` : null,
+  );
+  if (!electionId || !code) return <p className="text-mismatch">No polling unit selected.</p>;
+  if (q.status === 'loading') return <p role="status" className="text-ink-muted">Loading…</p>;
+  if (q.status === 'error') return <p className="text-mismatch">{q.error.message}</p>;
+  const d = q.data;
   const canResolve = admin.role === 'reviewer' || admin.role === 'system_admin';
   const versionLabel = (v: Detail['versions'][number], i: number) =>
     `Version ${String.fromCharCode(65 + i)}: ${d.parties.map((p) => `${p.acronym} ${v.figures.partyVotes[p.acronym] ?? 0}`).join(', ')} (${v.witnessCount} witnesses)`;
@@ -104,15 +113,11 @@ async function UnitReview({ params }: { params: PageProps<'/admin/review/[electi
                 {photos.map((p) => (
                   <li key={p.id} className="grid gap-1 text-xs text-ink-muted">
                     {p.hasImage ? (
-                      <a href={`/api/admin/review/photos/${p.id}`} target="_blank" rel="noopener">
-                        {/* eslint-disable-next-line @next/next/no-img-element -- authenticated evidence image */}
-                        <img
-                          src={`/api/admin/review/photos/${p.id}`}
-                          alt={`Photo received ${time(p.receivedAt)}`}
-                          loading="lazy"
-                          className="aspect-[3/4] w-full rounded-lg border border-divider object-cover"
-                        />
-                      </a>
+                      <AuthImage
+                        path={`/admin/review/photos/${p.id}`}
+                        alt={`Photo received ${time(p.receivedAt)}`}
+                        className="aspect-[3/4] w-full rounded-lg border border-divider object-cover"
+                      />
                     ) : (
                       <div className="grid aspect-[3/4] place-items-center rounded-lg border border-divider">No image</div>
                     )}
@@ -144,13 +149,5 @@ async function UnitReview({ params }: { params: PageProps<'/admin/review/[electi
         </Link>
       </p>
     </div>
-  );
-}
-
-export default function UnitReviewPage(props: PageProps<'/admin/review/[electionId]/[code]'>) {
-  return (
-    <PageShell title="Review polling unit" description="Compare the versions and the photos behind them, then record which version the evidence supports.">
-      <UnitReview params={props.params} />
-    </PageShell>
   );
 }

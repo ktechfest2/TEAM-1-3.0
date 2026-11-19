@@ -37,3 +37,7 @@ apps/api/data/
 
 # Local evidence storage (development)
 apps/api/storage/
+
+# Firebase
+.firebase/
+firebase-debug.log

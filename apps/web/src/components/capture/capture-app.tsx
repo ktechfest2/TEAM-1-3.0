@@ -1,5 +1,6 @@
 'use client';
 
+import { apiUrl, authHeaders, sessionToken } from '@/lib/api';
 import Link from 'next/link';
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { Camera } from './camera';
@@ -57,12 +58,13 @@ export function CaptureApp() {
   // Session check, queue load, and upload when the network comes back
   useEffect(() => {
     queue.all().then(setItems).catch(() => undefined);
-    fetch('/api/capture/config')
+    fetch(apiUrl('/capture/config'))
       .then((r) => (r.ok ? r.json() : null))
       .then((c: { phoneVerification?: string } | null) => setSmsMode(c?.phoneVerification === 'sms'))
       .catch(() => undefined);
-    fetch('/api/capture/session')
+    fetch(apiUrl('/capture/session'), { headers: authHeaders('voter') })
       .then(async (res) => {
+        if (res.status === 401) sessionToken.clear('voter');
         if (res.ok) {
           setPhoneMasked(((await res.json()) as { phoneMasked: string }).phoneMasked);
           setStep('election');
@@ -88,7 +90,7 @@ export function CaptureApp() {
 
   useEffect(() => {
     if (step !== 'election' || elections) return;
-    fetch('/api/elections')
+    fetch(apiUrl('/elections'))
       .then((r) => (r.ok ? r.json() : []))
       .then((list: Election[]) => setElections(list.filter((e) => e.status === 'active')))
       .catch(() => setElections([]));

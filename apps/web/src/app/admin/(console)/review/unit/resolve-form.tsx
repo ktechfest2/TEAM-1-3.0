@@ -1,7 +1,7 @@
 'use client';
 
+import { useAdminRefresh } from '@/lib/admin-session';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { FormError } from '@/components/admin/auth-card';
 import { adminPost } from '@/lib/admin-client';
 
@@ -14,7 +14,7 @@ export function ResolveForm({
   unitCode: string;
   versions: { id: string; label: string }[];
 }) {
-  const router = useRouter();
+  const refresh = useAdminRefresh();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -36,7 +36,7 @@ export function ResolveForm({
         });
         setBusy(false);
         if (!result.ok) return setError(result.message);
-        router.refresh();
+        refresh();
       }}
     >
       <h2 id="resolve-heading" className="text-lg font-semibold">Decide which version counts</h2>

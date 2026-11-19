@@ -1,3 +1,4 @@
+import { apiUrl, authHeaders } from '@/lib/api';
 /**
  * Offline queue for photographs (CAP-04). Photos are kept in IndexedDB on the phone
  * and uploaded when the network is available. Each photo has a clientId, so the
@@ -128,9 +129,9 @@ async function runFlush(onChange: () => void): Promise<FlushResult> {
 
     let res: Response | null = null;
     try {
-      res = await fetch(`/api/capture/photos?${params}`, {
+      res = await fetch(apiUrl(`/capture/photos?${params}`), {
         method: 'POST',
-        headers: { 'content-type': item.blob.type || 'image/jpeg', 'x-device-id': deviceId() },
+        headers: { 'content-type': item.blob.type || 'image/jpeg', 'x-device-id': deviceId(), ...authHeaders('voter') },
         body: item.blob,
       });
     } catch {
@@ -173,7 +174,7 @@ export async function refreshChecks(): Promise<boolean> {
   let changed = false;
   for (const item of open) {
     try {
-      const res = await fetch(`/api/capture/photos/${item.serverId}`);
+      const res = await fetch(apiUrl(`/capture/photos/${item.serverId}`), { headers: authHeaders('voter') });
       if (!res.ok) continue;
       const check = (await res.json()) as PhotoCheck;
       if (JSON.stringify(check) !== JSON.stringify(item.check)) {
@@ -189,9 +190,9 @@ export async function refreshChecks(): Promise<boolean> {
 
 /** Records the voter's answer to "do these figures match the poster?" */
 export async function answerConfirmation(item: QueuedPhoto, confirmed: boolean): Promise<string | null> {
-  const res = await fetch(`/api/capture/photos/${item.serverId}/confirm`, {
+  const res = await fetch(apiUrl(`/capture/photos/${item.serverId}/confirm`), {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...authHeaders('voter') },
     body: JSON.stringify({ confirmed }),
   }).catch(() => null);
   if (!res?.ok) return 'Could not send your answer. Check your connection and try again.';

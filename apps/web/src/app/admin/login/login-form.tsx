@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FormError, inputClass, primaryButtonClass } from '@/components/admin/auth-card';
+import { apiUrl, sessionToken } from '@/lib/api';
 
 type Step = 'credentials' | 'code';
 
@@ -19,12 +20,13 @@ export function LoginForm() {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch('/api/admin/auth/login', {
+      const res = await fetch(apiUrl('/admin/auth/login'), {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify(body),
       });
-      const data = (await res.json().catch(() => ({}))) as { status?: string; message?: string };
+      const data = (await res.json().catch(() => ({}))) as { status?: string; message?: string; token?: string };
+      if (data.token) sessionToken.set('admin', data.token);
 
       if (res.status === 429) return setError('Too many attempts. Wait a minute and try again.');
       if (!res.ok) return setError(data.message ?? 'Sign-in failed. Try again.');

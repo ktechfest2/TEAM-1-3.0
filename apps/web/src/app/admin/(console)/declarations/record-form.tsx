@@ -1,9 +1,10 @@
 'use client';
 
+import { useAdminRefresh } from '@/lib/admin-session';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { FormError, inputClass } from '@/components/admin/auth-card';
 import { adminPost } from '@/lib/admin-client';
+import { apiUrl, authHeaders } from '@/lib/api';
 
 type Election = { id: string; title: string; scopeLevel: string; scopeCode: string | null; parties: { acronym: string; name: string }[] };
 
@@ -18,7 +19,7 @@ const RANK: Record<string, number> = { national: 0, state: 1, lga: 2, ward: 3 };
 type Prefill = { partyVotes: Record<string, number | null>; totalValid: number | null; rejected: number | null; totalCast: number | null; unmatchedParties: string[] };
 
 export function RecordForm({ elections }: { elections: Election[] }) {
-  const router = useRouter();
+  const refresh = useAdminRefresh();
   const [electionId, setElectionId] = useState(elections[0]?.id ?? '');
   const election = elections.find((e) => e.id === electionId);
   const [level, setLevel] = useState<string>(election?.scopeLevel === 'polling_unit' ? 'ward' : (election?.scopeLevel ?? 'national'));
@@ -37,9 +38,9 @@ export function RecordForm({ elections }: { elections: Election[] }) {
     setReading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/declarations/source?electionId=${electionId}`, {
+      const res = await fetch(apiUrl(`/admin/declarations/source?electionId=${electionId}`), {
         method: 'POST',
-        headers: { 'content-type': file.type },
+        headers: { 'content-type': file.type, ...authHeaders('admin') },
         body: file,
       });
       const data = (await res.json()) as { sourceFileKey?: string; prefill?: Prefill | null; message?: string };
@@ -73,7 +74,8 @@ export function RecordForm({ elections }: { elections: Election[] }) {
       className="grid gap-5"
       onSubmit={async (e) => {
         e.preventDefault();
-        const d = new FormData(e.currentTarget);
+        const form = e.currentTarget;
+        const d = new FormData(form);
         const num = (v: string) => (v.trim() === '' ? null : Number(v));
         setBusy(true);
         setError(null);
@@ -97,12 +99,12 @@ export function RecordForm({ elections }: { elections: Election[] }) {
           setNeedsAck(/add up to/.test(result.message));
           return setError(result.message);
         }
-        e.currentTarget.reset();
+        form.reset();
         setVotes({});
         setTotals({ totalValid: '', rejected: '', totalCast: '' });
         setSource(null);
         setNeedsAck(false);
-        router.refresh();
+        refresh();
       }}
     >
       <h2 id="record-heading" className="text-lg font-semibold">Record a declaration</h2>

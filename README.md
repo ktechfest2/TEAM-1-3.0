@@ -30,7 +30,7 @@ npm run dev:api        # API on http://localhost:4000
 npm run dev:web        # web on http://localhost:3000
 ```
 
-The admin console is at http://localhost:3000/admin (not linked from the public site). The web app proxies `/api/*` to the API, so admin cookies stay first-party.
+The admin console is at http://localhost:3000/admin (not linked from the public site). The web app calls the API at `NEXT_PUBLIC_API_URL` (default http://localhost:4000).
 
 ## Polling unit register
 
@@ -100,6 +100,26 @@ ADMIN_PASSWORD='a long passphrase' npm run admin:create -w @trustelect/api -- \
 ```
 
 Roles: `reviewer`, `declarations_admin`, `approver`, `system_admin`. At first sign-in the admin scans a QR code with an authenticator app. Sessions are server-side, in an HTTP-only, SameSite=Strict cookie; logins are rate-limited and lock for 15 minutes after 5 failures; every action is written to the audit log.
+
+## Deployment
+
+| Part | Where | Address |
+|---|---|---|
+| Web app (static) | Firebase Hosting, project `trustelect` (free Spark plan) | https://trustelect.web.app |
+| API, Postgres | VPS, Docker Compose in `/opt/trustelect` | https://api.example.org |
+
+The web app is a static export: pages load data in the browser from `NEXT_PUBLIC_API_URL`, and admin
+and voter sessions travel as Bearer tokens (the API is on another site, where browsers block cookies).
+Security headers and the Content-Security-Policy are in `firebase.json`. On the server, Caddy terminates
+HTTPS (`deploy/api/Caddyfile`) and the API listens on `127.0.0.1:4100` only.
+
+```bash
+deploy/deploy-api.sh   # build the API image here, load it on the server, restart, health check
+deploy/deploy-web.sh   # build the static site and publish it to Firebase Hosting
+```
+
+Production secrets are only in `/opt/trustelect/.env` and `/opt/trustelect/db_password` on the server.
+Migrations run when the API container starts.
 
 ## Tests
 

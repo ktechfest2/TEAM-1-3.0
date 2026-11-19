@@ -1,30 +1,14 @@
-import type { Metadata } from 'next';
+'use client';
+
 import Link from 'next/link';
-import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { UNOFFICIAL_LABEL } from '@trustelect/shared';
 import { LiveRefresh } from '@/components/results/live-refresh';
 import { CHILD_HEADING, CHILD_LABEL, n, pct, type Comparison, type TallyResponse } from '@/components/results/tally-types';
 import { ComparisonBadge, UnitStatusBadge } from '@/components/status-badge';
-
-export const metadata: Metadata = { title: 'Live results' };
-
-const API_URL = process.env.API_URL ?? 'http://localhost:4000';
+import { apiUrl, useApi } from '@/lib/api';
 const LEVELS = new Set(['national', 'state', 'lga', 'ward']);
 const NEXT_LEVEL = { state: 'state', lga: 'lga', ward: 'ward' } as const;
-
-async function load(id: string, level?: string, code?: string): Promise<TallyResponse | 'not_found' | 'error'> {
-  const q = new URLSearchParams();
-  if (level && LEVELS.has(level)) q.set('level', level);
-  if (code && /^[\d-]{2,12}$/.test(code)) q.set('code', code);
-  try {
-    const res = await fetch(`${API_URL}/results/elections/${encodeURIComponent(id)}?${q}`, { cache: 'no-store' });
-    if (res.status === 404 || res.status === 400) return 'not_found';
-    if (!res.ok) return 'error';
-    return (await res.json()) as TallyResponse;
-  } catch {
-    return 'error';
-  }
-}
 
 function MixList({ mix }: { mix: TallyResponse['totals']['mix'] }) {
   const items: [string, number, string][] = [
@@ -118,11 +102,21 @@ function DeclaredComparison({ comparison, areaName }: { comparison?: Comparison;
   );
 }
 
-async function Dashboard({ params, searchParams }: PageProps<'/results/elections/[id]'>) {
-  const { id } = await params;
-  const sp = await searchParams;
-  const data = await load(id, typeof sp.level === 'string' ? sp.level : undefined, typeof sp.code === 'string' ? sp.code : undefined);
+function tallyPath(id: string | null, level: string | null, code: string | null) {
+  if (!id || !/^[0-9a-f-]{36}$/i.test(id)) return null;
+  const q = new URLSearchParams();
+  if (level && LEVELS.has(level)) q.set('level', level);
+  if (code && /^[\d-]{2,12}$/.test(code)) q.set('code', code);
+  return `/results/elections/${id}?${q}`;
+}
 
+export function Dashboard() {
+  const sp = useSearchParams();
+  const path = tallyPath(sp.get('id'), sp.get('level'), sp.get('code'));
+  const q = useApi<TallyResponse>(path);
+  const data = !path ? 'not_found' : q.status === 'ready' ? q.data : q.status === 'error' ? ([400, 404].includes(q.error.status) ? 'not_found' : 'error') : null;
+
+  if (data === null) return <p role="status" className="text-ink-muted">Loading results…</p>;
   if (data === 'not_found') {
     return <p className="text-ink-muted">This election or area was not found.</p>;
   }
@@ -135,7 +129,7 @@ async function Dashboard({ params, searchParams }: PageProps<'/results/elections
   const childHref = (code: string) =>
     childLevel === 'polling_unit'
       ? `/results?unit=${code}`
-      : `/results/elections/${data.election.id}?level=${NEXT_LEVEL[childLevel]}&code=${code}`;
+      : `/results/election?id=${data.election.id}&level=${NEXT_LEVEL[childLevel]}&code=${code}`;
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-8">
@@ -148,7 +142,7 @@ async function Dashboard({ params, searchParams }: PageProps<'/results/elections
                 {i === area.path.length - 1 ? (
                   <span aria-current="page" className="font-medium text-ink">{p.name}</span>
                 ) : (
-                  <Link href={`/results/elections/${data.election.id}?level=${p.level}${p.code ? `&code=${p.code}` : ''}`} className="hover:text-ink hover:underline">
+                  <Link href={`/results/election?id=${data.election.id}&level=${p.level}${p.code ? `&code=${p.code}` : ''}`} className="hover:text-ink hover:underline">
                     {p.name}
                   </Link>
                 )}
@@ -164,14 +158,14 @@ async function Dashboard({ params, searchParams }: PageProps<'/results/elections
           <div className="flex flex-wrap items-center gap-4">
             {area.level === 'ward' && area.code && (
               <a
-                href={`/api/evidence/elections/${data.election.id}/wards/${area.code}`}
+                href={apiUrl(`/evidence/elections/${data.election.id}/wards/${area.code}`)}
                 download
                 className="inline-flex min-h-10 items-center rounded-xl border border-border bg-surface px-4 text-sm font-semibold hover:bg-surface-muted"
               >
                 Download ward evidence pack
               </a>
             )}
-            <LiveRefresh electionId={data.election.id} generatedAt={data.generatedAt} />
+            <LiveRefresh electionId={data.election.id} generatedAt={data.generatedAt} onChange={q.reload} />
           </div>
         </div>
       </div>
@@ -285,16 +279,6 @@ async function Dashboard({ params, searchParams }: PageProps<'/results/elections
           </table>
         </div>
       </section>
-    </div>
-  );
-}
-
-export default function LiveResultsPage(props: PageProps<'/results/elections/[id]'>) {
-  return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
-      <Suspense fallback={<p role="status" className="text-ink-muted">Loading results…</p>}>
-        <Dashboard {...props} />
-      </Suspense>
     </div>
   );
 }

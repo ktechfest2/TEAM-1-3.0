@@ -1,7 +1,7 @@
 'use client';
 
+import { useAdminRefresh } from '@/lib/admin-session';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { adminPost } from '@/lib/admin-client';
 import type { ElectionStatus } from './labels';
 
@@ -19,7 +19,7 @@ const ACTIONS: Partial<Record<ElectionStatus, { to: 'active' | 'closed'; label: 
 };
 
 export function StatusButton({ id, status }: { id: string; status: ElectionStatus }) {
-  const router = useRouter();
+  const refresh = useAdminRefresh();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const action = ACTIONS[status];
@@ -37,7 +37,7 @@ export function StatusButton({ id, status }: { id: string; status: ElectionStatu
           const result = await adminPost(`/admin/elections/${id}/status`, { status: action.to });
           setBusy(false);
           if (!result.ok) return setError(result.message);
-          router.refresh();
+          refresh();
         }}
         className="inline-flex min-h-9 items-center rounded-lg border border-border bg-surface px-3 text-sm font-semibold hover:bg-surface-muted disabled:opacity-70"
       >

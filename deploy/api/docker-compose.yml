@@ -1,0 +1,51 @@
+# TrustElect API in production (one small server, next to other services).
+# The API listens on 127.0.0.1:4100 only; Caddy on the host terminates HTTPS (see Caddyfile).
+name: trustelect
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: trustelect
+      POSTGRES_DB: trustelect
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    secrets: [db_password]
+    # Tuned for a 1-2 GB server shared with other services
+    command: >-
+      postgres -c shared_buffers=64MB -c effective_cache_size=256MB -c work_mem=4MB
+      -c maintenance_work_mem=64MB -c max_connections=30
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U trustelect -d trustelect']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 384m
+
+  api:
+    image: trustelect-api:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      NODE_OPTIONS: --max-old-space-size=320
+      EVIDENCE_DIR: /data/evidence
+      # Caddy on the host reaches the container over the Docker bridge
+      TRUST_PROXY: loopback, uniquelocal
+    ports:
+      - '127.0.0.1:4100:4000'
+    volumes:
+      - evidence:/data/evidence
+    mem_limit: 448m
+
+secrets:
+  db_password:
+    file: ./db_password
+
+volumes:
+  pgdata:
+  evidence:

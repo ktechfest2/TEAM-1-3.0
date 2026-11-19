@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { FormError, inputClass, primaryButtonClass } from '@/components/admin/auth-card';
-import { apiPost } from '@/lib/admin-client';
+import { apiPost, sessionToken } from '@/lib/api';
 
 /** Phone number, then the 6-digit SMS code (CAP-02). Consent was given on the previous step. */
 export function VerifyPhone({ onVerified }: { onVerified: (phoneMasked: string) => void }) {
@@ -90,9 +90,10 @@ export function VerifyPhone({ onVerified }: { onVerified: (phoneMasked: string) 
         const code = String(new FormData(e.currentTarget).get('code') ?? '').trim();
         setBusy(true);
         setError(null);
-        const result = await apiPost<{ phoneMasked: string }>('/capture/verify', { phone, code, consent: true });
+        const result = await apiPost<{ phoneMasked: string; token: string }>('/capture/verify', { phone, code, consent: true });
         setBusy(false);
         if (!result.ok) return setError(result.message);
+        sessionToken.set('voter', result.data.token);
         onVerified(result.data.phoneMasked);
       }}
     >

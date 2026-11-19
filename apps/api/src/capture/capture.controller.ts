@@ -21,7 +21,7 @@ import { ConfigService } from '@nestjs/config';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
-import { readCookie } from '../auth/session.guard.js';
+import { readSessionToken } from '../auth/session.guard.js';
 import { parseOrThrow } from '../common/validation.js';
 import type { Env } from '../config/env.js';
 import { VerificationService } from '../verification/verification.service.js';
@@ -37,7 +37,7 @@ export class CaptureSessionGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<VoterRequest>();
-    const token = readCookie(req, CAPTURE_COOKIE);
+    const token = readSessionToken(req, CAPTURE_COOKIE);
     const voter = token ? await this.capture.resolveSession(token) : null;
     if (!voter) throw new UnauthorizedException('Verify your phone number first');
     req.voter = voter;
@@ -103,7 +103,7 @@ export class CaptureController {
     const { phone } = parseOrThrow(startSchema, body);
     const { token, voter } = await this.capture.startWithoutVerification(phone);
     this.setSessionCookie(res, token);
-    return { phoneMasked: voter.phoneMasked, expiresAt: voter.expiresAt };
+    return { phoneMasked: voter.phoneMasked, expiresAt: voter.expiresAt, token };
   }
 
   @Post('code')
@@ -124,7 +124,7 @@ export class CaptureController {
     const { phone, code } = parseOrThrow(verifySchema, body);
     const { token, voter } = await this.capture.verifyCode(phone, code);
     this.setSessionCookie(res, token);
-    return { phoneMasked: voter.phoneMasked, expiresAt: voter.expiresAt };
+    return { phoneMasked: voter.phoneMasked, expiresAt: voter.expiresAt, token };
   }
 
   private setSessionCookie(res: Response, token: string) {

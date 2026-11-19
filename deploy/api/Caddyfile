@@ -1,0 +1,11 @@
+# Appended to /etc/caddy/Caddyfile on the server
+api.example.org {
+	encode gzip zstd
+	header -Server
+	header Strict-Transport-Security "max-age=31536000"
+	# Photos are up to 10 MB
+	request_body {
+		max_size 12MB
+	}
+	reverse_proxy 127.0.0.1:4100
+}
