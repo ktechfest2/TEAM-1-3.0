@@ -12,12 +12,12 @@ export function UnitSearch({ defaultValue }: { defaultValue?: string }) {
             name="unit"
             type="text"
             required
-            pattern="\d{1,2}[\-/]\d{1,2}[\-/]\d{1,2}[\-/]\d{1,3}"
+            minLength={2}
+            maxLength={100}
             aria-describedby="unit-help"
             defaultValue={defaultValue}
             autoComplete="off"
             autoCorrect="off"
-            autoCapitalize="none"
             spellCheck={false}
             enterKeyHint="search"
             className="min-h-12 min-w-0 flex-1 basis-48 rounded-xl bg-transparent px-3 text-[max(1rem,1em)] text-ink tabular user-invalid:text-mismatch"
@@ -30,8 +30,8 @@ export function UnitSearch({ defaultValue }: { defaultValue?: string }) {
           </button>
         </div>
         <p id="unit-help" className="text-sm text-ink-muted">
-          Polling unit code, for example <span className="whitespace-nowrap">24-05-01-003</span>. It is on your voter&apos;s card and the
-          result poster.
+          The polling unit code from your voter&apos;s card, for example <span className="whitespace-nowrap">24-05-01-003</span>, or its
+          name or address, for example <span className="whitespace-nowrap">Badagry Road Apapa</span>.
         </p>
       </form>
     </search>

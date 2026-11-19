@@ -193,6 +193,27 @@ data: {"electionId":"…","at":"2027-03-06T19:42:10.511Z"}`,
         example: '/geo/wards/24-05-01/units',
       },
       {
+        id: 'geo-search',
+        method: 'GET',
+        path: '/geo/search',
+        summary: 'Find polling units by name or address. Every word must appear in the unit, ward, LGA or state name; best matches first.',
+        params: [
+          ['q', 'query', 'Words to search for, e.g. badagry road apapa (2 to 100 characters)'],
+          ['state', 'query', 'Optional: a two-digit state code to search in, e.g. 24'],
+          ['limit', 'query', 'Optional: 1 to 50 (default 20)'],
+        ],
+        example: '/geo/search?q=badagry%20road%20apapa&limit=5',
+        response: `[
+  {
+    "code": "24-05-01-003", "name": "BADAGRY ROAD",
+    "ward": { "code": "24-05-01", "name": "APAPA I (MARINE RD. & ENVIRONS)" },
+    "lga": { "code": "24-05", "name": "APAPA" },
+    "state": { "code": "24", "name": "Lagos" }
+  },
+  …
+]`,
+      },
+      {
         id: 'geo-unit',
         method: 'GET',
         path: '/geo/units/{code}',

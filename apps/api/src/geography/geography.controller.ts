@@ -1,4 +1,6 @@
-import { Controller, Get, Header, Param } from '@nestjs/common';
+import { Controller, Get, Header, Param, Query } from '@nestjs/common';
+import { z } from 'zod';
+import { parseOrThrow } from '../common/validation.js';
 import { GeographyService } from './geography.service.js';
 
 const CODE = /^[\d-]{2,12}$/;
@@ -36,6 +38,21 @@ export class GeographyController {
   @Header('Cache-Control', 'public, max-age=300')
   units(@Param('code') code: string) {
     return CODE.test(code) ? this.geo.listUnits(code) : [];
+  }
+
+  /** Address search: GET /geo/search?q=badagry road apapa&state=24&limit=20 */
+  @Get('search')
+  @Header('Cache-Control', 'public, max-age=300')
+  search(@Query() query: unknown) {
+    const q = parseOrThrow(
+      z.object({
+        q: z.string().trim().min(2).max(100),
+        state: z.string().regex(/^\d{2}$/).optional(),
+        limit: z.coerce.number().int().min(1).max(50).default(20),
+      }),
+      query,
+    );
+    return this.geo.search(q.q, { state: q.state, limit: q.limit });
   }
 
   @Get('units/:code')

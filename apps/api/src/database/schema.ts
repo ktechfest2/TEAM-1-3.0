@@ -20,6 +20,7 @@ import {
   uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
+import { sql } from 'drizzle-orm';
 
 const createdAt = () => timestamp('created_at', { withTimezone: true }).notNull().defaultNow();
 
@@ -107,8 +108,13 @@ export const pollingUnits = pgTable(
     latitude: doublePrecision('latitude'),
     longitude: doublePrecision('longitude'),
     registeredVoters: integer('registered_voters'),
+    /** Unit, ward, LGA and state names, lower case without punctuation, for address search (trigram index) */
+    searchText: text('search_text').notNull().default(''),
   },
-  (t) => [index('polling_units_ward_idx').on(t.wardId)],
+  (t) => [
+    index('polling_units_ward_idx').on(t.wardId),
+    index('polling_units_search_idx').using('gin', sql`${t.searchText} gin_trgm_ops`),
+  ],
 );
 
 /* ------------------------------------------------------------------ */

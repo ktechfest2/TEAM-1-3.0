@@ -1,0 +1,90 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "0ef7e15c-be51-4943-af92-21574266b40c",
+  "prevIds": [
+    "a51d3f97-a52d-47de-8c3b-bc25671d1106"
+  ],
+  "footprints": [
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "polling_units",
+        "search_text"
+      ],
+      "writes": [
+        "s|col|public.polling_units.search_text",
+        "n|col|public.polling_units.search_text",
+        "e|col|public.polling_units.search_text"
+      ],
+      "reads": [
+        "n|tbl|public.polling_units",
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "create_index",
+      "statementTarget": [
+        "index",
+        "public",
+        "polling_units",
+        "polling_units_search_idx"
+      ],
+      "writes": [
+        "s|idx|public.polling_units_search_idx",
+        "n|idx|public.polling_units_search_idx",
+        "e|idx|public.polling_units_search_idx",
+        "n|rel|public.polling_units_search_idx"
+      ],
+      "reads": [
+        "n|tbl|public.polling_units",
+        "n|sch|public"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "polling_units",
+        "name": "search_text",
+        "type": "text",
+        "typeSchema": null,
+        "notNull": true,
+        "dimensions": 0,
+        "default": "''",
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "polling_units",
+        "name": "polling_units_search_idx",
+        "nameExplicit": true,
+        "columns": [
+          {
+            "value": "\"search_text\" gin_trgm_ops",
+            "isExpression": true,
+            "asc": true,
+            "nullsFirst": false,
+            "opclass": null
+          }
+        ],
+        "isUnique": false,
+        "where": null,
+        "with": "",
+        "method": "gin",
+        "concurrently": false,
+        "entityType": "indexes"
+      }
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectDrizzle } from '@nestjs/drizzle';
 import { NIGERIAN_STATES, parseUnitCode } from '@trustelect/shared';
-import { asc, count, eq, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, or, sql } from 'drizzle-orm';
 import type { Database } from '../database/database.module.js';
 import { lgas, pollingUnits, states, wards } from '../database/schema.js';
 import type { RegisterRow } from './register.js';
@@ -94,6 +94,9 @@ export class GeographyService {
           });
       }
 
+      // Address search: unit, ward, LGA and state names, normalised the same way as queries
+      await tx.execute(REFRESH_SEARCH_TEXT);
+
       return {
         states: new Set(rows.map((r) => r.stateCode)).size,
         lgas: lgaRows.length,
@@ -153,6 +156,36 @@ export class GeographyService {
       .orderBy(asc(pollingUnits.code));
   }
 
+  /**
+   * Finds polling units by address: every word must appear in the unit, ward, LGA or state name.
+   * Best matches first. Optionally limited to one state.
+   */
+  async search(query: string, options: { state?: string; limit: number }) {
+    const words = normaliseForSearch(query).split(' ').filter((w) => w.length >= 2).slice(0, 6);
+    if (!words.length) return [];
+    const phrase = words.join(' ');
+    // Each word (or one of its register abbreviations) must start a word in the unit, ward, LGA or state name
+    const conditions = words.map((w) =>
+      or(...searchForms(w).flatMap((f) => [sql`${pollingUnits.searchText} like ${`${f}%`}`, sql`${pollingUnits.searchText} like ${`% ${f}%`}`])),
+    );
+    if (options.state) conditions.push(sql`${pollingUnits.code} like ${`${options.state}-%`}`);
+    return this.db
+      .select({
+        code: pollingUnits.code,
+        name: pollingUnits.name,
+        ward: { code: wards.code, name: wards.name },
+        lga: { code: lgas.code, name: lgas.name },
+        state: { code: states.code, name: states.name },
+      })
+      .from(pollingUnits)
+      .innerJoin(wards, eq(wards.id, pollingUnits.wardId))
+      .innerJoin(lgas, eq(lgas.id, wards.lgaId))
+      .innerJoin(states, eq(states.id, lgas.stateId))
+      .where(and(...conditions))
+      .orderBy(desc(sql`word_similarity(${phrase}, ${pollingUnits.searchText})`), asc(pollingUnits.code))
+      .limit(options.limit);
+  }
+
   /** Resolves any polling unit code to its full place in the hierarchy (CNT-01). */
   async getUnit(rawCode: string) {
     const parsed = parseUnitCode(rawCode);
@@ -176,6 +209,51 @@ export class GeographyService {
     return row;
   }
 }
+
+/** Lower case, apostrophes dropped (St. John's → st johns), other punctuation as spaces */
+export function normaliseForSearch(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+/** Words INEC's register spells both in full and abbreviated (counts checked on the full register) */
+const ABBREVIATIONS: string[][] = [
+  ['school', 'sch'],
+  ['primary', 'pry', 'pri', 'prim'],
+  ['secondary', 'sec'],
+  ['nursery', 'nur'],
+  ['grammar', 'gram'],
+  ['government', 'govt'],
+  ['market', 'mkt'],
+  ['road', 'rd'],
+  ['street', 'st'],
+  ['saint', 'st'],
+  ['square', 'sq'],
+  ['junction', 'jct', 'junc'],
+  ['community', 'comm'],
+  ['opposite', 'opp'],
+  ['village', 'vill'],
+  ['hospital', 'hosp'],
+  ['centre', 'center', 'ctr'],
+  ['estate', 'est'],
+];
+
+/** The word and every spelling the register may use for it */
+export function searchForms(word: string): string[] {
+  const forms = new Set([word]);
+  for (const group of ABBREVIATIONS) if (group.includes(word)) group.forEach((f) => forms.add(f));
+  return [...forms];
+}
+
+/** Same normalisation in SQL, for every polling unit (also run by the migration that added the column) */
+const REFRESH_SEARCH_TEXT = sql`
+  update polling_units pu
+  set search_text = trim(regexp_replace(lower(regexp_replace(pu.name || ' ' || w.name || ' ' || l.name || ' ' || s.name, '[''’]', '', 'g')), '[^a-z0-9]+', ' ', 'g'))
+  from wards w, lgas l, states s
+  where w.id = pu.ward_id and l.id = w.lga_id and s.id = l.state_id`;
 
 function uniqueBy<T>(items: T[], key: (item: T) => string): T[] {
   const seen = new Map<string, T>();
