@@ -1,17 +1,17 @@
-/** TrustElect mark: a ballot tick on Nigerian flag green. Decorative. */
+import Image from 'next/image';
+import mark from '../../public/brand/trustelect-mark.png';
+
+/** TrustElect mark: shield, ballot box and tick. Decorative; the name is always written next to it. */
 export function LogoMark({ size = 32 }: { size?: number }) {
+  return <Image src={mark} alt="" width={size} height={size} className="shrink-0" />;
+}
+
+/** The name as in the logo: "Trust" in deep green, "Elect" in flag green. */
+export function Wordmark({ className = '' }: { className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-      <rect x="1" y="1" width="30" height="30" rx="9" fill="var(--brand)" />
-      <rect x="11.5" y="1" width="9" height="30" fill="var(--brand-ink)" opacity="0.18" />
-      <path
-        d="m9 16.5 4.5 4.5 9.5-10"
-        fill="none"
-        stroke="var(--brand-ink)"
-        strokeWidth="3.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <span className={`font-bold tracking-tight ${className}`}>
+      <span className="text-brand-strong">Trust</span>
+      <span className="text-brand">Elect</span>
+    </span>
   );
 }

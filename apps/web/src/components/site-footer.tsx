@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { UNOFFICIAL_LABEL } from '@trustelect/shared';
-import { LogoMark } from './logo';
+import { LogoMark, Wordmark } from './logo';
 
 export function SiteFooter() {
   return (
@@ -8,8 +8,8 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-[1.2fr_1fr]">
         <div className="grid content-start gap-3">
           <div className="inline-flex items-center gap-2.5">
-            <LogoMark size={28} />
-            <span className="text-lg font-bold tracking-tight">TrustElect</span>
+            <LogoMark size={32} />
+            <Wordmark className="text-lg" />
           </div>
           <p className="max-w-[48ch] text-ink-muted">
             Citizen-verified polling unit results, counted from the polling unit up and compared

@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import Link from 'next/link';
-import { LogoMark } from '@/components/logo';
+import { LogoMark, Wordmark } from '@/components/logo';
 
 export const metadata: Metadata = {
   title: 'Photograph a result',
@@ -17,8 +17,8 @@ export default function CaptureLayout({ children }: { children: React.ReactNode 
       <header className="border-b border-divider bg-surface">
         <div className="mx-auto flex min-h-12 max-w-lg items-center justify-between px-4">
           <Link href="/" className="inline-flex items-center gap-2 text-ink no-underline">
-            <LogoMark size={26} />
-            <span className="font-bold tracking-tight">TrustElect</span>
+            <LogoMark size={28} />
+            <Wordmark />
           </Link>
           <Link href="/privacy" className="text-sm font-medium text-ink-muted hover:text-ink">
             Privacy

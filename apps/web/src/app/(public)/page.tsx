@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { CONFIDENCE_THRESHOLDS } from '@trustelect/shared';
 import { ExampleResultCard } from '@/components/example-result-card';
+import { HeroVideo } from '@/components/hero-video';
 import { ComparisonBadge } from '@/components/status-badge';
 import { UnitSearch } from '@/components/unit-search';
 
@@ -72,26 +73,23 @@ function OutlineIcon({ d }: { d: string }) {
 export default function Home() {
   return (
     <>
-      {/* Hero */}
-      <section className="bg-surface">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:py-20">
-          <div className="grid gap-6">
-            <h1 className="text-[clamp(2.25rem,1.6rem+2.6vw,3.75rem)] font-bold tracking-tight text-ink">
-              Every result, <span className="text-brand-strong">backed by evidence.</span>
+      {/* Hero: full-screen film with the headline and the two main actions */}
+      <section aria-labelledby="hero-heading" className="relative isolate overflow-hidden bg-[#06110c] text-white">
+        <HeroVideo />
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 bg-[linear-gradient(to_top,rgb(3_10_7/0.92)_0%,rgb(3_10_7/0.55)_38%,rgb(3_10_7/0)_70%),linear-gradient(to_right,rgb(3_10_7/0.55)_0%,rgb(3_10_7/0)_60%)]"
+        />
+        <div className="mx-auto flex min-h-[calc(100svh-var(--header-height)-6px)] max-w-6xl flex-col justify-end px-4 portrait:max-sm:justify-start pt-[calc(56.25vw+1.5rem)] pb-14 sm:px-6 sm:pt-24 sm:pb-16 landscape:pt-24">
+          <div className="grid max-w-2xl gap-5">
+            <h1 id="hero-heading" className="text-[clamp(2.25rem,1.6rem+2.6vw,3.75rem)] font-bold tracking-tight text-white">
+              Every result, <span className="text-[#5fd39a]">backed by evidence.</span>
             </h1>
-            <p className="max-w-[54ch] text-lg text-ink-muted">
-              Voters photograph the result poster at their polling unit. TrustElect verifies each
-              photo, counts results from the unit up, and shows whether declared results match
-              what was pasted on the wall.
+            <p className="max-w-[54ch] text-lg text-white/85">
+              Voters photograph the result poster at their polling unit. TrustElect verifies each photo, counts results
+              from the unit up, and shows whether declared results match what was pasted on the wall.
             </p>
-            {/* Primary action: send an EC60E result */}
-            <div className="grid max-w-xl gap-3 rounded-2xl border-2 border-brand bg-surface-tint p-5">
-              <div>
-                <h2 className="text-lg font-bold">At a polling unit after counting?</h2>
-                <p className="text-ink-muted">
-                  Photograph the EC60E result poster. Every independent photo makes the record stronger.
-                </p>
-              </div>
+            <div className="flex flex-wrap gap-3">
               <Link
                 href="/capture"
                 className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-brand px-6 text-lg font-semibold text-brand-ink hover:bg-brand-strong"
@@ -99,12 +97,53 @@ export default function Home() {
                 <OutlineIcon d="M4 8h3l2-3h6l2 3h3v11H4V8Zm8 9a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
                 Photograph a result poster
               </Link>
-            </div>
-            <div className="max-w-xl">
-              <UnitSearch />
+              <Link
+                href="/results/elections"
+                className="inline-flex min-h-14 items-center justify-center rounded-xl border border-white/60 px-6 text-lg font-semibold text-white hover:bg-white/10"
+              >
+                See live results
+              </Link>
             </div>
           </div>
-          <div className="mx-auto w-full max-w-md lg:max-w-none">
+        </div>
+      </section>
+
+      {/* Send a result, or look one up */}
+      <section aria-label="Send or find a result" className="bg-surface">
+        <div className="mx-auto grid max-w-6xl items-start gap-8 px-4 py-12 sm:px-6 lg:grid-cols-2">
+          <div className="grid gap-3 rounded-2xl border-2 border-brand bg-surface-tint p-5">
+            <div>
+              <h2 className="text-lg font-bold">At a polling unit after counting?</h2>
+              <p className="text-ink-muted">
+                Photograph the EC60E result poster. Every independent photo makes the record stronger.
+              </p>
+            </div>
+            <Link
+              href="/capture"
+              className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-brand px-6 text-lg font-semibold text-brand-ink hover:bg-brand-strong"
+            >
+              <OutlineIcon d="M4 8h3l2-3h6l2 3h3v11H4V8Zm8 9a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+              Photograph a result poster
+            </Link>
+          </div>
+          <div className="rounded-2xl border border-divider bg-surface p-5">
+            <UnitSearch />
+          </div>
+        </div>
+      </section>
+
+      {/* What a result looks like */}
+      <section aria-labelledby="example-heading" className="bg-surface">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="grid gap-3">
+            <p className="text-sm font-semibold text-verified">What you see</p>
+            <h2 id="example-heading" className="text-3xl font-bold tracking-tight">Every figure shows how sure we are</h2>
+            <p className="max-w-[52ch] text-ink-muted">
+              Each polling unit result shows how many independent witnesses photographed the same figures, whether the
+              poster was stamped, and how it compares with what was officially declared.
+            </p>
+          </div>
+          <div className="mx-auto w-full max-w-md lg:max-w-lg">
             <ExampleResultCard />
           </div>
         </div>

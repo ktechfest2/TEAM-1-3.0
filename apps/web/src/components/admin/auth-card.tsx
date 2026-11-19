@@ -1,3 +1,6 @@
+import Image from 'next/image';
+import logo from '../../../public/brand/trustelect-logo.png';
+
 /** Centered card used by the sign-in and two-factor screens. */
 export function AuthCard({
   title,
@@ -10,6 +13,7 @@ export function AuthCard({
 }) {
   return (
     <div className="mx-auto w-full max-w-md px-4 py-12 sm:py-16">
+      <Image src={logo} alt="TrustElect" width={132} className="mx-auto mb-6 h-auto" priority />
       <div className="card-shadow rounded-2xl border border-divider bg-surface p-6 sm:p-8">
         <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
         {description && <div className="mt-2 text-ink-muted">{description}</div>}

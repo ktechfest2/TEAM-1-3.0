@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { LogoMark } from '@/components/logo';
+import { LogoMark, Wordmark } from '@/components/logo';
 
 export const metadata: Metadata = {
   title: { default: 'Admin', template: '%s · TrustElect Admin' },
@@ -13,8 +13,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div aria-hidden="true" className="flag-band" />
       <header className="border-b border-divider bg-surface">
         <div className="mx-auto flex min-h-14 max-w-6xl items-center gap-2.5 px-4 sm:px-6">
-          <LogoMark size={28} />
-          <span className="text-lg font-bold tracking-tight">TrustElect</span>
+          <LogoMark size={30} />
+          <Wordmark className="text-lg" />
           <span className="rounded-md bg-surface-tint px-2 py-0.5 text-xs font-semibold text-brand-strong">
             Admin
           </span>
