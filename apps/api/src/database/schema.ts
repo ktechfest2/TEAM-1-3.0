@@ -41,6 +41,8 @@ export const channel = pgEnum('channel', ['web', 'whatsapp', 'sms', 'ussd']);
 export const submissionKind = pgEnum('submission_kind', ['photo', 'typed']);
 export const submissionStatus = pgEnum('submission_status', ['pending', 'verified', 'needs_confirmation', 'rejected']);
 export const confidenceLevel = pgEnum('confidence_level', ['low', 'medium', 'high']);
+/** How strong one accepted photo is as evidence (stamp visible, code on poster matches) */
+export const evidenceStrength = pgEnum('evidence_strength', ['strong', 'standard', 'low']);
 export const unitStatus = pgEnum('unit_status', [
   'not_confirmed',
   'counted',
@@ -246,6 +248,8 @@ export const submissions = pgTable(
     imageType: text('image_type'),
     /** Reported GPS accuracy in metres */
     locationAccuracy: doublePrecision('location_accuracy'),
+    /** Evidence strength of an accepted photo; used by the confidence engine */
+    evidenceStrength: evidenceStrength('evidence_strength'),
     /** AI reading of the photo and the checks applied (VER), kept for audit */
     verification: jsonb('verification'),
     /** Plain-language reason shown to the voter when a retake, confirmation or rejection is needed */

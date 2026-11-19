@@ -31,13 +31,37 @@ const ctx: DecisionContext = {
 const with_ = (r: Partial<Ec60eReading>, c: Partial<DecisionContext> = {}) => decide({ ...good, ...r }, { ...ctx, ...c });
 
 describe('decide', () => {
-  it('verifies a clear, stamped, signed poster whose figures add up', () => {
+  it('verifies a clear, stamped, signed poster whose figures add up; matching code makes it strong evidence', () => {
     const d = decide(good, ctx);
     expect(d).toMatchObject({
       outcome: 'verified',
       unitCode: '24-05-01-003',
+      strength: 'strong',
+      flags: { stampVisible: true, posterCodeMatches: true },
       figures: { partyVotes: { APC: 112, LP: 98, PDP: 140 }, totalValid: 350, rejected: 9, totalCast: 359 },
     });
+  });
+
+  it('accepts a poster with no code on it as standard evidence, using the unit the voter entered', () => {
+    expect(with_({ polling_unit_code: null })).toMatchObject({
+      outcome: 'verified',
+      unitCode: '24-05-01-003',
+      strength: 'standard',
+      flags: { posterCodeMatches: null },
+    });
+    // A partly written, unparseable code is treated as no code
+    expect(with_({ polling_unit_code: '003 UNIT 4' })).toMatchObject({ outcome: 'verified', strength: 'standard' });
+  });
+
+  it('asks the voter to check when the poster shows a different polling unit', () => {
+    expect(with_({ polling_unit_code: '24/05/01/004' })).toMatchObject({ outcome: 'retake', code: 'unit_code_mismatch' });
+  });
+
+  it('accepts a poster with no visible stamp as low-confidence evidence', () => {
+    const d = with_({ stamp_visible: false });
+    expect(d).toMatchObject({ outcome: 'verified', strength: 'low', flags: { stampVisible: false } });
+    expect(d.outcome === 'verified' && d.notes).toContain('No stamp visible on the poster');
+    expect(with_({ stamp_visible: false, total_valid_votes: 999 })).toMatchObject({ outcome: 'needs_confirmation', strength: 'low' });
   });
 
   it('rejects images that are not an EC60E', () => {
@@ -50,8 +74,7 @@ describe('decide', () => {
     }
   });
 
-  it('requires the stamp and the signature', () => {
-    expect(with_({ stamp_visible: false })).toMatchObject({ outcome: 'retake', code: 'no_stamp' });
+  it('requires the signature', () => {
     expect(with_({ signature_present: false })).toMatchObject({ outcome: 'retake', code: 'no_signature' });
   });
 
@@ -59,13 +82,14 @@ describe('decide', () => {
     expect(with_({}, { receivedAt: new Date('2027-03-06T10:00:00Z') })).toMatchObject({ outcome: 'rejected', code: 'before_polls_close' });
   });
 
-  it('checks the polling unit code against the register and the election area', () => {
-    expect(with_({ polling_unit_code: null })).toMatchObject({ outcome: 'retake', code: 'unit_code_unreadable' });
-    expect(with_({}, { unit: null })).toMatchObject({ outcome: 'retake', code: 'unit_not_in_register' });
+  it("checks the voter's polling unit is in the election area", () => {
     const kano = { code: '19-01-01-001', wardCode: '19-01-01', lgaCode: '19-01', stateCode: '19' };
-    expect(with_({}, { unit: kano })).toMatchObject({ outcome: 'rejected', code: 'outside_election_area' });
+    expect(with_({ polling_unit_code: null }, { unit: kano })).toMatchObject({ outcome: 'rejected', code: 'outside_election_area' });
     const national = { ...ctx.election, scopeLevel: 'national' as const, scopeCode: null, type: 'presidential' as const };
-    expect(with_({ election_type_on_form: 'Presidential' }, { unit: kano, election: national })).toMatchObject({ outcome: 'verified' });
+    expect(with_({ election_type_on_form: 'Presidential', polling_unit_code: '19/1/1/1' }, { unit: kano, election: national })).toMatchObject({
+      outcome: 'verified',
+      strength: 'strong',
+    });
   });
 
   it('rejects a poster for a different election type, and ignores unrecognised wording', () => {

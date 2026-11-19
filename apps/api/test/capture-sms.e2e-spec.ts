@@ -9,6 +9,7 @@ import type { App } from 'supertest/types.js';
 import type { Database } from '../src/database/database.module.js';
 import { captureSessions, elections, reporters, submissions, voterOtps } from '../src/database/schema.js';
 import { keyedHash } from '../src/security/encryption.js';
+import { addTestUnits, removeTestUnits, TEST_UNIT } from './helpers.js';
 
 /** A minimal byte sequence that starts like a JPEG */
 const jpeg = (fill: number) => Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(2048, fill)]);
@@ -33,6 +34,7 @@ describe('Voter capture with SMS verification switched on (e2e)', () => {
     await app.init();
     db = app.get(getDrizzleToken());
     phoneHash = keyedHash(process.env.PHONE_HASH_KEY!, e164);
+    await addTestUnits(app);
     const base = {
       type: 'governorship' as const,
       title: 'E2E capture election',
@@ -54,6 +56,7 @@ describe('Voter capture with SMS verification switched on (e2e)', () => {
     }
     await db.delete(voterOtps).where(eq(voterOtps.phoneHash, phoneHash));
     await db.delete(elections).where(inArray(elections.id, [activeElection, draftElection]));
+    await removeTestUnits(app);
     await rm(process.env.EVIDENCE_DIR!, { recursive: true, force: true });
     await app.close();
   });
@@ -71,7 +74,7 @@ describe('Voter capture with SMS verification switched on (e2e)', () => {
 
   it('refuses photos without a verified phone', async () => {
     await request(server())
-      .post(`/capture/photos?electionId=${activeElection}&clientId=${randomUUID()}`)
+      .post(`/capture/photos?electionId=${activeElection}&clientId=${randomUUID()}&unitCode=${TEST_UNIT}`)
       .set('Content-Type', 'image/jpeg')
       .send(jpeg(1))
       .expect(401);
@@ -105,7 +108,7 @@ describe('Voter capture with SMS verification switched on (e2e)', () => {
 
   it('accepts a photo once, and treats retries of the same clientId as the same submission', async () => {
     const clientId = randomUUID();
-    const url = `/capture/photos?electionId=${activeElection}&clientId=${clientId}&capturedAt=${encodeURIComponent(new Date().toISOString())}&lat=6.45&lng=3.39&accuracy=12`;
+    const url = `/capture/photos?electionId=${activeElection}&clientId=${clientId}&unitCode=${TEST_UNIT}&capturedAt=${encodeURIComponent(new Date().toISOString())}&lat=6.45&lng=3.39&accuracy=12`;
     const first = await request(server()).post(url).set('Cookie', cookie).set('Content-Type', 'image/jpeg').send(jpeg(2)).expect(201);
     expect(first.body.status).toBe('pending');
     expect(first.body.sha256).toMatch(/^[0-9a-f]{64}$/);
@@ -120,7 +123,7 @@ describe('Voter capture with SMS verification switched on (e2e)', () => {
   it('rejects non-images, draft elections and unknown elections', async () => {
     const send = (electionId: string, body: Buffer, type = 'image/jpeg') =>
       request(server())
-        .post(`/capture/photos?electionId=${electionId}&clientId=${randomUUID()}`)
+        .post(`/capture/photos?electionId=${electionId}&clientId=${randomUUID()}&unitCode=${TEST_UNIT}`)
         .set('Cookie', cookie)
         .set('Content-Type', type)
         .send(body);

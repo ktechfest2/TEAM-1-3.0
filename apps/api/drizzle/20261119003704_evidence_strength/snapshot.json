@@ -1,0 +1,78 @@
+{
+  "type": "diff",
+  "version": "9",
+  "dialect": "postgres",
+  "id": "5b2b7d40-85e7-455e-ad7e-21d2696f99d3",
+  "prevIds": [
+    "75ebc0b0-439a-471c-b4eb-78e9d933c5f3"
+  ],
+  "footprints": [
+    {
+      "statementType": "create_enum",
+      "statementTarget": [
+        "enum",
+        "public",
+        "evidence_strength"
+      ],
+      "writes": [
+        "s|enum|public.evidence_strength",
+        "n|enum|public.evidence_strength",
+        "e|enum|public.evidence_strength",
+        "n|type|public.evidence_strength"
+      ],
+      "reads": [
+        "n|sch|public"
+      ]
+    },
+    {
+      "statementType": "add_column",
+      "statementTarget": [
+        "column",
+        "public",
+        "submissions",
+        "evidence_strength"
+      ],
+      "writes": [
+        "s|col|public.submissions.evidence_strength",
+        "n|col|public.submissions.evidence_strength",
+        "e|col|public.submissions.evidence_strength"
+      ],
+      "reads": [
+        "n|tbl|public.submissions",
+        "n|sch|public",
+        "n|enum|public.evidence_strength"
+      ]
+    }
+  ],
+  "deltas": [
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "name": "evidence_strength",
+        "values": [
+          "strong",
+          "standard",
+          "low"
+        ],
+        "entityType": "enums"
+      }
+    },
+    {
+      "op": "create",
+      "row": {
+        "schema": "public",
+        "table": "submissions",
+        "name": "evidence_strength",
+        "type": "evidence_strength",
+        "typeSchema": "public",
+        "notNull": false,
+        "dimensions": 0,
+        "default": null,
+        "generated": null,
+        "identity": null,
+        "entityType": "columns"
+      }
+    }
+  ]
+}

@@ -11,6 +11,7 @@ export type QueueStatus = 'waiting' | 'uploading' | 'sent' | 'failed';
 export interface PhotoCheck {
   status: 'pending' | 'verified' | 'needs_confirmation' | 'rejected';
   reason: string | null;
+  evidenceStrength: 'strong' | 'standard' | 'low' | null;
   retake: boolean;
   figures: { partyVotes: Record<string, number>; totalValid: number; rejected: number | null; totalCast: number | null } | null;
   unitCode: string | null;
@@ -21,6 +22,9 @@ export interface QueuedPhoto {
   clientId: string;
   electionId: string;
   electionTitle: string;
+  /** Polling unit the voter entered */
+  unitCode: string;
+  unitName: string;
   blob: Blob | null;
   capturedAt: string;
   latitude?: number;
@@ -92,7 +96,12 @@ async function runFlush(onChange: () => void): Promise<FlushResult> {
     await queue.put({ ...item, status: 'uploading' });
     onChange();
 
-    const params = new URLSearchParams({ electionId: item.electionId, clientId: item.clientId, capturedAt: item.capturedAt });
+    const params = new URLSearchParams({
+      electionId: item.electionId,
+      clientId: item.clientId,
+      unitCode: item.unitCode,
+      capturedAt: item.capturedAt,
+    });
     if (item.latitude != null && item.longitude != null) {
       params.set('lat', String(item.latitude));
       params.set('lng', String(item.longitude));

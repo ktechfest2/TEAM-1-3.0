@@ -12,7 +12,8 @@ import { and, count, desc, eq, gt, isNull } from 'drizzle-orm';
 import { randomInt } from 'node:crypto';
 import type { Env } from '../config/env.js';
 import type { Database } from '../database/database.module.js';
-import { captureSessions, elections, reporters, submissions, voterOtps } from '../database/schema.js';
+import { parseUnitCode } from '@trustelect/shared';
+import { captureSessions, elections, lgas, pollingUnits, reporters, states, submissions, voterOtps, wards } from '../database/schema.js';
 import { Encryptor, keyedHash, newToken, sha256 } from '../security/encryption.js';
 import { EvidenceStorage } from '../storage/evidence-storage.js';
 import { maskPhone, normaliseNigerianMobile } from './phone.js';
@@ -39,6 +40,8 @@ export interface CaptureVoter {
 export interface PhotoMeta {
   electionId: string;
   clientId: string;
+  /** Polling unit code entered by the voter (from their voter's card) */
+  unitCode: string;
   capturedAt?: Date;
   latitude?: number;
   longitude?: number;
@@ -195,12 +198,29 @@ export class CaptureService {
     if (bytes.length > MAX_PHOTO_BYTES) throw new BadRequestException('The photo is too large');
 
     const [election] = await this.db
-      .select({ status: elections.status })
+      .select({ status: elections.status, scopeLevel: elections.scopeLevel, scopeCode: elections.scopeCode })
       .from(elections)
       .where(eq(elections.id, meta.electionId))
       .limit(1);
     if (!election || election.status !== 'active') {
       throw new BadRequestException('This election is not accepting photographs');
+    }
+
+    // The voter's polling unit must exist and belong to this election's area
+    const code = parseUnitCode(meta.unitCode);
+    if (!code) throw new BadRequestException('Enter a valid polling unit code, for example 24-05-01-003');
+    const [unit] = await this.db
+      .select({ id: pollingUnits.id, code: pollingUnits.code, ward: wards.code, lga: lgas.code, state: states.code })
+      .from(pollingUnits)
+      .innerJoin(wards, eq(wards.id, pollingUnits.wardId))
+      .innerJoin(lgas, eq(lgas.id, wards.lgaId))
+      .innerJoin(states, eq(states.id, lgas.stateId))
+      .where(eq(pollingUnits.code, code.unit))
+      .limit(1);
+    if (!unit) throw new BadRequestException(`Polling unit ${code.unit} is not in INEC's register`);
+    const scopeCode = { national: null, state: unit.state, lga: unit.lga, ward: unit.ward, polling_unit: unit.code }[election.scopeLevel];
+    if (election.scopeLevel !== 'national' && scopeCode !== election.scopeCode) {
+      throw new BadRequestException(`Polling unit ${unit.code} is not part of this election's area`);
     }
 
     const hourAgo = new Date(Date.now() - 3_600_000);
@@ -223,6 +243,7 @@ export class CaptureService {
       .insert(submissions)
       .values({
         electionId: meta.electionId,
+        pollingUnitId: unit.id,
         reporterId: voter.reporterId,
         kind: 'photo',
         channel: 'web',

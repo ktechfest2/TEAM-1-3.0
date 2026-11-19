@@ -1,11 +1,13 @@
 import type { INestApplication } from '@nestjs/common';
 import { getDrizzleToken } from '@nestjs/drizzle';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, like } from 'drizzle-orm';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { AuthService, type AdminRole } from '../src/auth/auth.service.js';
 import type { Database } from '../src/database/database.module.js';
-import { adminSessions, adminUsers, auditLog } from '../src/database/schema.js';
+import { adminSessions, adminUsers, auditLog, lgas, pollingUnits, wards } from '../src/database/schema.js';
+import { GeographyService } from '../src/geography/geography.service.js';
+import { parseRegister } from '../src/geography/register.js';
 import { totp } from '../src/security/totp.js';
 
 export const ORIGIN = 'http://localhost:3000';
@@ -39,4 +41,24 @@ export async function removeAdmins(app: INestApplication<App>, emails: string[])
   await db.delete(auditLog).where(inArray(auditLog.adminUserId, ids));
   for (const id of ids) await db.delete(auditLog).where(eq(auditLog.targetId, id));
   await db.delete(adminUsers).where(inArray(adminUsers.id, ids));
+}
+
+/** Fictional polling units for tests: LGA 98 does not exist in Lagos (24) or Kano (19). */
+export const TEST_UNIT = '24-98-01-001';
+export const TEST_UNIT_OUTSIDE_LAGOS = '19-98-01-001';
+
+export async function addTestUnits(app: INestApplication<App>) {
+  const { rows } = parseRegister(
+    `pu_code,pu_name,ward_name,lga_name,state_name\n${TEST_UNIT},TEST UNIT,TEST WARD,TEST LGA,Lagos\n${TEST_UNIT_OUTSIDE_LAGOS},TEST UNIT KANO,TEST WARD,TEST LGA,Kano\n`,
+  );
+  await app.get(GeographyService).importRegister(rows);
+}
+
+export async function removeTestUnits(app: INestApplication<App>) {
+  const db = app.get<Database>(getDrizzleToken());
+  for (const prefix of ['24-98', '19-98']) {
+    await db.delete(pollingUnits).where(like(pollingUnits.code, `${prefix}-%`));
+    await db.delete(wards).where(like(wards.code, `${prefix}-%`));
+    await db.delete(lgas).where(eq(lgas.code, prefix));
+  }
 }

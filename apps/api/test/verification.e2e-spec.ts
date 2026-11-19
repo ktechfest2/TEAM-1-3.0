@@ -4,7 +4,7 @@ import { Test } from '@nestjs/testing';
 import { randomUUID } from 'node:crypto';
 import { access, rm } from 'node:fs/promises';
 import { join } from 'node:path';
-import { eq, inArray, like } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import request from 'supertest';
 import type { App } from 'supertest/types.js';
 import { AppModule } from '../src/app.module.js';
@@ -13,16 +13,11 @@ import {
   captureSessions,
   electionParties,
   elections,
-  lgas,
   parties,
-  pollingUnits,
   rejectionLog,
   reporters,
   submissions,
-  wards,
 } from '../src/database/schema.js';
-import { GeographyService } from '../src/geography/geography.service.js';
-import { parseRegister } from '../src/geography/register.js';
 import type { Ec60eReading } from '../src/verification/reading.js';
 import { VerificationService } from '../src/verification/verification.service.js';
 import { VisionModel } from '../src/verification/vision-model.js';
@@ -40,7 +35,7 @@ class FakeVisionModel extends VisionModel {
 
 const tag = Date.now().toString(36).toUpperCase().slice(-4);
 const P = [`TA${tag}`, `TB${tag}`];
-const UNIT = '24-98-01-001';
+import { addTestUnits, removeTestUnits, TEST_UNIT as UNIT } from './helpers.js';
 
 const reading = (over: Partial<Ec60eReading> = {}): Ec60eReading => ({
   is_ec60e: true,
@@ -84,8 +79,7 @@ describe('Photo verification (e2e)', () => {
     verification = app.get(VerificationService);
 
     // A test polling unit in a fictional LGA (24-98), parties and an active election that closed in the past
-    const { rows } = parseRegister(`pu_code,pu_name,ward_name,lga_name,state_name\n${UNIT},TEST UNIT,TEST WARD,TEST LGA,Lagos\n`);
-    await app.get(GeographyService).importRegister(rows);
+    await addTestUnits(app);
     const ps = await db.insert(parties).values(P.map((a) => ({ acronym: a, name: `Test ${a}` }))).returning();
     [{ id: electionId }] = await db
       .insert(elections)
@@ -121,16 +115,14 @@ describe('Photo verification (e2e)', () => {
     await db.delete(electionParties).where(eq(electionParties.electionId, electionId));
     await db.delete(elections).where(eq(elections.id, electionId));
     await db.delete(parties).where(inArray(parties.acronym, P));
-    await db.delete(pollingUnits).where(like(pollingUnits.code, '24-98-%'));
-    await db.delete(wards).where(like(wards.code, '24-98-%'));
-    await db.delete(lgas).where(eq(lgas.code, '24-98'));
+    await removeTestUnits(app);
     await rm(process.env.EVIDENCE_DIR!, { recursive: true, force: true });
     await app.close();
   });
 
   async function upload(voter = 0, fill = Math.floor(Math.random() * 255)) {
     const res = await request(app.getHttpServer())
-      .post(`/capture/photos?electionId=${electionId}&clientId=${randomUUID()}`)
+      .post(`/capture/photos?electionId=${electionId}&clientId=${randomUUID()}&unitCode=${UNIT}`)
       .set('Cookie', voters[voter].cookie)
       .set('Content-Type', 'image/jpeg')
       .send(jpeg(fill))
@@ -159,12 +151,29 @@ describe('Photo verification (e2e)', () => {
     expect(res.body).toMatchObject({
       status: 'verified',
       unitCode: UNIT,
+      evidenceStrength: 'strong',
       figures: { partyVotes: { [P[0]]: 120, [P[1]]: 80 }, totalValid: 200, rejected: 5, totalCast: 205 },
     });
     expect(await imageExists(id)).toBe(true);
     const [row] = await db.select().from(submissions).where(eq(submissions.id, id));
     expect(row.model).toBe('fake-model');
     expect(row.verification).toMatchObject({ decision: { outcome: 'verified' } });
+  });
+
+  it('accepts a poster with no stamp and no code as low-confidence evidence for the unit the voter entered', async () => {
+    const id = await upload();
+    model.next.push(reading({ stamp_visible: false, polling_unit_code: null }));
+    await verification.process(id);
+    expect((await status(id).expect(200)).body).toMatchObject({ status: 'verified', unitCode: UNIT, evidenceStrength: 'low' });
+  });
+
+  it('asks the voter to check when the poster shows a different polling unit', async () => {
+    const id = await upload();
+    model.next.push(reading({ polling_unit_code: '24/98/01/002' }));
+    await verification.process(id);
+    const res = await status(id).expect(200);
+    expect(res.body).toMatchObject({ status: 'rejected', retake: true });
+    expect(res.body.reason).toMatch(/you entered 24-98-01-001/);
   });
 
   it('asks for a retake of a blurred photo and deletes the image', async () => {

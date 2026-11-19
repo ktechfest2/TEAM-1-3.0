@@ -100,7 +100,9 @@ export function QueueList({
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="min-w-0">
                   <p className="truncate font-medium">{item.electionTitle}</p>
-                  <p className="text-sm text-ink-muted">Taken at {time(item.capturedAt)}</p>
+                  <p className="text-sm text-ink-muted">
+                    {item.unitName ? `${item.unitName} · ` : ''}Taken at {time(item.capturedAt)}
+                  </p>
                 </div>
                 <span className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-sm font-semibold ${b.className}`}>
                   <span aria-hidden="true">{b.icon}</span>
@@ -108,7 +110,17 @@ export function QueueList({
                 </span>
               </div>
 
-              {check?.status === 'verified' && <Figures check={check} />}
+              {check?.status === 'verified' && (
+                <>
+                  {check.evidenceStrength === 'low' && (
+                    <p className="mt-2 text-sm text-dispute">
+                      No stamp is visible on this poster, so it counts with low confidence. If the poster has a stamp, a
+                      photo that shows it makes the record stronger.
+                    </p>
+                  )}
+                  <Figures check={check} />
+                </>
+              )}
 
               {check?.status === 'needs_confirmation' && (
                 <div className="mt-3 grid gap-2">

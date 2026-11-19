@@ -64,6 +64,7 @@ const verifySchema = z.object({
 const photoQuerySchema = z.object({
   electionId: z.uuid(),
   clientId: z.uuid(),
+  unitCode: z.string().min(7).max(20),
   capturedAt: z.iso.datetime({ offset: true }).optional(),
   lat: z.coerce.number().min(-90).max(90).optional(),
   lng: z.coerce.number().min(-180).max(180).optional(),
@@ -164,6 +165,7 @@ export class CaptureController {
       {
         electionId: q.electionId,
         clientId: q.clientId,
+        unitCode: q.unitCode,
         capturedAt: q.capturedAt ? new Date(q.capturedAt) : undefined,
         latitude: q.lat,
         longitude: q.lng,

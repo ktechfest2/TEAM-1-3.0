@@ -30,7 +30,7 @@ export function UnitSearch({ defaultValue }: { defaultValue?: string }) {
           </button>
         </div>
         <p id="unit-help" className="text-sm text-ink-muted">
-          Polling unit code, for example 24-05-01-003. It is on your voter&apos;s card and the
+          Polling unit code, for example <span className="whitespace-nowrap">24-05-01-003</span>. It is on your voter&apos;s card and the
           result poster.
         </p>
       </form>

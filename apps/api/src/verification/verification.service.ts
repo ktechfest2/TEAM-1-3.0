@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectDrizzle } from '@nestjs/drizzle';
-import { parseUnitCode } from '@trustelect/shared';
 import { and, asc, eq, ne, sql } from 'drizzle-orm';
 import type { Database } from '../database/database.module.js';
 import {
@@ -90,17 +89,21 @@ export class VerificationService {
       return null;
     }
 
-    const parsed = reading.polling_unit_code ? parseUnitCode(reading.polling_unit_code) : null;
-    const [unit] = parsed
+    // The polling unit the voter entered (checked against the register at upload)
+    const [unit] = sub.pollingUnitId
       ? await this.db
           .select({ id: pollingUnits.id, code: pollingUnits.code, wardCode: wards.code, lgaCode: lgas.code, stateCode: states.code })
           .from(pollingUnits)
           .innerJoin(wards, eq(wards.id, pollingUnits.wardId))
           .innerJoin(lgas, eq(lgas.id, wards.lgaId))
           .innerJoin(states, eq(states.id, lgas.stateId))
-          .where(eq(pollingUnits.code, parsed.unit))
+          .where(eq(pollingUnits.id, sub.pollingUnitId))
           .limit(1)
       : [];
+    if (!unit) {
+      this.logger.error(`submission ${sub.id}: no polling unit recorded`);
+      return null;
+    }
 
     const decision = decide(reading, {
       election: {
@@ -111,23 +114,36 @@ export class VerificationService {
       },
       ballot,
       receivedAt: sub.receivedAt,
-      unit: unit ?? null,
+      unit,
     });
 
-    const audit = { reading, decision: { outcome: decision.outcome, code: 'code' in decision ? decision.code : null } };
+    const audit = {
+      reading,
+      decision: {
+        outcome: decision.outcome,
+        code: 'code' in decision ? decision.code : null,
+        flags: 'flags' in decision ? decision.flags : null,
+      },
+    };
     const common = { verification: audit, processedAt: new Date(), model: this.model.name, nextAttemptAt: null };
 
     switch (decision.outcome) {
       case 'verified':
         await this.db
           .update(submissions)
-          .set({ ...common, status: 'verified', pollingUnitId: unit!.id, extracted: decision.figures, reviewReason: null })
+          .set({ ...common, status: 'verified', extracted: decision.figures, evidenceStrength: decision.strength, reviewReason: null })
           .where(eq(submissions.id, sub.id));
         break;
       case 'needs_confirmation':
         await this.db
           .update(submissions)
-          .set({ ...common, status: 'needs_confirmation', pollingUnitId: unit!.id, extracted: decision.figures, reviewReason: decision.reason })
+          .set({
+            ...common,
+            status: 'needs_confirmation',
+            extracted: decision.figures,
+            evidenceStrength: decision.strength,
+            reviewReason: decision.reason,
+          })
           .where(eq(submissions.id, sub.id));
         break;
       case 'retake':
@@ -191,6 +207,7 @@ export class VerificationService {
         reason: submissions.reviewReason,
         retake: submissions.retakeRequested,
         figures: submissions.extracted,
+        evidenceStrength: submissions.evidenceStrength,
         unitCode: pollingUnits.code,
         unitName: pollingUnits.name,
         attempts: submissions.processingAttempts,

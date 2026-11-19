@@ -1,8 +1,10 @@
+import { parseUnitCode } from '@trustelect/shared';
 import type { ResultFigures } from '../database/schema.js';
 import type { Ec60eReading } from './reading.js';
 
 /**
- * TrustElect's verification rules (Specification VER-01 to VER-09). The vision model only
+ * TrustElect's verification rules (Specification VER-01 to VER-09, as amended 19 Nov:
+ * the voter supplies the polling unit; a missing stamp lowers evidence strength). The vision model only
  * describes the photo; these rules decide what happens, so they are testable and consistent.
  */
 
@@ -25,13 +27,35 @@ export interface DecisionContext {
   /** Party acronyms on this election's ballot, in ballot order */
   ballot: string[];
   receivedAt: Date;
-  /** The polling unit the poster's code resolves to in INEC's register, or null if not found */
-  unit: { code: string; wardCode: string; lgaCode: string; stateCode: string } | null;
+  /** The polling unit the voter entered, already checked against INEC's register */
+  unit: { code: string; wardCode: string; lgaCode: string; stateCode: string };
+}
+
+/**
+ * Evidence strength of an accepted photo:
+ *   strong   = stamp visible and the code on the poster matches the voter's polling unit
+ *   standard = stamp visible, no readable code on the poster
+ *   low      = no visible stamp (accepted, but weighs less)
+ */
+export type EvidenceStrength = 'strong' | 'standard' | 'low';
+
+export interface EvidenceFlags {
+  stampVisible: boolean;
+  /** True: poster code matches. Null: no readable code on the poster. */
+  posterCodeMatches: boolean | null;
 }
 
 export type Decision =
-  | { outcome: 'verified'; unitCode: string; figures: ResultFigures; notes: string[] }
-  | { outcome: 'needs_confirmation'; unitCode: string; figures: ResultFigures; code: string; reason: string }
+  | { outcome: 'verified'; unitCode: string; figures: ResultFigures; strength: EvidenceStrength; flags: EvidenceFlags; notes: string[] }
+  | {
+      outcome: 'needs_confirmation';
+      unitCode: string;
+      figures: ResultFigures;
+      strength: EvidenceStrength;
+      flags: EvidenceFlags;
+      code: string;
+      reason: string;
+    }
   | { outcome: 'retake'; code: string; reason: string }
   | { outcome: 'rejected'; code: string; reason: string };
 
@@ -64,7 +88,7 @@ export function normaliseParty(name: string): string {
   return name.toUpperCase().replace(/[^A-Z0-9]/g, '');
 }
 
-function inScope(unit: NonNullable<DecisionContext['unit']>, scope: DecisionContext['election']): boolean {
+function inScope(unit: DecisionContext['unit'], scope: DecisionContext['election']): boolean {
   switch (scope.scopeLevel) {
     case 'national':
       return true;
@@ -94,14 +118,7 @@ export function decide(reading: Ec60eReading, ctx: DecisionContext): Decision {
     return { outcome: 'retake', code: `quality_${reading.image_quality}`, reason: QUALITY_MESSAGES[reading.image_quality] };
   }
 
-  // VER-03: stamp required, signature present
-  if (!reading.stamp_visible) {
-    return {
-      outcome: 'retake',
-      code: 'no_stamp',
-      reason: 'The official stamp is not visible. Take the photo again with the stamp in view. Posters without a stamp cannot be accepted.',
-    };
-  }
+  // VER-03: a signature is required. A missing stamp lowers the evidence strength (decision of 19 Nov).
   if (!reading.signature_present) {
     return {
       outcome: 'retake',
@@ -119,21 +136,7 @@ export function decide(reading: Ec60eReading, ctx: DecisionContext): Decision {
     };
   }
 
-  // VER-02: polling unit code exists and belongs to this election's area
-  if (!reading.polling_unit_code) {
-    return {
-      outcome: 'retake',
-      code: 'unit_code_unreadable',
-      reason: 'The polling unit code is not readable. Take the photo again with the code clearly in view.',
-    };
-  }
-  if (!ctx.unit) {
-    return {
-      outcome: 'retake',
-      code: 'unit_not_in_register',
-      reason: `The polling unit code "${reading.polling_unit_code}" does not match INEC's register. Check it is readable and take the photo again.`,
-    };
-  }
+  // VER-02: the voter's polling unit must be in this election's area
   if (!inScope(ctx.unit, ctx.election)) {
     return {
       outcome: 'rejected',
@@ -141,6 +144,18 @@ export function decide(reading: Ec60eReading, ctx: DecisionContext): Decision {
       reason: `Polling unit ${ctx.unit.code} is not part of this election's area. Check you chose the right election.`,
     };
   }
+
+  // If the poster shows a polling unit code, it must be the voter's unit; a match strengthens the evidence
+  const posterCode = reading.polling_unit_code ? parseUnitCode(reading.polling_unit_code) : null;
+  if (posterCode && posterCode.unit !== ctx.unit.code) {
+    return {
+      outcome: 'retake',
+      code: 'unit_code_mismatch',
+      reason: `The poster shows polling unit ${posterCode.unit}, but you entered ${ctx.unit.code}. Check the code you entered and try again.`,
+    };
+  }
+  const flags: EvidenceFlags = { stampVisible: reading.stamp_visible, posterCodeMatches: posterCode ? true : null };
+  const strength: EvidenceStrength = !flags.stampVisible ? 'low' : flags.posterCodeMatches ? 'strong' : 'standard';
 
   // VER-02: election type printed on the form
   const printedType = electionTypeFromText(reading.election_type_on_form);
@@ -213,11 +228,14 @@ export function decide(reading: Ec60eReading, ctx: DecisionContext): Decision {
       outcome: 'needs_confirmation',
       unitCode: ctx.unit.code,
       figures,
+      strength,
+      flags,
       code: 'arithmetic_mismatch',
       reason: `Please check these figures against the poster: ${problems.join('; ')}.`,
     };
   }
 
   const notes = reading.notes.trim() ? [reading.notes.trim()] : [];
-  return { outcome: 'verified', unitCode: ctx.unit.code, figures, notes };
+  if (!flags.stampVisible) notes.push('No stamp visible on the poster');
+  return { outcome: 'verified', unitCode: ctx.unit.code, figures, strength, flags, notes };
 }

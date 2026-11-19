@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { Camera } from './camera';
+import { ChooseUnit, type ChosenUnit } from './choose-unit';
 import { EnterPhone } from './enter-phone';
 import { answerConfirmation, flushQueue, queue, refreshChecks, type QueuedPhoto } from './queue';
 import { QueueList } from './queue-list';
 import { VerifyPhone } from './verify-phone';
 
-type Election = { id: string; title: string; status: string };
-type Step = 'loading' | 'intro' | 'verify' | 'election' | 'camera' | 'review';
+type Election = { id: string; title: string; status: string; scopeLevel: string; scopeCode: string | null };
+type Step = 'loading' | 'intro' | 'verify' | 'election' | 'unit' | 'camera' | 'review';
 type Coords = { latitude: number; longitude: number; accuracy: number };
 
 const RETRY_MS = 30_000;
@@ -36,6 +37,7 @@ export function CaptureApp() {
   const [phoneMasked, setPhoneMasked] = useState<string | null>(null);
   const [elections, setElections] = useState<Election[] | null>(null);
   const [election, setElection] = useState<Election | null>(null);
+  const [unit, setUnit] = useState<ChosenUnit | null>(null);
   const [coords, setCoords] = useState<Coords | null>(null);
   const [locationState, setLocationState] = useState<'off' | 'asking' | 'on' | 'denied'>('off');
   const [photo, setPhoto] = useState<{ blob: Blob; url: string; capturedAt: string } | null>(null);
@@ -118,11 +120,13 @@ export function CaptureApp() {
   }
 
   async function savePhoto() {
-    if (!photo || !election) return;
+    if (!photo || !election || !unit) return;
     await queue.put({
       clientId: crypto.randomUUID(),
       electionId: election.id,
       electionTitle: election.title,
+      unitCode: unit.code,
+      unitName: unit.name,
       blob: photo.blob,
       capturedAt: photo.capturedAt,
       ...(coords ?? {}),
@@ -214,8 +218,9 @@ export function CaptureApp() {
                     type="button"
                     className={secondary}
                     onClick={() => {
+                      if (election?.id !== e.id) setUnit(null);
                       setElection(e);
-                      setStep('camera');
+                      setStep('unit');
                     }}
                   >
                     {e.title}
@@ -227,13 +232,33 @@ export function CaptureApp() {
         </section>
       )}
 
-      {step === 'camera' && election && (
+      {step === 'unit' && election && (
+        <section className={card} aria-labelledby="unit-heading">
+          <h1 id="unit-heading" className="text-xl font-bold tracking-tight">Which polling unit are you at?</h1>
+          <p className="mt-1 mb-4 text-sm text-ink-muted">
+            {election.title} ·{' '}
+            <button type="button" className="font-medium text-brand-strong underline" onClick={() => setStep('election')}>
+              change
+            </button>
+          </p>
+          <ChooseUnit
+            election={election}
+            initial={unit}
+            onChosen={(u) => {
+              setUnit(u);
+              setStep('camera');
+            }}
+          />
+        </section>
+      )}
+
+      {step === 'camera' && election && unit && (
         <section className="grid gap-4" aria-labelledby="camera-heading">
           <div>
             <h1 id="camera-heading" className="text-xl font-bold tracking-tight">Photograph the EC60E poster</h1>
             <p className="text-sm text-ink-muted">
-              {election.title} ·{' '}
-              <button type="button" className="font-medium text-brand-strong underline" onClick={() => setStep('election')}>
+              {election.title} · {unit.name} ({unit.code}) ·{' '}
+              <button type="button" className="font-medium text-brand-strong underline" onClick={() => setStep('unit')}>
                 change
               </button>
             </p>
@@ -292,7 +317,7 @@ export function CaptureApp() {
           await refresh();
         }}
         onRetake={() => {
-          setStep(election ? 'camera' : 'election');
+          setStep(election && unit ? 'camera' : election ? 'unit' : 'election');
           window.scrollTo({ top: 0 });
         }}
         onAnswer={async (item, confirmed) => {
