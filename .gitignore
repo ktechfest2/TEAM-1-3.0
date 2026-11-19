@@ -50,3 +50,6 @@ deploy/.env.deploy
 
 # Original brand media (web versions are in apps/web/public)
 apps/web/media-source/
+
+# Local copies of production backups (encrypted)
+backups/

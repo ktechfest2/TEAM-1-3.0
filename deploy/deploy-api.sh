@@ -5,8 +5,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 source deploy/.env.deploy
 docker build -f apps/api/Dockerfile -t trustelect-api:latest .
-docker save trustelect-api:latest | gzip -1 | ssh "$DEPLOY_SSH_HOST" 'gunzip | docker load'
+docker build -t trustelect-backup:latest deploy/backup
+docker save trustelect-api:latest trustelect-backup:latest | gzip -1 | ssh "$DEPLOY_SSH_HOST" 'gunzip | docker load'
 scp -q deploy/api/docker-compose.yml "$DEPLOY_SSH_HOST":/opt/trustelect/docker-compose.yml
-ssh "$DEPLOY_SSH_HOST" 'cd /opt/trustelect && docker compose up -d && docker image prune -f >/dev/null'
+ssh "$DEPLOY_SSH_HOST" 'cd /opt/trustelect && mkdir -p backups && chmod 700 backups && docker compose up -d && docker image prune -f >/dev/null'
 sleep 10
 curl -fsS "$API_URL/health/live" && echo

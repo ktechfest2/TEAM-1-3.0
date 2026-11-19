@@ -42,6 +42,21 @@ services:
       - evidence:/data/evidence
     mem_limit: 448m
 
+  backup:
+    image: trustelect-backup:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      BACKUP_PASSPHRASE: ${BACKUP_PASSPHRASE:?set BACKUP_PASSPHRASE in /opt/trustelect/.env}
+      BACKUP_KEEP_DAYS: '14'
+    secrets: [db_password]
+    volumes:
+      - ./backups:/backups
+      - evidence:/evidence:ro
+    mem_limit: 128m
+
 secrets:
   db_password:
     file: ./db_password
