@@ -116,6 +116,9 @@ describe('SMS and USSD channels (e2e)', () => {
     expect((await request(app.getHttpServer()).get(`/channels/${TOKEN}/ussd`).expect(200)).text).toBe('OK');
     await request(app.getHttpServer()).get(`/channels/${TOKEN}/sms`).expect(200);
     await request(app.getHttpServer()).get('/channels/wrong-token-wrong-token-wrong/ussd').expect(404);
+    // An empty POST (address check) is answered, not rejected
+    expect((await request(app.getHttpServer()).post(`/channels/${TOKEN}/sms`).expect(200)).text).toBe('OK');
+    expect((await request(app.getHttpServer()).post(`/channels/${TOKEN}/ussd`).expect(200)).text).toBe('END TrustElect');
   });
 
   it('refuses callbacks without the secret token', async () => {

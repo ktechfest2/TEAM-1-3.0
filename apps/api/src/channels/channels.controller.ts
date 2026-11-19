@@ -1,9 +1,9 @@
-import { Body, Controller, Get, Header, HttpCode, NotFoundException, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Header, HttpCode, Logger, NotFoundException, Param, Post, Req } from '@nestjs/common';
+import type { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { timingSafeEqual } from 'node:crypto';
 import { z } from 'zod';
 import type { Env } from '../config/env.js';
-import { parseOrThrow } from '../common/validation.js';
 import { SmsService } from './sms.service.js';
 import { UssdService } from './ussd.service.js';
 
@@ -13,11 +13,20 @@ import { UssdService } from './ussd.service.js';
  */
 @Controller('channels/:token')
 export class ChannelsController {
+  private readonly logger = new Logger('Channels');
+
   constructor(
     private readonly config: ConfigService<Env, true>,
     private readonly sms: SmsService,
     private readonly ussd: UssdService,
   ) {}
+
+  /** Logs what an incomplete request carried (field names only, never values) and answers 200 */
+  private probe(req: Request, answer: string) {
+    const fields = req.body && typeof req.body === 'object' ? Object.keys(req.body as object).join(',') : typeof req.body;
+    this.logger.log(`address check: ${req.method} ${req.headers['content-type'] ?? '-'} fields=[${fields}] ua=${(req.headers['user-agent'] ?? '-').slice(0, 60)}`);
+    return answer;
+  }
 
   private checkToken(token: string) {
     const expected = this.config.get('CHANNELS_WEBHOOK_TOKEN', { infer: true });
@@ -37,9 +46,12 @@ export class ChannelsController {
   /** Incoming SMS: from, to, text, id, date, linkId */
   @Post('sms')
   @HttpCode(200)
-  async incomingSms(@Param('token') token: string, @Body() body: unknown) {
+  async incomingSms(@Param('token') token: string, @Body() body: unknown, @Req() req: Request) {
     this.checkToken(token);
-    const m = parseOrThrow(z.object({ from: z.string().min(5).max(20), text: z.string().max(1000).default(''), id: z.string().min(1).max(100) }), body);
+    const parsed = z.object({ from: z.string().min(5).max(20), text: z.string().max(1000).default(''), id: z.string().min(1).max(100) }).safeParse(body);
+    // The provider checks the address with a request that carries no message: answer OK
+    if (!parsed.success) return this.probe(req, 'OK');
+    const m = parsed.data;
     await this.sms.receive(m);
     return 'OK';
   }
@@ -48,12 +60,13 @@ export class ChannelsController {
   @Post('ussd')
   @HttpCode(200)
   @Header('Content-Type', 'text/plain; charset=utf-8')
-  async ussdStep(@Param('token') token: string, @Body() body: unknown) {
+  async ussdStep(@Param('token') token: string, @Body() body: unknown, @Req() req: Request) {
     this.checkToken(token);
-    const s = parseOrThrow(
-      z.object({ sessionId: z.string().min(1).max(100), phoneNumber: z.string().min(5).max(20), text: z.string().max(300).default('') }),
-      body,
-    );
+    const parsed = z
+      .object({ sessionId: z.string().min(1).max(100), phoneNumber: z.string().min(5).max(20), text: z.string().max(300).default('') })
+      .safeParse(body);
+    if (!parsed.success) return this.probe(req, 'END TrustElect');
+    const s = parsed.data;
     return this.ussd.handle(s.sessionId, `+${s.phoneNumber.replace(/\D/g, '')}`, s.text);
   }
 }
