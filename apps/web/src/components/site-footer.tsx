@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { UNOFFICIAL_LABEL } from '@trustelect/shared';
 import { LogoMark, Wordmark } from './logo';
+import { WHATSAPP_CHAT_URL } from './whatsapp-chat';
 
 export function SiteFooter() {
   return (
@@ -23,6 +24,14 @@ export function SiteFooter() {
             units. Official results are declared by INEC.
           </p>
           <p className="flex flex-wrap gap-x-5 gap-y-1">
+            <a
+              href={WHATSAPP_CHAT_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-brand-strong hover:underline"
+            >
+              Ask TrustElect AI on WhatsApp
+            </a>
             <Link href="/incidents" className="font-medium text-brand-strong hover:underline">
               Incident reports
             </Link>
