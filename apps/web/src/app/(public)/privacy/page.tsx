@@ -2,13 +2,19 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = { title: 'Privacy notice' };
 
-const SECTIONS: { title: string; body: React.ReactNode }[] = [
+const CONTACT = 'francisvictor.st@gmail.com';
+
+const SECTIONS: { id?: string; title: string; body: React.ReactNode }[] = [
   {
     title: 'Who we are',
     body: (
       <p>
         TrustElect is a citizen election evidence platform run by Team 1 (KTech Fest 3.0). It is not INEC and is not
-        affiliated with any party or candidate. Contact: <span className="font-medium">[privacy contact email]</span>.
+        affiliated with any party or candidate. Contact:{' '}
+        <a href={`mailto:${CONTACT}`} className="font-medium text-brand-strong hover:underline">
+          {CONTACT}
+        </a>
+        .
       </p>
     ),
   },
@@ -32,6 +38,27 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
         <li>
           <strong>Technical records</strong>: the time your submission arrived and security logs needed to stop abuse.
         </li>
+      </ul>
+    ),
+  },
+  {
+    id: 'whatsapp',
+    title: 'On WhatsApp',
+    body: (
+      <ul className="grid list-disc gap-2 pl-5">
+        <li>
+          We ask for your consent the first time you message TrustElect. Your WhatsApp number is stored encrypted and is
+          used in the same way as above.
+        </li>
+        <li>
+          We do not keep the text of your messages. We keep only message identifiers and delivery status, the polling unit
+          you asked about (so you need not repeat it), your preferred language, and any result figures you send.
+        </li>
+        <li>
+          To answer questions, the text of your message is sent to an AI service that does not keep it or use it for
+          training. Result figures never come from the AI.
+        </li>
+        <li>Messages are delivered through WhatsApp (Meta), under WhatsApp&apos;s own terms and privacy policy.</li>
       </ul>
     ),
   },
@@ -64,11 +91,16 @@ const SECTIONS: { title: string; body: React.ReactNode }[] = [
     ),
   },
   {
-    title: 'Your rights',
+    id: 'your-rights',
+    title: 'Your rights and deleting your data',
     body: (
       <p>
         You can ask to see the data we hold about your number, correct it, or have it deleted, and you can withdraw
-        consent at any time by contacting us. Evidence already used in a published result may be kept in anonymised form
+        consent at any time. To have your data deleted, email{' '}
+        <a href={`mailto:${CONTACT}`} className="font-medium text-brand-strong hover:underline">
+          {CONTACT}
+        </a>{' '}
+        from any address, giving the phone number you used; we confirm and delete it within 30 days. Evidence already used in a published result may be kept in anonymised form
         so that the public record stays complete. You can also complain to the Nigeria Data Protection Commission.
       </p>
     ),
@@ -91,7 +123,7 @@ export default function PrivacyPage() {
       <p className="mt-2 text-ink-muted">How TrustElect handles your information, in plain language.</p>
       <div className="mt-8 grid gap-8">
         {SECTIONS.map((s) => (
-          <section key={s.title} className="grid gap-2">
+          <section key={s.title} id={s.id} className="grid scroll-mt-24 gap-2">
             <h2 className="text-xl font-semibold">{s.title}</h2>
             <div className="max-w-[70ch] text-ink-muted [&_strong]:text-ink">{s.body}</div>
           </section>
