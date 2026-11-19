@@ -17,7 +17,7 @@ import {
 import { EvidenceStorage } from '../storage/evidence-storage.js';
 import { WitnessService } from '../witnesses/witness.service.js';
 import { decide, type Decision } from './decide.js';
-import { TemporaryAiError, VisionModel } from './vision-model.js';
+import { modelThatRead, TemporaryAiError, VisionModel } from './vision-model.js';
 
 export const MAX_ATTEMPTS = 6;
 /** Minutes to wait after each failed attempt */
@@ -129,7 +129,7 @@ export class VerificationService {
         flags: 'flags' in decision ? decision.flags : null,
       },
     };
-    const common = { verification: audit, processedAt: new Date(), model: this.model.name, nextAttemptAt: null };
+    const common = { verification: audit, processedAt: new Date(), model: modelThatRead(reading, this.model.name), nextAttemptAt: null };
 
     switch (decision.outcome) {
       case 'verified':

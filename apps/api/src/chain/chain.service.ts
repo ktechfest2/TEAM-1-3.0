@@ -10,6 +10,13 @@ import { declarationRecord, incidentRecord, submissionRecord, unitResultRecord, 
 /** Advisory lock that serialises appends, so sequence numbers have no gaps */
 const CHAIN_LOCK = 7_303_281;
 
+/** Most appends written in one transaction */
+const BATCH = 50;
+
+type Loader = (tx: Executor) => Promise<{ ref: string; record: unknown } | null>;
+type Pending = { entryType: ChainEntryType; load: Loader };
+type Appended = { seq: number; hash: string };
+
 const sha256 = (s: string) => createHash('sha256').update(s).digest('hex');
 
 /**
@@ -25,39 +32,89 @@ export class ChainService {
   /**
    * Chains the current state of a record. The record is read under the chain lock, so the
    * latest entry for a record is always its latest state. Unchanged records are not re-chained.
+   *
+   * Appends from this instance are queued and written in batches, one transaction per batch
+   * (Sprint 16 load test): before, every upload in a burst held a database connection while
+   * waiting for the lock, which starved the pool. Callers inside their own transaction pass
+   * it as `exec` and are appended in it directly.
    */
-  async append(
-    entryType: ChainEntryType,
-    load: (tx: Executor) => Promise<{ ref: string; record: unknown } | null>,
-    exec: Executor = this.db,
-  ) {
+  append(entryType: ChainEntryType, load: Loader, exec?: Executor): Promise<Appended | null> {
+    if (exec) return this.appendIn(exec, [{ entryType, load }]).then((r) => r[0]);
+    return new Promise((resolve, reject) => {
+      this.queue.push({ entryType, load, resolve, reject });
+      void this.drain();
+    });
+  }
+
+  private readonly queue: (Pending & { resolve: (r: Appended | null) => void; reject: (e: unknown) => void })[] = [];
+  private draining = false;
+
+  private async drain() {
+    if (this.draining) return;
+    this.draining = true;
+    try {
+      while (this.queue.length) {
+        const batch = this.queue.splice(0, BATCH);
+        try {
+          const results = await this.appendIn(this.db, batch);
+          batch.forEach((b, i) => b.resolve(results[i]));
+        } catch (err) {
+          // One failing record must not fail the others: retry them one by one
+          if (batch.length === 1) batch[0].reject(err);
+          else
+            for (const b of batch) {
+              try {
+                b.resolve((await this.appendIn(this.db, [b]))[0]);
+              } catch (e) {
+                b.reject(e);
+              }
+            }
+        }
+      }
+    } finally {
+      this.draining = false;
+    }
+  }
+
+  private appendIn(exec: Executor, items: Pending[]): Promise<(Appended | null)[]> {
     return exec.transaction(async (tx) => {
       await tx.execute(sql`select pg_advisory_xact_lock(${CHAIN_LOCK})`);
-      const loaded = await load(tx);
-      if (!loaded) return null;
-      const payload = canonicalJson(loaded.record);
-      const payloadSha256 = sha256(payload);
+      let [head] = await tx.select({ seq: chainEntries.seq, hash: chainEntries.hash }).from(chainEntries).orderBy(desc(chainEntries.seq)).limit(1);
+      const out: (Appended | null)[] = [];
+      for (const { entryType, load } of items) {
+        const loaded = await load(tx);
+        if (!loaded) {
+          out.push(null);
+          continue;
+        }
+        const payload = canonicalJson(loaded.record);
+        const payloadSha256 = sha256(payload);
 
-      const [last] = await tx
-        .select({ payloadSha256: chainEntries.payloadSha256 })
-        .from(chainEntries)
-        .where(and(eq(chainEntries.entryType, entryType), eq(chainEntries.refId, loaded.ref)))
-        .orderBy(desc(chainEntries.seq))
-        .limit(1);
-      if (last?.payloadSha256 === payloadSha256) return null;
+        const [last] = await tx
+          .select({ payloadSha256: chainEntries.payloadSha256 })
+          .from(chainEntries)
+          .where(and(eq(chainEntries.entryType, entryType), eq(chainEntries.refId, loaded.ref)))
+          .orderBy(desc(chainEntries.seq))
+          .limit(1);
+        if (last?.payloadSha256 === payloadSha256) {
+          out.push(null);
+          continue;
+        }
 
-      const [head] = await tx.select({ seq: chainEntries.seq, hash: chainEntries.hash }).from(chainEntries).orderBy(desc(chainEntries.seq)).limit(1);
-      const entry = {
-        seq: (head?.seq ?? 0) + 1,
-        entryType,
-        refId: loaded.ref,
-        payloadSha256,
-        prevHash: head?.hash ?? GENESIS_HASH,
-        createdAt: new Date().toISOString(),
-      };
-      const hash = sha256(entryHashInput(entry));
-      await tx.insert(chainEntries).values({ ...entry, payload, hash, createdAt: new Date(entry.createdAt) });
-      return { seq: entry.seq, hash };
+        const entry = {
+          seq: (head?.seq ?? 0) + 1,
+          entryType,
+          refId: loaded.ref,
+          payloadSha256,
+          prevHash: head?.hash ?? GENESIS_HASH,
+          createdAt: new Date().toISOString(),
+        };
+        const hash = sha256(entryHashInput(entry));
+        await tx.insert(chainEntries).values({ ...entry, payload, hash, createdAt: new Date(entry.createdAt) });
+        head = { seq: entry.seq, hash };
+        out.push({ seq: entry.seq, hash });
+      }
+      return out;
     });
   }
 

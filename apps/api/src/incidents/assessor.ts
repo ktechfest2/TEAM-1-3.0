@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { z } from 'zod';
+import { routeModels } from '../ai/openrouter.js';
 import type { Env } from '../config/env.js';
 import { INCIDENT_TYPES, type Assessment, type IncidentType } from './rules.js';
 
@@ -59,7 +60,7 @@ export class OpenRouterIncidentAssessor extends IncidentAssessor {
         method: 'POST',
         headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'X-Title': 'TrustElect' },
         body: JSON.stringify({
-          model: this.config.get('OPENROUTER_MODEL', { infer: true }),
+          ...routeModels(this.config.get('OPENROUTER_MODEL', { infer: true }), this.config.get('OPENROUTER_FALLBACK_MODEL', { infer: true })),
           temperature: 0,
           max_tokens: 800,
           provider: { data_collection: 'deny' },

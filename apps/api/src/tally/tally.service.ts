@@ -69,27 +69,69 @@ interface Row {
 
 const CACHE_MS = 5_000;
 
+type Tally = Awaited<ReturnType<TallyService['compute']>>;
+type CacheEntry = {
+  /** Bumped whenever the election's units change */
+  version: number;
+  value?: Tally;
+  valueVersion?: number;
+  at: number;
+  pending?: { version: number; promise: Promise<Tally> };
+};
+
 @Injectable()
 export class TallyService {
-  private readonly cache = new Map<string, { at: number; value: unknown }>();
+  /**
+   * One entry per area. Under load (Sprint 16) the same tally is asked for hundreds of times
+   * a second, and every live update makes every open dashboard ask again at once: so each
+   * area is computed by one query at a time, shared by everyone waiting for it.
+   */
+  private readonly cache = new Map<string, CacheEntry>();
 
   constructor(
     @InjectDrizzle() private readonly db: Database,
     private readonly declarations: DeclarationsService,
   ) {}
 
-  /** Forget cached tallies of an election (called when one of its units changes). */
+  /** An election's units changed: its tallies must be recomputed before they are shown again. */
   invalidate(electionId: string) {
-    for (const key of this.cache.keys()) if (key.startsWith(`${electionId}|`)) this.cache.delete(key);
+    for (const [key, entry] of this.cache) if (key.startsWith(`${electionId}|`)) entry.version++;
   }
 
-  async area(electionId: string, level?: string, code?: string) {
+  async area(electionId: string, level?: string, code?: string): Promise<Tally> {
     const key = `${electionId}|${level ?? ''}|${code ?? ''}`;
-    const hit = this.cache.get(key);
-    if (hit && Date.now() - hit.at < CACHE_MS) return hit.value as Awaited<ReturnType<TallyService['compute']>>;
-    const value = await this.compute(electionId, level, code);
-    this.cache.set(key, { at: Date.now(), value });
-    return value;
+    let e = this.cache.get(key);
+    if (!e) this.cache.set(key, (e = { version: 0, at: 0 }));
+    // "current" means the value reflects every change we know of
+    const current = e.value !== undefined && e.valueVersion === e.version;
+    if (current && Date.now() - e.at < CACHE_MS) return e.value!;
+    const refresh = this.refresh(e, () => this.compute(electionId, level, code));
+    if (current) {
+      // Only aged out: answer at once with the last tally while one query refreshes it
+      refresh.catch(() => {});
+      return e.value!;
+    }
+    return refresh;
+  }
+
+  /** Joins the computation already running for this version, or starts one */
+  private refresh(e: CacheEntry, compute: () => Promise<Tally>): Promise<Tally> {
+    if (e.pending && e.pending.version === e.version) return e.pending.promise;
+    const version = e.version;
+    const promise = compute()
+      .then((value) => {
+        if (e.valueVersion === undefined || version >= e.valueVersion) {
+          e.value = value;
+          e.valueVersion = version;
+          e.at = Date.now();
+        }
+        return value;
+      })
+      .finally(() => {
+        if (e.pending?.promise === promise) e.pending = undefined;
+      });
+    e.pending = { version, promise };
+    return promise;
   }
 
   private async compute(electionId: string, rawLevel?: string, rawCode?: string) {
@@ -164,22 +206,15 @@ export class TallyService {
     ).rows;
 
     const partyRows = (
-      await this.db.execute<{ code: string; party: string; votes: string }>(sql`
+      await this.db.execute<{ code: string; party: string; votes: string; strong: string | null }>(sql`
         with area as (${area})
-        select code, kv.key as party, sum(kv.value::int) as votes
+        select code, kv.key as party, sum(kv.value::int) as votes,
+               sum(kv.value::int) filter (where confidence <> 'low') as strong
         from area, jsonb_each_text(figures->'partyVotes') as kv
         where ${counted}
         group by code, kv.key`)
     ).rows;
-
-    const strongRows = (
-      await this.db.execute<{ code: string; party: string; votes: string }>(sql`
-        with area as (${area})
-        select code, kv.key as party, sum(kv.value::int) as votes
-        from area, jsonb_each_text(figures->'partyVotes') as kv
-        where ${counted} and confidence <> 'low'
-        group by code, kv.key`)
-    ).rows;
+    const strongRows = partyRows.filter((r) => r.strong !== null).map((r) => ({ ...r, votes: r.strong! }));
 
     const group = (list: { code: string; party: string; votes: string }[]) => {
       const out = new Map<string, Record<string, number>>();

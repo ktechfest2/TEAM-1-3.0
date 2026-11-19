@@ -9,6 +9,8 @@ export const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   API_PORT: z.coerce.number().int().positive().default(4000),
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
+  /** Database connections per API instance (keep below the server's max_connections) */
+  DATABASE_POOL_MAX: z.coerce.number().int().min(2).max(100).default(10),
   /** Origin of the web app, allowed by CORS and checked on admin requests */
   WEB_ORIGIN: z.url().default('http://localhost:3000'),
   /** Other origins serving the same web app, comma-separated (e.g. a second domain for the same site) */
@@ -39,6 +41,8 @@ export const envSchema = z.object({
   OPENROUTER_API_KEY: z.string().min(1).optional(),
   /** Vision model on OpenRouter used to read EC60E photos */
   OPENROUTER_MODEL: z.string().min(3).default('anthropic/claude-sonnet-5.5'),
+  /** Tried when the vision model fails (another provider, for resilience); "none" turns it off */
+  OPENROUTER_FALLBACK_MODEL: z.string().min(3).default('google/gemini-3.8-flash'),
   /** Background verification of submitted photos: on, or off (tests, maintenance) */
   VERIFICATION_WORKER: z.enum(['on', 'off']).default('on'),
   /** Publishing the latest chain hash (EVD-03): on, or off (tests) */
@@ -58,8 +62,10 @@ export const envSchema = z.object({
   WHATSAPP_GRAPH_VERSION: z.string().regex(/^v\d+\.\d+$/).default('v23.0'),
   /** Text model for the information assistant (INF) */
   OPENROUTER_CHAT_MODEL: z.string().min(3).default('anthropic/claude-haiku-5.5'),
+  OPENROUTER_CHAT_FALLBACK_MODEL: z.string().min(3).default('google/gemini-3.8-flash'),
   /** Audio model that transcribes WhatsApp voice notes (INF-05) */
   OPENROUTER_AUDIO_MODEL: z.string().min(3).default('google/gemini-3.8-flash'),
+  OPENROUTER_AUDIO_FALLBACK_MODEL: z.string().min(3).default('google/gemini-3.7-flash'),
   /** Deletes expired codes, sessions and old message records every 6 hours: on, or off (tests) */
   RETENTION_WORKER: z.enum(['on', 'off']).default('on'),
   /** Two-way SMS and USSD (Sprint 10): log = development and tests, africastalking = Africa's Talking */

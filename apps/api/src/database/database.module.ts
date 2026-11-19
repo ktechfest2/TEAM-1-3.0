@@ -10,7 +10,7 @@ import type { Env } from '../config/env.js';
       inject: [ConfigService],
       useFactory: (config: ConfigService<Env, true>) => ({
         drizzle,
-        connection: { connectionString: config.get('DATABASE_URL', { infer: true }) },
+        connection: { connectionString: config.get('DATABASE_URL', { infer: true }), max: config.get('DATABASE_POOL_MAX', { infer: true }) },
       }),
     }),
   ],

@@ -20,6 +20,12 @@ describe('Health (e2e)', () => {
     return request(app.getHttpServer()).get('/health/live').expect(200).expect({ status: 'ok' });
   });
 
+  it('GET /health/ready reports the database and the verification backlog', async () => {
+    const res = await request(app.getHttpServer()).get('/health/ready').expect(200);
+    expect(res.body).toMatchObject({ database: 'up', verification: { pending: expect.any(Number), behind: expect.any(Boolean) } });
+    expect(['ok', 'degraded']).toContain(res.body.status);
+  });
+
   afterEach(async () => {
     await app.close();
   });

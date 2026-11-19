@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { z } from 'zod';
+import { routeModels } from '../ai/openrouter.js';
 import type { Env } from '../config/env.js';
 import { LANGUAGES, type Language } from './knowledge.js';
 
@@ -106,7 +107,7 @@ export class OpenRouterAssistant extends Assistant {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'X-Title': 'TrustElect' },
       body: JSON.stringify({
-        model: this.config.get('OPENROUTER_CHAT_MODEL', { infer: true }),
+        ...routeModels(this.config.get('OPENROUTER_CHAT_MODEL', { infer: true }), this.config.get('OPENROUTER_CHAT_FALLBACK_MODEL', { infer: true })),
         temperature: 0,
         max_tokens: 1000,
         provider: { data_collection: 'deny' },
@@ -169,7 +170,7 @@ export class OpenRouterAssistant extends Assistant {
         method: 'POST',
         headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json', 'X-Title': 'TrustElect' },
         body: JSON.stringify({
-          model: this.config.get('OPENROUTER_AUDIO_MODEL', { infer: true }),
+          ...routeModels(this.config.get('OPENROUTER_AUDIO_MODEL', { infer: true }), this.config.get('OPENROUTER_AUDIO_FALLBACK_MODEL', { infer: true })),
           temperature: 0,
           max_tokens: 600,
           provider: { data_collection: 'deny' },

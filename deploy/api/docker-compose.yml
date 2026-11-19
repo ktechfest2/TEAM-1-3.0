@@ -14,7 +14,9 @@ services:
     # Tuned for a 1-2 GB server shared with other services
     command: >-
       postgres -c shared_buffers=64MB -c effective_cache_size=256MB -c work_mem=4MB
-      -c maintenance_work_mem=64MB -c max_connections=30
+      -c maintenance_work_mem=64MB -c max_connections=30 -c max_parallel_workers_per_gather=1
+    # Parallel queries use /dev/shm; Docker's 64 MB default ran out under load (Sprint 16 load test)
+    shm_size: 128m
     volumes:
       - pgdata:/var/lib/postgresql
     healthcheck:

@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { routeModels } from '../ai/openrouter.js';
 import type { Env } from '../config/env.js';
 import {
   DECLARATION_JSON_SCHEMA,
@@ -25,6 +26,10 @@ export abstract class VisionModel {
 export class TemporaryAiError extends Error {}
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+
+/** Which model actually produced a reading (the fallback, during an outage), for the record */
+const answeredBy = new WeakMap<object, string>();
+export const modelThatRead = (reading: object, otherwise: string) => answeredBy.get(reading) ?? otherwise;
 
 /** Vision model through OpenRouter's chat completions API, with strict JSON output. */
 @Injectable()
@@ -72,7 +77,7 @@ export class OpenRouterVisionModel extends VisionModel {
           'X-Title': 'TrustElect',
         },
         body: JSON.stringify({
-          model: this.name,
+          ...routeModels(this.name, this.config.get('OPENROUTER_FALLBACK_MODEL', { infer: true })),
           temperature: 0,
           max_tokens: 3000,
           // Keep election photos out of provider training and logging where possible
@@ -98,6 +103,7 @@ export class OpenRouterVisionModel extends VisionModel {
     const data = (await res.json().catch(() => ({}))) as {
       choices?: { message?: { content?: string } }[];
       error?: { message?: string };
+      model?: string;
     };
     if (!res.ok) {
       const message = data.error?.message ?? `HTTP ${res.status}`;
@@ -114,6 +120,10 @@ export class OpenRouterVisionModel extends VisionModel {
     }
     const reading = validator.safeParse(parsed);
     if (!reading.success) throw new TemporaryAiError('model output did not match the schema');
+    if (data.model && reading.data && typeof reading.data === 'object') {
+      answeredBy.set(reading.data, data.model);
+      if (data.model !== this.name) this.logger.warn(`primary model unavailable; read by fallback ${data.model}`);
+    }
     return reading.data;
   }
 }

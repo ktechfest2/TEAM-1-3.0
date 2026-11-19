@@ -30,24 +30,65 @@ const unitColumns = {
 
 @Injectable()
 export class ResultsService {
-  constructor(@InjectDrizzle() private readonly db: Database) {}
+  /** Named prepared statements for the hottest public lookups: planned once per connection, not per request */
+  private readonly unitQuery;
+  private readonly unitResultQuery;
 
-  private async unitByCode(raw: string) {
-    const code = parseUnitCode(raw);
-    if (!code) throw new NotFoundException('Not a valid polling unit code');
-    const [unit] = await this.db
+  constructor(@InjectDrizzle() private readonly db: Database) {
+    this.unitQuery = db
       .select(unitColumns)
       .from(pollingUnits)
       .innerJoin(wards, eq(wards.id, pollingUnits.wardId))
       .innerJoin(lgas, eq(lgas.id, wards.lgaId))
       .innerJoin(states, eq(states.id, lgas.stateId))
-      .where(eq(pollingUnits.code, code.unit))
-      .limit(1);
+      .where(eq(pollingUnits.code, sql.placeholder('code')))
+      .limit(1)
+      .prepare('public_unit_by_code');
+    this.unitResultQuery = db
+      .select({
+        status: unitResults.status,
+        witnessCount: unitResults.witnessCount,
+        confidence: unitResults.confidence,
+        versionCount: unitResults.versionCount,
+        updatedAt: unitResults.updatedAt,
+        figures: resultVersions.figures,
+        stampedWitnesses: resultVersions.stampedWitnessCount,
+        strongWitnesses: resultVersions.strongWitnessCount,
+      })
+      .from(unitResults)
+      .leftJoin(resultVersions, eq(resultVersions.id, unitResults.countedVersionId))
+      .where(and(eq(unitResults.electionId, sql.placeholder('electionId')), eq(unitResults.pollingUnitId, sql.placeholder('unitId'))))
+      .limit(1)
+      .prepare('public_unit_result');
+  }
+
+  /**
+   * Short in-memory caches for what every public lookup needs and that rarely changes
+   * (Sprint 16 load test: unit lookups made 4-5 round trips each). Shared while loading.
+   */
+  private readonly memo = new Map<string, { at: number; value: Promise<unknown> }>();
+  private cached<T>(key: string, ms: number, load: () => Promise<T>): Promise<T> {
+    const hit = this.memo.get(key);
+    if (hit && Date.now() - hit.at < ms) return hit.value as Promise<T>;
+    const value = load();
+    this.memo.set(key, { at: Date.now(), value });
+    value.catch(() => this.memo.delete(key));
+    return value;
+  }
+
+  private async unitByCode(raw: string) {
+    const code = parseUnitCode(raw);
+    if (!code) throw new NotFoundException('Not a valid polling unit code');
+    const [unit] = await this.unitQuery.execute({ code: code.unit });
     if (!unit) throw new NotFoundException('Polling unit not found in the register');
     return unit;
   }
 
-  private async ballot(electionId: string) {
+  private ballot(electionId: string) {
+    return this.cached(`ballot|${electionId}`, 60_000, () => this.loadBallot(electionId));
+  }
+
+  private async loadBallot(electionId: string) {
     return this.db
       .select({ acronym: parties.acronym, name: parties.name })
       .from(electionParties)
@@ -62,54 +103,31 @@ export class ResultsService {
    */
   async publicUnitResults(rawCode: string) {
     const unit = await this.unitByCode(rawCode);
-    const covering = await this.db
-      .select()
-      .from(elections)
-      .where(
-        and(
-          ne(elections.status, 'draft'),
-          or(
-            eq(elections.scopeLevel, 'national'),
-            and(eq(elections.scopeLevel, 'state'), eq(elections.scopeCode, unit.stateCode)),
-            and(eq(elections.scopeLevel, 'lga'), eq(elections.scopeCode, unit.lgaCode)),
-            and(eq(elections.scopeLevel, 'ward'), eq(elections.scopeCode, unit.wardCode)),
-            and(eq(elections.scopeLevel, 'polling_unit'), eq(elections.scopeCode, unit.code)),
-          ),
-        ),
-      )
-      .orderBy(desc(elections.electionDate));
+    // Published elections, newest first (cached briefly); those whose area covers this unit
+    const published = await this.cached('published-elections', 10_000, () =>
+      this.db.select().from(elections).where(ne(elections.status, 'draft')).orderBy(desc(elections.electionDate)),
+    );
+    const scopeOf = { national: null, state: unit.stateCode, lga: unit.lgaCode, ward: unit.wardCode, polling_unit: unit.code } as const;
+    const covering = published.filter((e) => e.scopeLevel === 'national' || e.scopeCode === scopeOf[e.scopeLevel]);
 
-    const results = [];
-    for (const election of covering) {
-      const [row] = await this.db
-        .select({
-          status: unitResults.status,
-          witnessCount: unitResults.witnessCount,
-          confidence: unitResults.confidence,
-          versionCount: unitResults.versionCount,
-          updatedAt: unitResults.updatedAt,
-          figures: resultVersions.figures,
-          stampedWitnesses: resultVersions.stampedWitnessCount,
-          strongWitnesses: resultVersions.strongWitnessCount,
-        })
-        .from(unitResults)
-        .leftJoin(resultVersions, eq(resultVersions.id, unitResults.countedVersionId))
-        .where(and(eq(unitResults.electionId, election.id), eq(unitResults.pollingUnitId, unit.id)))
-        .limit(1);
-      const showFigures = row && row.status !== 'disputed' && row.figures;
-      results.push({
-        election: { id: election.id, title: election.title, type: election.type, electionDate: election.electionDate, status: election.status },
-        status: row?.status ?? 'not_confirmed',
-        confidence: row?.confidence ?? null,
-        witnessCount: row?.witnessCount ?? 0,
-        stampedWitnesses: row?.stampedWitnesses ?? 0,
-        strongWitnesses: row?.strongWitnesses ?? 0,
-        versionCount: row?.versionCount ?? 0,
-        updatedAt: row?.updatedAt ?? null,
-        parties: await this.ballot(election.id),
-        figures: showFigures ? row.figures : null,
-      });
-    }
+    const results = await Promise.all(
+      covering.map(async (election) => {
+        const [row] = await this.unitResultQuery.execute({ electionId: election.id, unitId: unit.id });
+        const showFigures = row && row.status !== 'disputed' && row.figures;
+        return {
+          election: { id: election.id, title: election.title, type: election.type, electionDate: election.electionDate, status: election.status },
+          status: row?.status ?? 'not_confirmed',
+          confidence: row?.confidence ?? null,
+          witnessCount: row?.witnessCount ?? 0,
+          stampedWitnesses: row?.stampedWitnesses ?? 0,
+          strongWitnesses: row?.strongWitnesses ?? 0,
+          versionCount: row?.versionCount ?? 0,
+          updatedAt: row?.updatedAt ?? null,
+          parties: await this.ballot(election.id),
+          figures: showFigures ? row.figures : null,
+        };
+      }),
+    );
     const { id: _id, ...publicUnit } = unit;
     return { unit: publicUnit, results };
   }
