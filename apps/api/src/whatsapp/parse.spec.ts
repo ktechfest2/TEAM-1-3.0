@@ -1,4 +1,4 @@
-import { findAreaCode, isEmergency, meansRememberedUnit, numbersIn, parseTypedFigures, wantsCaptureLink } from './parse.js';
+import { findAreaCode, findPlace, isEmergency, meansRememberedUnit, numbersIn, parseTypedFigures, wantsCaptureLink } from './parse.js';
 
 describe('typed figures (CAP-06)', () => {
   it('reads the short format, in any case and with separators', () => {
@@ -38,5 +38,31 @@ describe('message understanding without the model', () => {
 
   it('lists numbers so a translation that changes them can be rejected', () => {
     expect(numbersIn('APC 112 · LP 98, 24-05-01-003')).toBe('112,98,24,05,01,003');
+  });
+});
+
+describe('findPlace', () => {
+  const lgaList = [
+    { code: '12-12', name: 'OREDO' },
+    { code: '12-01', name: 'AKOKO EDO' },
+    { code: '11-05', name: 'EBONYI' },
+    { code: '24-23', name: 'SURULERE' },
+    { code: '31-27', name: 'SURULERE' },
+    { code: '24-05', name: 'APAPA' },
+  ];
+  it.each([
+    ['what is election update in edo?', { level: 'state', code: '12' }],
+    ['Results for Edo State', { level: 'state', code: '12' }],
+    ['how far oredo?', { level: 'lga', code: '12-12' }],
+    ['update for Oredo, Edo', { level: 'lga', code: '12-12' }],
+    ['wetin dey happen for Ebonyi', { level: 'state', code: '11' }],
+    ['results in abuja', { level: 'state', code: '37' }],
+    ['Surulere Lagos results', { level: 'lga', code: '24-23' }],
+    ['Akoko-Edo result', { level: 'lga', code: '12-01' }],
+  ])('%s', (text, expected) => {
+    expect(findPlace(text, lgaList)).toEqual(expected);
+  });
+  it.each(['any update for surulere?', 'what is happening?', 'my unit result'])('finds nothing in "%s"', (text) => {
+    expect(findPlace(text, lgaList)).toBeNull();
   });
 });

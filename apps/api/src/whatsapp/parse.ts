@@ -1,4 +1,4 @@
-import { parseUnitCode } from '@trustelect/shared';
+import { NIGERIAN_STATES, parseUnitCode } from '@trustelect/shared';
 
 /**
  * CAP-06: typed figures in a short format, e.g. "PU 24-05-01-003 APC 112 LP 98 PDP 140".
@@ -53,3 +53,30 @@ export const meansRememberedUnit = (text: string) =>
 
 /** Every number in a text, in order: used to check a translation kept them unchanged */
 export const numbersIn = (text: string) => (text.match(/\d+/g) ?? []).join(',');
+
+const words = (text: string) => ` ${text.toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, ' ').trim()} `;
+
+const STATE_NAMES: { code: string; name: string }[] = [
+  ...NIGERIAN_STATES.map((s) => ({ code: s.code, name: words(s.name) })),
+  { code: '37', name: words('FCT') },
+  { code: '37', name: words('Abuja') },
+];
+
+/**
+ * A state or LGA named in a message ("what is the update in Edo?", "results for Oredo"),
+ * for lookups without a code. The more specific LGA wins; a name shared by a state and one of
+ * its LGAs (Ebonyi, Ekiti) means the state. Ambiguous LGA names give nothing.
+ */
+export function findPlace(text: string, lgas: { code: string; name: string }[]): { level: 'lga' | 'state'; code: string } | null {
+  const t = words(text);
+  const states = STATE_NAMES.filter((s) => t.includes(s.name));
+  let candidates = lgas.filter((l) => {
+    const n = words(l.name);
+    return n.trim().length >= 3 && t.includes(n) && !states.some((s) => s.name === n);
+  });
+  if (states.length) candidates = candidates.filter((l) => states.some((s) => l.code.startsWith(`${s.code}-`)));
+  if (candidates.length === 1) return { level: 'lga', code: candidates[0].code };
+  const stateCodes = new Set(states.map((s) => s.code));
+  if (stateCodes.size === 1) return { level: 'state', code: [...stateCodes][0] };
+  return null;
+}

@@ -7,7 +7,7 @@ import { CaptureService } from '../capture/capture.service.js';
 import { normaliseNigerianMobile } from '../capture/phone.js';
 import type { Env } from '../config/env.js';
 import type { Database } from '../database/database.module.js';
-import { whatsappContacts, whatsappMessages } from '../database/schema.js';
+import { lgas, whatsappContacts, whatsappMessages } from '../database/schema.js';
 import { IncidentsService, MAX_EVIDENCE_BYTES } from '../incidents/incidents.service.js';
 import { DANGER, INCIDENT_TYPES, type IncidentType } from '../incidents/rules.js';
 import { KnowledgeService } from '../knowledge/knowledge.service.js';
@@ -16,7 +16,7 @@ import { Encryptor, keyedHash } from '../security/encryption.js';
 import { Assistant } from './assistant.js';
 import { WhatsAppClient } from './client.js';
 import { EMERGENCY_TEXT, type Language } from './knowledge.js';
-import { findAreaCode, isEmergency, meansRememberedUnit, numbersIn, parseTypedFigures, wantsCaptureLink, wantsHelp } from './parse.js';
+import { findAreaCode, findPlace, isEmergency, meansRememberedUnit, numbersIn, parseTypedFigures, wantsCaptureLink, wantsHelp } from './parse.js';
 
 /** An incoming WhatsApp message, reduced to what TrustElect uses */
 export type Inbound = {
@@ -192,8 +192,12 @@ export class WhatsAppService {
       case 'capture_link':
         return this.sendLink(contact);
       case 'lookup': {
-        const asked = findAreaCode(`${u.unit_code ?? ''} ${u.area_code ?? ''}`) ?? (contact.rememberedUnitCode ? { level: 'polling_unit' as const, code: contact.rememberedUnitCode } : null);
-        if (!asked) return this.say(contact, 'Which polling unit? Send its code, for example 24-05-01-003. It is printed on your voter\'s card.', { translate: true });
+        // A code first, then a state or LGA named in the message, then the voter's unit from earlier
+        const asked =
+          findAreaCode(`${u.unit_code ?? ''} ${u.area_code ?? ''}`) ??
+          findPlace(text, await this.lgaNames()) ??
+          (contact.rememberedUnitCode ? { level: 'polling_unit' as const, code: contact.rememberedUnitCode } : null);
+        if (!asked) return this.say(contact, 'Which polling unit, LGA or state? Send a polling unit code, for example 24-05-01-003 (it is printed on your voter\'s card), or name the LGA or state.', { translate: true });
         return this.lookup(contact, asked);
       }
       case 'voting_advice':
@@ -358,6 +362,14 @@ export class WhatsAppService {
 
   private async sendLink(contact: Contact) {
     return this.reply(contact, await this.core.captureLink(this.phoneOf(contact), 'whatsapp'));
+  }
+
+  private lgaCache: { code: string; name: string }[] | null = null;
+
+  /** LGA names from the register, to recognise places named in messages */
+  private async lgaNames() {
+    this.lgaCache ??= await this.db.select({ code: lgas.code, name: lgas.name }).from(lgas);
+    return this.lgaCache;
   }
 
   private async lookup(contact: Contact, area: Area) {
