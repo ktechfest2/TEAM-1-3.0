@@ -33,6 +33,27 @@ const primary =
 const secondary =
   'inline-flex min-h-12 w-full items-center justify-center rounded-xl border border-border bg-surface px-5 font-semibold text-ink hover:bg-surface-muted';
 
+
+/** Small values kept on the phone so the capture app works with no network */
+const MASKED_KEY = 'te_capture_phone_masked';
+const ELECTIONS_KEY = 'te_capture_elections';
+const offline = {
+  get(key: string): string | null {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  },
+  set(key: string, value: string) {
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      /* private mode: nothing kept */
+    }
+  },
+};
+
 export function CaptureApp() {
   const [step, setStep] = useState<Step>('loading');
   const [phoneMasked, setPhoneMasked] = useState<string | null>(null);
@@ -56,6 +77,13 @@ export function CaptureApp() {
   }, [refresh]);
 
   const [linkError, setLinkError] = useState<string | null>(null);
+
+  // Offline first: the capture pages open with no network once visited (see public/sw.js)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => undefined);
+    }
+  }, []);
 
   // Session check, queue load, and upload when the network comes back
   useEffect(() => {
@@ -84,14 +112,24 @@ export function CaptureApp() {
       .then(async (res) => {
         if (res.status === 401) sessionToken.clear('voter');
         if (res.ok) {
-          setPhoneMasked(((await res.json()) as { phoneMasked: string }).phoneMasked);
+          const masked = ((await res.json()) as { phoneMasked: string }).phoneMasked;
+          offline.set(MASKED_KEY, masked);
+          setPhoneMasked(masked);
           setStep('election');
           void flush();
         } else {
           setStep('intro');
         }
       })
-      .catch(() => setStep('intro'));
+      // No network: carry on with the session saved on this phone; photos wait until it returns
+      .catch(() => {
+        if (sessionToken.get('voter')) {
+          setPhoneMasked(offline.get(MASKED_KEY) ?? '');
+          setStep('election');
+        } else {
+          setStep('intro');
+        }
+      });
 
     const goOnline = () => void flush();
     window.addEventListener('online', goOnline);
@@ -109,9 +147,14 @@ export function CaptureApp() {
   useEffect(() => {
     if (step !== 'election' || elections) return;
     fetch(apiUrl('/elections'))
-      .then((r) => (r.ok ? r.json() : []))
-      .then((list: Election[]) => setElections(list.filter((e) => e.status === 'active')))
-      .catch(() => setElections([]));
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((list: Election[]) => {
+        const active = list.filter((e) => e.status === 'active');
+        offline.set(ELECTIONS_KEY, JSON.stringify(active));
+        setElections(active);
+      })
+      // No network: the elections last seen on this phone
+      .catch(() => setElections(JSON.parse(offline.get(ELECTIONS_KEY) ?? '[]') as Election[]));
   }, [step, elections]);
 
   // Free the preview image memory
@@ -120,6 +163,7 @@ export function CaptureApp() {
   }, [photo]);
 
   function started(masked: string) {
+    offline.set(MASKED_KEY, masked);
     setPhoneMasked(masked);
     setNeedsVerify(false);
     setStep('election');
@@ -283,7 +327,7 @@ export function CaptureApp() {
           <div>
             <h1 id="camera-heading" className="text-xl font-bold tracking-tight">Photograph the EC60E poster</h1>
             <p className="text-sm text-ink-muted">
-              {election.title} · {unit.name} ({unit.code}) ·{' '}
+              {election.title} · {unit.name ? `${unit.name} (${unit.code})` : unit.code} ·{' '}
               <button type="button" className="font-medium text-brand-strong underline" onClick={() => setStep('unit')}>
                 change
               </button>

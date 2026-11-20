@@ -49,9 +49,21 @@ export function ChooseUnit({
 
   const choose = (u: UnitResponse) => setFound({ code: u.code, name: u.name, ward: u.ward.name, lga: u.lga.name, state: u.state.name });
 
+  /**
+   * No network: a well-formed code in the election's area is accepted as typed; TrustElect checks
+   * it against the register when the photo is sent, and shows the unit's name then.
+   */
+  function chooseOffline(code: string) {
+    const area = election.scopeCode;
+    const inArea = election.scopeLevel === 'national' || !area || code === area || code.startsWith(`${area}-`);
+    if (!inArea) return setError(`${code} is not part of this election's area. Check the code on your voter's card.`);
+    setFound({ code, name: '', ward: '', lga: '', state: '' });
+  }
+
   /** Name or address search, limited to the election's area */
   async function search(text: string) {
     if (text.trim().length < 2) return setError('Type the polling unit code, or at least two letters of its name or address.');
+    if (!navigator.onLine) return setError("Searching by name needs a network. Enter the code from your voter's card instead; it works offline.");
     setBusy(true);
     try {
       const stateCode = election.scopeLevel === 'national' ? null : election.scopeCode?.slice(0, 2);
@@ -78,6 +90,7 @@ export function ChooseUnit({
       if (/^[\d\s\-/.]+$/.test(raw.trim())) return setError('Enter the code in the format 24-05-01-003 (slashes are fine too).');
       return search(raw);
     }
+    if (!navigator.onLine) return chooseOffline(parsed.unit);
     setBusy(true);
     try {
       const res = await fetch(apiUrl(`/geo/units/${parsed.unit}`));
@@ -89,7 +102,8 @@ export function ChooseUnit({
       }
       choose(u);
     } catch {
-      setError('Could not look up the code. Check your connection and try again.');
+      // The network dropped during the lookup
+      chooseOffline(parsed.unit);
     } finally {
       setBusy(false);
     }
@@ -159,10 +173,19 @@ export function ChooseUnit({
         <div className="grid gap-3 rounded-xl border-2 border-brand bg-surface-tint p-4" aria-live="polite">
           <div>
             <p className="font-mono text-sm text-ink-muted tabular">{found.code}</p>
-            <p className="text-lg font-semibold">{found.name}</p>
-            <p className="text-sm text-ink-muted">
-              {found.ward} ward · {found.lga} · {found.state}
-            </p>
+            {found.name ? (
+              <>
+                <p className="text-lg font-semibold">{found.name}</p>
+                <p className="text-sm text-ink-muted">
+                  {found.ward} ward · {found.lga} · {found.state}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm">
+                You are offline, so the name of this polling unit cannot be shown yet. Check the code against your voter&apos;s
+                card; TrustElect confirms it when your photo is sent.
+              </p>
+            )}
           </div>
           <button type="button" className={primaryButtonClass} onClick={() => onChosen(found)}>
             Yes, this is my polling unit
