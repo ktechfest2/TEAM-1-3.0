@@ -95,6 +95,43 @@ export class MessagingCore {
     return { text: `${name} (${area.code})\n\n${blocks.join('\n\n')}\n\n${UNOFFICIAL_LABEL}. Not a projection. More: ${this.web}/results/elections` };
   }
 
+  /**
+   * Every published election with its totals for the whole election area: what the assistant
+   * may draw on for election-wide questions ("which elections are on?", "how far Edo?").
+   */
+  async overview(): Promise<string> {
+    const list = await this.db.select().from(elections).where(ne(elections.status, 'draft')).orderBy(asc(elections.electionDate));
+    if (!list.length) return 'No election has been published on TrustElect yet.';
+    const blocks: string[] = [];
+    for (const e of list) {
+      try {
+        const t = await this.tally.area(e.id);
+        const votes = t.parties.map((p: { acronym: string }) => `${p.acronym} ${(t.totals.partyVotes[p.acronym] ?? 0).toLocaleString('en-NG')}`).join(' · ');
+        const byChild = t.children
+          .filter((c: { countedUnits: number }) => c.countedUnits > 0)
+          .map((c: { name: string; countedUnits: number; totalUnits: number; comparison?: { status: string } }) =>
+            `${c.name}: ${c.countedUnits.toLocaleString('en-NG')} of ${c.totalUnits.toLocaleString('en-NG')} units counted${c.comparison && c.comparison.status !== 'awaiting_data' ? `, ${COMPARISON[c.comparison.status]?.toLowerCase()}` : ''}`,
+          )
+          .join('; ');
+        blocks.push(
+          [
+            `Election: ${e.title} (${e.status === 'active' ? 'results coming in' : 'closed'}), held ${e.electionDate}, area: ${t.area.name}`,
+            `Counted from ${t.totals.countedUnits.toLocaleString('en-NG')} of ${t.totals.totalUnits.toLocaleString('en-NG')} polling units`,
+            t.totals.countedUnits ? `Votes in counted polling units: ${votes}` : 'No counted polling units yet',
+            t.totals.comparison ? `Declared result: ${COMPARISON[t.totals.comparison.status]}` : null,
+            byChild ? `By ${t.childLevel === 'lga' ? 'LGA' : t.childLevel}: ${byChild}` : null,
+            `Live results: ${this.web}/results/election?id=${e.id}`,
+          ]
+            .filter(Boolean)
+            .join('\n'),
+        );
+      } catch (err) {
+        if (!(err instanceof NotFoundException) && !(err instanceof HttpException)) throw err;
+      }
+    }
+    return `${blocks.join('\n\n')}\n\nAll figures: ${UNOFFICIAL_LABEL}. Not a projection.`;
+  }
+
   private async unitLookup(code: string, format: Format): Promise<Reply> {
     let found;
     try {

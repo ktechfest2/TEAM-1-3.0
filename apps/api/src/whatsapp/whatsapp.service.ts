@@ -197,20 +197,35 @@ export class WhatsAppService {
           findAreaCode(`${u.unit_code ?? ''} ${u.area_code ?? ''}`) ??
           findPlace(text, await this.lgaNames()) ??
           (contact.rememberedUnitCode ? { level: 'polling_unit' as const, code: contact.rememberedUnitCode } : null);
-        if (!asked) return this.say(contact, 'Which polling unit, LGA or state? Send a polling unit code, for example 24-05-01-003 (it is printed on your voter\'s card), or name the LGA or state.', { translate: true });
-        return this.lookup(contact, asked);
+        // No place: answer from the overview of every election ("any update?")
+        if (!asked) {
+          return this.conversational(contact, text, await this.core.overview(), {
+            text: 'Which polling unit, LGA or state? Send a polling unit code, for example 24-05-01-003 (it is printed on your voter\'s card), or name the LGA or state.',
+            translate: true,
+          });
+        }
+        return this.conversational(contact, text, null, await this.core.lookup(asked, 'whatsapp'));
       }
       case 'voting_advice':
         return this.say(contact, 'TrustElect does not give voting advice or predict winners, and has no view on any party or candidate. Your vote is your choice, and it is secret.', { translate: true });
-      case 'rumour_check':
-        return this.say(
-          contact,
-          `TrustElect only reports what voters have photographed and verified. Send a polling unit, ward or LGA code to see what has been confirmed there. If it is not shown, nothing has been confirmed. Official results: https://inecelectionresults.ng`,
-          { translate: true },
-        );
-      case 'question':
+      case 'rumour_check': {
+        // What has actually been confirmed, from the live results; never a verdict on the rumour itself
+        const place = findPlace(text, await this.lgaNames());
+        const data = place ? (await this.core.lookup(place, 'whatsapp')).text : await this.core.overview();
+        return this.conversational(contact, text, `${data}\n\nTrustElect only reports what voters have photographed and verified; anything not shown here has not been confirmed. Official results: https://inecelectionresults.ng`, {
+          text: `TrustElect only reports what voters have photographed and verified. Send a polling unit, ward or LGA code to see what has been confirmed there. If it is not shown, nothing has been confirmed. Official results: https://inecelectionresults.ng`,
+          translate: true,
+        });
+      }
+      case 'question': {
         if (u.answer) return this.say(contact, u.answer);
-        return this.say(contact, 'I can only answer from official INEC information, and I do not have that answer. Please check https://inecnigeria.org.', { translate: true });
+        // Not in the approved facts: it may be about the elections themselves ("which elections are on?")
+        const facts = (await this.knowledge.approvedFacts()).map((f) => `${f.topic}: ${f.fact} (${f.source})`).join('\n');
+        return this.conversational(contact, text, `${await this.core.overview()}\n\nOfficial information:\n${facts}`, {
+          text: 'I can only answer from official INEC information, and I do not have that answer. Please check https://inecnigeria.org.',
+          translate: true,
+        });
+      }
       case 'greeting':
         return this.say(contact, HELP, { translate: true });
       default:
@@ -349,6 +364,17 @@ export class WhatsAppService {
   /* ------------------------- shared with SMS and USSD ------------------------ */
 
   /** Sends a core reply and remembers the unit it was about (INF-02) */
+  /**
+   * A conversational answer written from `data` (or from the fixed reply's own text), checked
+   * for invented figures and standings; the fixed reply is sent if the model cannot answer.
+   */
+  private async conversational(contact: Contact, question: string, data: string | null, fallback: Reply) {
+    const answer = await this.assistant.compose(question, data ?? fallback.text, contact.language as Language);
+    if (!answer) return this.reply(contact, fallback);
+    if (fallback.rememberUnit) await this.db.update(whatsappContacts).set({ rememberedUnitCode: fallback.rememberUnit }).where(eq(whatsappContacts.id, contact.id));
+    return this.say(contact, answer);
+  }
+
   private async reply(contact: Contact, r: Reply) {
     if (r.rememberUnit) await this.db.update(whatsappContacts).set({ rememberedUnitCode: r.rememberUnit }).where(eq(whatsappContacts.id, contact.id));
     return this.say(contact, r.text, { translate: r.translate });

@@ -28,6 +28,9 @@ class FakeAssessor extends IncidentAssessor {
   }
 }
 class QuietAssistant extends Assistant {
+  async compose(): Promise<string | null> {
+    return null;
+  }
   async understand(): Promise<Understanding> {
     return { intent: 'other', language: 'en', unit_code: null, area_code: null, answer: null };
   }

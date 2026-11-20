@@ -44,6 +44,9 @@ class FakeVisionModel extends VisionModel {
 }
 
 class FakeAssistant extends Assistant {
+  async compose(): Promise<string | null> {
+    return null;
+  }
   next: Understanding | null = null;
   translations: string[] = [];
   translateWith: (text: string) => string = (t) => `[yo] ${t}`;
